@@ -2,7 +2,8 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <getopt.h>
-int main(int argc, char **argv[]){
+
+int main(int argc, char *argv[]){
 	int opt;	
 	while ((opt = getopt(argc, argv, "abcd")) != -1) {
 		switch (opt) {
