@@ -20,10 +20,8 @@ int main (int argc, char **argv)
 			  {0, 0, 0, 0}
 		};
 		int option_index = 0;
-
 		c = getopt_long(argc, argv, "abc:d:f:", long_options, 
 		&option_index);
-
 		if (c == -1) {
 			break;
 		}
@@ -47,22 +45,17 @@ int main (int argc, char **argv)
 		case 'b':
 			puts ("option -b\n");
 			break;
-
 		case 'c':
 			printf ("option -c with value `%s'\n", optarg);
 			break;
-
 		case 'd':
 			printf ("option -d with value `%s'\n", optarg);
 			break;
-
 		case 'f':
 			printf ("option -f with value `%s'\n", optarg);
 			break;
-
 		case '?':
 			break;
-
 		default:
 			abort ();
 		}
