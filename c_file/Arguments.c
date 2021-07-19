@@ -1,17 +1,26 @@
 #include <stdio.h>
-#include <stdarg.h>
-
-int sum_counter(int argc, ...){	
-	va_list ap;
-	va_start(ap, argc);
-	int sum = 0;
-	for (int i = 1; i<=argc; i++){
-		int a = va_arg(ap, int);
-		sum+=a;
+#include <unistd.h>
+#include <stdlib.h>
+#include <getopt.h>
+int main(int argc, char **argv[]){
+	int opt;	
+	while ((opt = getopt(argc, argv, "abcd")) != -1) {
+		switch (opt) {
+		case 'a':
+		       	printf("a chosen\n");
+			break;			  
+		
+		case 'b':
+			printf("b chosen\n");
+			break;
+		
+		case 'c':
+			printf("c choosen\n");
+			break;
+		
+		default:
+			printf("Unknown option\n");
+		}
 	}
-	return sum;
-}
-int main(int argc, char* argv[]){
-	printf("\n%d", sum_counter(5, 1, -2, 3, 8, 87));
 	return 0;
 }
