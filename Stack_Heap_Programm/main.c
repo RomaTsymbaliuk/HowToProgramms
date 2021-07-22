@@ -1,6 +1,7 @@
 #include <stdio.h> 
 #include <stdlib.h>
 #include <getopt.h>
+#include "stack.h"
 
 int main(int argc, char *argv[])
 {
@@ -11,8 +12,8 @@ int main(int argc, char *argv[])
 	while (1) {
 		static struct option long_options[] =
 		{
-			{"create stack", no_argument, &create_stack_flag, 1},
-			{"create heap", no_argument, &create_heap_flag, 1},
+			{"create-stack", no_argument, 0, 'd'},
+			{"create-heap", no_argument, 0, 'e'},
 			{"push", required_argument, 0, 'a'},
 			{"pop", no_argument, 0, 'b'},
 			{"data-type", required_argument, 0, 'c'},
@@ -20,7 +21,7 @@ int main(int argc, char *argv[])
 			{0, 0, 0, 0}
 		};
 		int option_index = 0;
-		c = getopt_long(argc, argv, "abc:f", long_options, &option_index);
+		c = getopt_long(argc, argv, "d:f:c:a:be", long_options, &option_index);
 		if (c == -1){
 			break;
 		}
@@ -38,16 +39,22 @@ int main(int argc, char *argv[])
 			break;
 		
 		case 'a':
-			puts("option push selected");
+			printf("option push selected with : %s\n", optarg);
 			break;
 		case 'b':
-			puts("option pop selected");
+			printf("option pop selected\n");
 			break;
 		case 'c':
-			puts("option data type selected");
+			printf("option data type selected with : %s\n", optarg);
+			break;
+		case 'd':
+			printf("stack creation\n");
+			break;
+		case 'e':
+			printf("heap creation\n");
 			break;
 		case 'f':
-			printf("file creation selected with value : %s", optarg);
+			printf("file creation selected with value : %s\n", optarg);
 			break;
 		case '?':
 			break;
