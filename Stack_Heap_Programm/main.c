@@ -1,8 +1,15 @@
 #include <stdio.h> 
 #include <stdlib.h>
 #include <getopt.h>
+#include <string.h>
 #include "stack.h"
+#define CMD_NUM 40
 
+struct commands{
+	int (*push_pointer)(struct stack *st, char *str);
+	int (*pop_pointer)(struct stack *st);
+	char *str;
+};
 int main(int argc, char *argv[])
 {
 	static int create_stack_flag;
@@ -12,7 +19,18 @@ int main(int argc, char *argv[])
 	int status;
 	enum {STATIC_ARRAY, DYNAMIC_ARRAY, LINKED_LIST};
 	int data_type = -1;
+	int size;
+	int push_counter = 0;
+	int pop_counter = 0;
+	struct commands *cmd = (struct commands*)malloc(sizeof(struct commands) * CMD_NUM);
+	for (int i = 0; i < CMD_NUM; i++){
+		cmd[i].push_pointer = NULL;
+		cmd[i].pop_pointer = NULL;
+	}
+	int k = 0;
+
 	while (1) {
+
 		static struct option long_options[] =
 		{
 			{"create-stack", required_argument, 0, 'd'},
@@ -43,28 +61,29 @@ int main(int argc, char *argv[])
 			break;
 		
 		case 'a':
-			status = stack_push(st, optarg);
+			cmd[k].push_pointer = stack_push;
+			cmd[k].pop_pointer = NULL;
+			cmd[k].str = optarg;
+			k++;
 			break;
 		case 'b':
-			stack_pop(st);
+			cmd[k].push_pointer = NULL;
+			cmd[k].pop_pointer = stack_pop;
+			cmd[k].str = NULL;
+			k++;
 			break;
 		case 'c':
-
-			printf("option data type selected with : %s\n", optarg);
-			if (optarg == "dynamic-arr"){
+			if (!strcmp(optarg, "dynamic-arr")){
 				data_type = DYNAMIC_ARRAY;
-			} else if (optarg == "static-arr") {
+			} else if (!strcmp(optarg, "static-arr")) {
 				data_type = STATIC_ARRAY;
-			} else if (optarg == "linked-list") {
+			} else if (!strcmp(optarg, "linked-list")) {
 				data_type = LINKED_LIST;
 			}
 			break;
 		case 'd':
-			printf("stack creation\n");
-			int size = atoi(optarg);
-			printf("optarg : %d\n", size);
-			status = stack_init(st, DYNAMIC_ARRAY, size);
-			printf("Operation status : %d\n", status);
+			create_stack_flag = 1;
+			size = atoi(optarg);
 			break;
 		case 'e':
 			printf("queue creation\n");
@@ -73,7 +92,7 @@ int main(int argc, char *argv[])
 			printf("file creation selected with value : %s\n", optarg);
 			break;
 		case 'p':
-			stack_print(st);
+			
 			break;
 		case '?':
 			break;
@@ -83,6 +102,17 @@ int main(int argc, char *argv[])
 
 
 	}
+	if (create_stack_flag) {
 
+		int status = stack_init(st, data_type, size);
+		for (int i = 0; i < k; i++){
+			if (cmd[i].push_pointer) {
+				cmd[i].push_pointer(st, cmd[i].str);
+			} else if (cmd[i].pop_pointer) {
+				cmd[i].pop_pointer(st);
+			}
+		}
+		stack_print(st);
+	}
 	return 0; 
 }

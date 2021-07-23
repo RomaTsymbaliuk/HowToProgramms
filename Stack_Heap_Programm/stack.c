@@ -7,25 +7,26 @@ enum {STATIC_ARRAY, DYNAMIC_ARRAY, LINKED_LIST};
 
 int stack_init(struct stack *st, int flag_data_type, int size)
 {
+	char **arr = NULL;
         if (size < 0)
        		return 0;       
 	if (flag_data_type == STATIC_ARRAY) {
-		char **arr = (char**)malloc(sizeof(char*) * size);
-		st->arr = arr;
-	} else if (flag_data_type == DYNAMIC_ARRAY) {
-		char **arr = (char**)malloc(sizeof(char*) * size);
-		if (!arr){
+		arr = (char**)malloc(sizeof(char*) * size);
+		if (!arr)
 			return 0;
-				
+	} else if (flag_data_type == DYNAMIC_ARRAY) {
+		arr = (char**)malloc(sizeof(char*) * size);
+		if (!arr){
+			return 0;		
 		}
-		st->arr = arr;
-		st->top = -1;
-		st->size = size;
+
 	}
         else {
 		return 0;
 	}	
-	
+	st->arr = arr;
+	st->top = -1;
+	st->size = size;	
 	return 1;
 }
 
