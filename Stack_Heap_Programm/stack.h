@@ -11,4 +11,4 @@ int stack_pop(struct stack *st);
 int stack_is_empty(struct stack *st);
 int stack_init(struct stack *st, int flag_data_type, int size);
 int stack_is_full(struct stack *st);
-int stack_print(struct stack *st, int file_flag, char *filename);
+int stack_print(struct stack *st);

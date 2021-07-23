@@ -67,18 +67,11 @@ int stack_push(struct stack *st, char *str)
 	return 0;
 }
 
-int stack_print(struct stack *st, int file_flag, char *filename)
+int stack_print(struct stack *st)
 {
-	FILE *stream;
-	if (file_flag) {
-		FILE *f = fopen(filename, "w");
-		stream = f;
-	} else {
-		stream = stdout;
-	}
 	printf("\nPrinting stack\n");
 	for (int i = 0; i <= st->top; i++) {
-		fprintf(stream, "%s\n", st->arr[i]);
+		printf("%s\n", st->arr[i]);
 	}
 	return 1;
 }

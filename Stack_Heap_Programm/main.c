@@ -23,9 +23,6 @@ int main(int argc, char *argv[])
 	int push_counter = 0;
 	int pop_counter = 0;
 	struct commands *cmd = (struct commands*)malloc(sizeof(struct commands) * CMD_NUM);
-	char *filename;
-	int file_flag = 0;
-
 	for (int i = 0; i < CMD_NUM; i++){
 		cmd[i].push_pointer = NULL;
 		cmd[i].pop_pointer = NULL;
@@ -92,8 +89,7 @@ int main(int argc, char *argv[])
 			printf("queue creation\n");
 			break;
 		case 'f':
-			file_flag = 1;
-			filename = optarg;	
+			printf("file creation selected with value : %s\n", optarg);
 			break;
 		case 'p':
 			
@@ -116,7 +112,7 @@ int main(int argc, char *argv[])
 				cmd[i].pop_pointer(st);
 			}
 		}
-		stack_print(st, file_flag, filename);
+		stack_print(st);
 	}
 	return 0; 
 }
