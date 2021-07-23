@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "stack.h"
+#include "structures.h"
 
 enum {STATIC_ARRAY, DYNAMIC_ARRAY, LINKED_LIST};
 
@@ -8,21 +8,29 @@ enum {STATIC_ARRAY, DYNAMIC_ARRAY, LINKED_LIST};
 int stack_init(struct stack *st, int flag_data_type, int size)
 {
 	char **arr = NULL;
-        if (size < 0)
-       		return 0;       
+//        if (size < 0)
+//       		return 0;       
 	if (flag_data_type == STATIC_ARRAY) {
 		arr = (char**)malloc(sizeof(char*) * size);
 		if (!arr)
 			return 0;
+		st->list = NULL;
 	} else if (flag_data_type == DYNAMIC_ARRAY) {
 		arr = (char**)malloc(sizeof(char*) * size);
 		if (!arr){
 			return 0;		
 		}
+		st->list = NULL;
 
 	}
-        else {
-		return 0;
+        else if (flag_data_type == LINKED_LIST) {
+		printf("Im here or not ?!\n");	
+		list_init(st);
+		st->arr = NULL;
+		st->top = 0;
+		st->size = 0;
+		printf("first arg : %s\n", (st->list)->item);
+		return 1;
 	}	
 	st->arr = arr;
 	st->top = -1;
@@ -57,8 +65,12 @@ int stack_is_empty(struct stack *st)
 	return 1;
 }
 
-int stack_push(struct stack *st, char *str)
+int stack_push(int flag_data_type, struct stack *st, char *str)
 {
+	if (flag_data_type == LINKED_LIST) {
+		list_add(st, str);
+		return 1;
+	}
 	if (!stack_is_full(st)) {
 		st->arr[++st->top] = str;
 		return 1;
@@ -67,7 +79,7 @@ int stack_push(struct stack *st, char *str)
 	return 0;
 }
 
-int stack_print(struct stack *st, int file_flag, char *filename)
+int stack_print(int data_type, struct stack *st, int file_flag, char *filename)
 {
 	FILE *stream; 
 	if (file_flag) {
@@ -77,14 +89,27 @@ int stack_print(struct stack *st, int file_flag, char *filename)
 		stream = stdout;
 	}
 	printf("\nPrinting stack\n");
-	for (int i = 0; i <= st->top; i++) {
-		fprintf(stream, "%s\n", st->arr[i]);
+	if (data_type == DYNAMIC_ARRAY || data_type == STATIC_ARRAY){
+		for (int i = 0; i <= st->top; i++) {
+			fprintf(stream, "%s\n", st->arr[i]);
+		}
+	}
+	else {
+		struct linked_list *tmp = st->list;
+		while (tmp!= NULL) {
+			printf("%s\n", tmp->item);
+			tmp = tmp->next;
+		}
 	}
 	return 1;
 }
 
-int stack_pop(struct stack *st)
+int stack_pop(int flag_data_type, struct stack *st)
 {
+	if (flag_data_type == LINKED_LIST) {
+		list_remove(st);
+		return 1;
+	}
 	if (stack_is_empty(st)) {
 		st->arr[st->top--] = NULL;
 		return 1;

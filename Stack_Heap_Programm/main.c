@@ -2,12 +2,12 @@
 #include <stdlib.h>
 #include <getopt.h>
 #include <string.h>
-#include "stack.h"
+#include "structures.h"
 #define CMD_NUM 40
 
 struct commands{
-	int (*push_pointer)(struct stack *st, char *str);
-	int (*pop_pointer)(struct stack *st);
+	int (*push_pointer)(int flag_data_type, struct stack *st, char *str);
+	int (*pop_pointer)(int flag_data_type, struct stack *st);
 	char *str;
 };
 int main(int argc, char *argv[])
@@ -19,9 +19,7 @@ int main(int argc, char *argv[])
 	int status;
 	enum {STATIC_ARRAY, DYNAMIC_ARRAY, LINKED_LIST};
 	int data_type = -1;
-	int size;
-	int push_counter = 0;
-	int pop_counter = 0;
+	int size = 0;
 	struct commands *cmd = (struct commands*)malloc(sizeof(struct commands) * CMD_NUM);
 	int file_flag = 0;
 	char *filename;
@@ -86,7 +84,10 @@ int main(int argc, char *argv[])
 			break;
 		case 'd':
 			create_stack_flag = 1;
-			size = atoi(optarg);
+			if (optarg){
+				printf("optarg : %s", optarg);
+				size = atoi(optarg);
+			}
 			break;
 		case 'e':
 			printf("queue creation\n");
@@ -111,12 +112,13 @@ int main(int argc, char *argv[])
 		int status = stack_init(st, data_type, size);
 		for (int i = 0; i < k; i++){
 			if (cmd[i].push_pointer) {
-				cmd[i].push_pointer(st, cmd[i].str);
+				cmd[i].push_pointer(data_type, st, cmd[i].str);
 			} else if (cmd[i].pop_pointer) {
-				cmd[i].pop_pointer(st);
+				cmd[i].pop_pointer(data_type, st);
 			}
 		}
-		stack_print(st, file_flag, filename);
+//		printf("st->list item : %s\n", (st->list)->item);
+		stack_print(data_type, st, file_flag, filename);
 	}
 	return 0; 
 }
