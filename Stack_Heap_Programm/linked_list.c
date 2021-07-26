@@ -10,7 +10,7 @@ int list_init(struct stack *st) {
 		return 0;
 	}
 	list->next = NULL;
-	list->item = "Some stuff";
+	list->item = "NULL";
 	st->list = list;
 	
 	printf("Happy list init function !\n");
@@ -31,15 +31,12 @@ int list_remove(struct stack *st) {
 	
 	struct linked_list *tmp = st->list;
 
-	while ( (tmp->next)->next != NULL){
+	while ( ((tmp->next)->next) != NULL){
 		tmp = tmp->next;
+
 	}
-	tmp->item = NULL;
-	struct linked_list *smp = tmp;
-	smp = tmp->next;
+	struct linked_list *smp = tmp->next;
 	tmp->next = NULL;
 	smp->item = NULL;
-	free(smp);
-		
-	printf("Happy list remove function\n");
+	free(smp);	
 }

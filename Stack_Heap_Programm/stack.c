@@ -27,7 +27,7 @@ int stack_init(struct stack *st, int flag_data_type, int size)
 		printf("Im here or not ?!\n");	
 		list_init(st);
 		st->arr = NULL;
-		st->top = 0;
+		st->top = -1;
 		st->size = 0;
 		printf("first arg : %s\n", (st->list)->item);
 		return 1;
@@ -69,6 +69,7 @@ int stack_push(int flag_data_type, struct stack *st, char *str)
 {
 	if (flag_data_type == LINKED_LIST) {
 		list_add(st, str);
+		++st->top;
 		return 1;
 	}
 	if (!stack_is_full(st)) {
@@ -106,15 +107,16 @@ int stack_print(int data_type, struct stack *st, int file_flag, char *filename)
 
 int stack_pop(int flag_data_type, struct stack *st)
 {
-	if (flag_data_type == LINKED_LIST) {
-		list_remove(st);
-		return 1;
+
+	if (stack_is_empty(st)){
+		if (flag_data_type == LINKED_LIST) {
+			list_remove(st);
+			st->top--;
+			return 1;
+		}
+		else {
+			st->arr[st->top--] = NULL;
+		}
 	}
-	if (stack_is_empty(st)) {
-		st->arr[st->top--] = NULL;
-		return 1;
-	}
-	printf("\nStack is empty!\n");
-	return 0;
 
 }
