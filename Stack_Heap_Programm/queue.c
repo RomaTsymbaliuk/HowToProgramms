@@ -3,22 +3,23 @@
 #include "structures.h"
 
 enum {STATIC_ARRAY, DYNAMIC_ARRAY, LINKED_LIST};
+extern struct queue *q;
 
-int queue_is_full(struct queue *q)
+int queue_is_full()
 {
 	if (q->head == q->size - 1) {
 		return 0;
 	}
 	return 1;
 }
-int queue_is_empty(struct queue *q)
+int queue_is_empty()
 {
 	if (q->tail == -1 || q->tail > q->head) {
 		return 0;
 	}
 	return 1;
 }
-int queue_push(struct queue *q, char *str) {
+int queue_push(char *str) {
 	if (queue_is_full(q)) {
 		if (q->tail == -1) {
 			q->tail = 0;
@@ -27,12 +28,12 @@ int queue_push(struct queue *q, char *str) {
 		return 1;
 	}
 }
-int queue_pop(struct queue *q) {
+int queue_pop() {
 	if (queue_is_empty(q)) {
 		q->tail++;
 	}
 }
-void queue_show(struct queue *q) {
+void queue_show() {
 	if (!queue_is_empty(q)) {
 		printf("queue is empty");
 	} else {
@@ -42,7 +43,7 @@ void queue_show(struct queue *q) {
 		printf("\n");
 	}
 }
-int queue_init(struct queue *q, int flag_data_type, int size) {
+int queue_init(int flag_data_type, int size) {
 
         char **arr = NULL;
 //        if (size < 0)
@@ -64,11 +65,11 @@ int queue_init(struct queue *q, int flag_data_type, int size) {
 		q->tail = -1;
                 return 1;
 	}	
-//	q->head = -1;
-//      q->tail = -1;
-//	q->arr = arr;
-//	q->list = NULL;
-      q->size = size;
+	q->size = size;
+	q->head = -1;
+        q->tail = -1;
+	q->arr = arr;
+	q->list = NULL;
         return 1;
 
 }

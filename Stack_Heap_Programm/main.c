@@ -5,19 +5,20 @@
 #include "structures.h"
 #define CMD_NUM 40
 
+struct stack *st;
+struct queue *q;
 struct commands{
-	int (*push_pointer)(int flag_data_type, struct stack *st, char *str);
-	int (*pop_pointer)(int flag_data_type, struct stack *st);
+	int (*push_pointer)(int flag_data_type, char *str);
+	int (*pop_pointer)(int flag_data_type);
 	char *str;
 };
+
 int main(int argc, char *argv[])
 {
 	static int create_stack_flag;
 	static int create_queue_flag;
 	int c;
-        struct stack *st;
-	struct queue *q;
-	int status;
+       	int status;
 	enum {STATIC_ARRAY, DYNAMIC_ARRAY, LINKED_LIST};
 	int data_type = -1;
 	int size = 0;
@@ -114,26 +115,26 @@ int main(int argc, char *argv[])
 	}
 	if (create_stack_flag) {
 
-		int status = stack_init(st, data_type, size);
+		st = (struct stack *)malloc(sizeof(struct stack));
+		int status = stack_init(data_type, size);
 		for (int i = 0; i < k; i++){
 			if (cmd[i].push_pointer) {
-				cmd[i].push_pointer(data_type, st, cmd[i].str);
+				cmd[i].push_pointer(data_type, cmd[i].str);
 			} else if (cmd[i].pop_pointer) {
-				cmd[i].pop_pointer(data_type, st);
+				cmd[i].pop_pointer(data_type);
 			}
 		}
-		stack_print(data_type, st, file_flag, filename);
+		stack_print(data_type, file_flag, filename);
 	} else if (create_queue_flag) {
-		printf("Entered here\n");
-		int status = queue_init(q, data_type, size);
+		q = (struct queue *)malloc(sizeof(struct queue));
+		int status = queue_init(data_type, size);
 		for (int i = 0; i < k; i++){
 			if (cmd[i].push_pointer) {
-				cmd[i].push_pointer(data_type, st, cmd[i].str);
+				cmd[i].push_pointer(data_type, cmd[i].str);
 			} else if (cmd[i].pop_pointer) {
-				cmd[i].pop_pointer(data_type, st);
+				cmd[i].pop_pointer(data_type);
 			}
 		}
-//		queue_show(q);
 
 	}
 	return 0; 

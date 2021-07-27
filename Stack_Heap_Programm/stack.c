@@ -3,9 +3,9 @@
 #include "structures.h"
 
 enum {STATIC_ARRAY, DYNAMIC_ARRAY, LINKED_LIST};
+extern struct stack *st;
 
-
-int stack_init(struct stack *st, int flag_data_type, int size)
+int stack_init(int flag_data_type, int size)
 {
 	char **arr = NULL;
 //        if (size < 0)
@@ -44,7 +44,7 @@ int stack_init(struct stack *st, int flag_data_type, int size)
  *
  * return 1 - ok, 0 - err
  */
-int stack_is_full(struct stack *st)
+int stack_is_full()
 {
 	if (!st)
 		return 0;
@@ -56,7 +56,7 @@ int stack_is_full(struct stack *st)
 	}
 	return 1;
 }
-int stack_is_empty(struct stack *st)
+int stack_is_empty()
 {
 	if (st->top == -1){
 		printf("stack is empty !\n");
@@ -65,7 +65,7 @@ int stack_is_empty(struct stack *st)
 	return 1;
 }
 
-int stack_push(int flag_data_type, struct stack *st, char *str)
+int stack_push(int flag_data_type, char *str)
 {
 	if (flag_data_type == LINKED_LIST) {
 		list_add(st, str);
@@ -80,7 +80,7 @@ int stack_push(int flag_data_type, struct stack *st, char *str)
 	return 0;
 }
 
-int stack_print(int data_type, struct stack *st, int file_flag, char *filename)
+int stack_print(int data_type, int file_flag, char *filename)
 {
 	FILE *stream; 
 	if (file_flag) {
@@ -105,7 +105,7 @@ int stack_print(int data_type, struct stack *st, int file_flag, char *filename)
 	return 1;
 }
 
-int stack_pop(int flag_data_type, struct stack *st)
+int stack_pop(int flag_data_type)
 {
 
 	if (stack_is_empty(st)){
