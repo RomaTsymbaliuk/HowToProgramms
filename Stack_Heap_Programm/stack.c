@@ -25,7 +25,7 @@ int stack_init(struct stack *st, int flag_data_type, int size)
 	}
         else if (flag_data_type == LINKED_LIST) {
 		printf("Im here or not ?!\n");	
-		list_init(st);
+		list_init(st, NULL);
 		st->arr = NULL;
 		st->top = -1;
 		st->size = 0;

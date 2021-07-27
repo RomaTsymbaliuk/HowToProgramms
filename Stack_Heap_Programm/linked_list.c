@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-int list_init(struct stack *st) {
+int list_init(struct stack *st, struct queue *q) {
 	
 	struct linked_list *list = (struct linked_list *)malloc(sizeof(struct linked_list));
 	if (!list) {
@@ -11,11 +11,13 @@ int list_init(struct stack *st) {
 	}
 	list->next = NULL;
 	list->item = "NULL";
-	st->list = list;
+	if (st)
+		st->list = list;
+	if (q)
+		q->list = list;
 	
-	printf("Happy list init function !\n");
 }
-int list_add(struct stack *st, char *item){
+int list_add(struct stack *st, char *item) {
 	
 	struct linked_list *tmp = st->list;
 	while ( tmp->next != NULL) {
