@@ -30,4 +30,4 @@ int queue_is_full();
 int queue_pop();
 int queue_push(char *str);
 int queue_init(int flag_data_type, int size);
-void queue_show();
+void queue_print(int flag_data_type, int file_flag, char *filename);

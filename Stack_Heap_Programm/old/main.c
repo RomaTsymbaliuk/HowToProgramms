@@ -3,6 +3,7 @@
 #include <getopt.h>
 #include <string.h>
 #include "structures.h"
+#include "data.h"
 #define CMD_NUM 40
 
 struct stack *st;
@@ -64,9 +65,13 @@ int main(int argc, char *argv[])
 			break;
 		
 		case 'a':
-			cmd[k].push_pointer = stack_push;
+			if (create_stack_flag)
+				cmd[k].push_pointer = stack_push;
+			else if (create_queue_flag)
+				cmd[k].push_pointer = queue_push;
 			cmd[k].pop_pointer = NULL;
 			cmd[k].str = optarg;
+			printf("CASE : cmd[%d].str -  %s\n", k, cmd[k].str);
 			k++;
 			break;
 		case 'b':
@@ -93,8 +98,7 @@ int main(int argc, char *argv[])
 			break;
 		case 'e':
 			create_queue_flag = 1;
-			if (optarg) {
-				printf("optarg : %s", optarg);
+			if (optarg){
 				size = atoi(optarg);
 			}
 			break;
@@ -119,6 +123,7 @@ int main(int argc, char *argv[])
 		int status = stack_init(data_type, size);
 		for (int i = 0; i < k; i++){
 			if (cmd[i].push_pointer) {
+//				printf("in main : cmd[%d].str %s\n", i, cmd[i].str);
 				cmd[i].push_pointer(data_type, cmd[i].str);
 			} else if (cmd[i].pop_pointer) {
 				cmd[i].pop_pointer(data_type);
@@ -128,13 +133,14 @@ int main(int argc, char *argv[])
 	} else if (create_queue_flag) {
 		q = (struct queue *)malloc(sizeof(struct queue));
 		int status = queue_init(data_type, size);
-		for (int i = 0; i < k; i++){
+		for (int i = 0; i < k; i++) {
 			if (cmd[i].push_pointer) {
 				cmd[i].push_pointer(data_type, cmd[i].str);
 			} else if (cmd[i].pop_pointer) {
 				cmd[i].pop_pointer(data_type);
 			}
 		}
+		queue_print(data_type, file_flag, filename);
 
 	}
 	return 0; 

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "structures.h"
-
+// добавить дефайни на exit функцій 
 enum {STATIC_ARRAY, DYNAMIC_ARRAY, LINKED_LIST};
 extern struct stack *st;
 
@@ -11,7 +11,11 @@ int stack_init(int flag_data_type, int size)
 //        if (size < 0)
 //       		return 0;       
 	if (flag_data_type == STATIC_ARRAY) {
-		arr = (char**)malloc(sizeof(char*) * size);
+		// #define SIZE 100 
+		//
+		// розбити на три функції по бібліотеках 
+		static char *arr[100];
+		st->arr = arr;
 		if (!arr)
 			return 0;
 		st->list = NULL;
@@ -35,6 +39,7 @@ int stack_init(int flag_data_type, int size)
 	st->arr = arr;
 	st->top = -1;
 	st->size = size;	
+	printf("stack size : %d\n", st->size);
 	return 1;
 }
 
@@ -50,9 +55,9 @@ int stack_is_full()
 		return 0;
 	if (st->top == st->size) {
 		printf("stack is full !\n");
-		return 1;
-	} else {
 		return 0;
+	} else {
+		return 1;
 	}
 	return 1;
 }
@@ -72,7 +77,7 @@ int stack_push(int flag_data_type, char *str)
 		++st->top;
 		return 1;
 	}
-	if (!stack_is_full(st)) {
+	if (stack_is_full(st)) {
 		st->arr[++st->top] = str;
 		return 1;
 	}
@@ -85,6 +90,7 @@ int stack_print(int data_type, int file_flag, char *filename)
 	FILE *stream; 
 	if (file_flag) {
 		FILE *f = fopen(filename, "w");
+		//Перевірити чи відк файл 
 		stream = f;
 	} else {
 		stream = stdout;
@@ -97,7 +103,7 @@ int stack_print(int data_type, int file_flag, char *filename)
 	}
 	else {
 		struct linked_list *tmp = st->list;
-		while (tmp!= NULL) {
+		while (!tmp) {
 			printf("%s\n", tmp->item);
 			tmp = tmp->next;
 		}
