@@ -29,3 +29,19 @@ int stack_init(struct data *d)
 
 	}
 }
+int stack_push(struct data *d)
+{
+	printf("Stack push!\n");
+}
+int stack_pop(struct data *d)
+{
+	printf("Stack pop!\n");
+}
+int stack_is_full(struct data *d)
+{
+	printf("Stack is full!\n");
+}
+int stack_is_empty(struct data *d)
+{
+	printf("Stack is empty!\n");
+}

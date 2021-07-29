@@ -22,8 +22,11 @@
 int main()
 {
 	struct data *d = (struct data *)malloc(sizeof(struct data));
-	d->data_type = STATIC_ARRAY;
-	d->data_structure = STACK;
+	d->data_type = DYNAMIC_ARRAY;
+	d->data_structure = QUEUE;
 	init(d);
+	push(d);
+	pop(d);
+
 	return 1;
 }
