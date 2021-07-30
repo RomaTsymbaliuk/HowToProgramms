@@ -14,11 +14,20 @@
 #define STDIO
 #include <stdio.h>
 #endif
+#ifndef STDLIB
+#define STDLIB
+#include <stdlib.h>
+#endif
 
 int stack_init(struct data *d)
 {
 	printf("Stack initialization!\n");
-	if (d->data_type == STATIC_ARRAY) {
+	(d->anon_s).str_pnt = &Stack;
+	struct stack *st = malloc(sizeof(struct stack));
+	st->top = -1;
+	d->anon_s.str_pnt = st;
+	printf("TOP : %d\n", ((struct stack*)d->anon_s.str_pnt)->top);
+	if (d->data_type == STATIC_ARRAY) {		
 		static_init(d);
 
 	} else if (d->data_type == DYNAMIC_ARRAY) {

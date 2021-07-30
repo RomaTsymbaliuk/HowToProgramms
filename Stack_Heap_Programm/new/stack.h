@@ -13,7 +13,7 @@ struct stack{
         int top;
         int size;
 	struct data *d;
-};
+} Stack;
 
 int stack_init(struct data *d);
 int stack_push(struct data *d);
