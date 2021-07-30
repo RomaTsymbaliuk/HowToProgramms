@@ -25,16 +25,19 @@ int stack_init(struct data *d)
 	(d->anon_s).str_pnt = &Stack;
 	struct stack *st = malloc(sizeof(struct stack));
 	st->top = -1;
+	st->d = d;
 	d->anon_s.str_pnt = st;
 	printf("TOP : %d\n", ((struct stack*)d->anon_s.str_pnt)->top);
 	if (d->data_type == STATIC_ARRAY) {		
 		static_init(d);
-
+		printf("After init : %s\n", (char*)d->data_p[0]);
 	} else if (d->data_type == DYNAMIC_ARRAY) {
 		dynamic_init(d);
+		printf("After init : %s\n", (char*)d->data_p[0]);
 
 	} else if (d->data_type == LINKED_LIST) {
 		list_init(d);
+		printf("After init : %s\n", ((struct list*)d->anon_dt_tp.dat_type_pnt)->item);
 
 	}
 }

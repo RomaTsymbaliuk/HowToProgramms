@@ -87,6 +87,7 @@ struct data *menu(int argc, char *argv[], struct data *d)
                         if (optarg){
                                 size = atoi(optarg);
 				printf("Stack choosen with size : %d!\n", size);
+				d->structure_size = size;
 				d->init = init;
 				d->data_structure = STACK;
 				d->push = NULL;
@@ -99,6 +100,7 @@ struct data *menu(int argc, char *argv[], struct data *d)
 				
                                 size = atoi(optarg);
 				printf("Queue chosen with size : %d\n", size);
+				d->structure_size = size;
 				d->init = init;
 				d->data_structure = QUEUE;
 				d->push = NULL;

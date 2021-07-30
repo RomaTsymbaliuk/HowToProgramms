@@ -12,15 +12,20 @@ struct {
 struct data {
 	int data_type;
 	int data_structure;
-	void *data_p;
+	void **data_p;
 	int (*push)(struct data *d);
 	int (*pop)(struct data *d);
 	int (*init)(struct data *d);
 	void (*print)(struct data *d);
+	int structure_size;
 	struct 
 	{
 		void *str_pnt;
 	} anon_s;
+	struct 
+	{
+		void *dat_type_pnt;
+	} anon_dt_tp;
 };
 
 int push(struct data *d);

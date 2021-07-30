@@ -11,7 +11,6 @@
 
 struct stack{
         int top;
-        int size;
 	struct data *d;
 } Stack;
 
