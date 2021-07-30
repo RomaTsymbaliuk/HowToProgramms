@@ -38,3 +38,7 @@ int pop(struct data *d)
 		queue_pop(d);
 	}
 }
+void print(struct data *d)
+{
+	printf("Printing all this stuff\n");
+}

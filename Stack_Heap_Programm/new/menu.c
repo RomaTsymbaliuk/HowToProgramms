@@ -22,13 +22,17 @@
 #define STRING_H
 #include <string.h>
 #endif
+#ifndef EXECTR
+#define EXECTR
+#include "executor.h"
+#endif
 
 struct data *menu(int argc, char *argv[], struct data *d)
 {
 	char *filename;
 	int c;
 	int size;
-
+	d = (struct data*)malloc(sizeof(struct data));
 	while (1) {
 
                 static struct option long_options[] =
@@ -70,9 +74,12 @@ struct data *menu(int argc, char *argv[], struct data *d)
                 case 'c':
                        if (!strcmp(optarg, "dynamic-arr")){
                                 printf("Data type dynamic chosen\n");
+				d->data_type = DYNAMIC_ARRAY;
                         } else if (!strcmp(optarg, "static-arr")) {
+				d->data_type = STATIC_ARRAY;
                                 printf("Data type static chosen\n");
                         } else if (!strcmp(optarg, "linked-list")) {
+				d->data_type = LINKED_LIST;
                                 printf("Data type linked-list chosen\n");
                         }
                         break;
@@ -80,6 +87,11 @@ struct data *menu(int argc, char *argv[], struct data *d)
                         if (optarg){
                                 size = atoi(optarg);
 				printf("Stack choosen with size : %d!\n", size);
+				d->init = init;
+				d->data_structure = STACK;
+				d->push = NULL;
+				d->pop = NULL;
+				d->print = NULL;
                         }
                         break;
                 case 'e':
@@ -87,20 +99,28 @@ struct data *menu(int argc, char *argv[], struct data *d)
 				
                                 size = atoi(optarg);
 				printf("Queue chosen with size : %d\n", size);
+				d->init = init;
+				d->data_structure = QUEUE;
+				d->push = NULL;
+				d->pop = NULL;
+				d->print = NULL;
                         }
                         break;
                 case 'f':
                         filename = optarg;
                         break;
                 case 'p':
-
+			d->init = NULL;
+			d->push = NULL;
+			d->pop = NULL;
+			d->print = print;
                         break;
                 case '?':
                         break;
                 default:
                         abort();
                 }
-
-
+	
         }
+	executor(d);
 }
