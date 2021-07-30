@@ -7,8 +7,11 @@ struct data {
 	int data_type;
 	int data_structure;
 	void *data_p;
+	int (*push)(struct data *d);
+	int (*pop)(struct data *d);
+	int (*init)(struct data *d);
+	void (*print)(struct data *d);
 };
-
 
 int push(struct data *d);
 int pop(struct data *d);
