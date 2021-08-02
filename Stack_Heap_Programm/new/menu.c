@@ -44,6 +44,7 @@ struct data *menu(int argc, char *argv[], struct data *d)
                         {"data-type", required_argument, 0, 'c'},
                         {"file", required_argument, 0, 'f'},
                         {"print", no_argument, 0, 'p'},
+			{"upload", no_argument, 0, 'u'},
                         {0, 0, 0, 0}
                 };
                 int option_index = 0;
@@ -65,11 +66,22 @@ struct data *menu(int argc, char *argv[], struct data *d)
                         break;
 
                 case 'a':
-			printf("Push choosen\n");
+			if (optarg) {
+		  		printf("Push choosen\n");
+				d->push = push;
+				d->act_data = (char*)optarg;
+				d->pop = NULL;
+				d->init = NULL;
+				d->print = NULL;
+			}
                         break;
                 case 'b':
+			d->push = NULL;
+			d->init = NULL;
+			d->upload = NULL;
+			d->pop = pop;
+			d->print = NULL;
 			printf("Pop chosen\n");
-                        break;
                         break;
                 case 'c':
                        if (!strcmp(optarg, "dynamic-arr")){
@@ -90,9 +102,9 @@ struct data *menu(int argc, char *argv[], struct data *d)
 				d->structure_size = size;
 				d->init = init;
 				d->data_structure = STACK;
-				d->push = NULL;
 				d->pop = NULL;
 				d->print = NULL;
+				d->push = NULL;
                         }
                         break;
                 case 'e':
@@ -108,6 +120,12 @@ struct data *menu(int argc, char *argv[], struct data *d)
 				d->print = NULL;
                         }
                         break;
+		case 'u':
+			d->upload = upload;
+			d->init = NULL;
+			d->push = NULL;
+			d->pop = NULL;
+			break;
                 case 'f':
                         filename = optarg;
                         break;
@@ -122,7 +140,10 @@ struct data *menu(int argc, char *argv[], struct data *d)
                 default:
                         abort();
                 }
-	
-        }
+
 	executor(d);
+        }
+
+//	executor(d);
+
 }

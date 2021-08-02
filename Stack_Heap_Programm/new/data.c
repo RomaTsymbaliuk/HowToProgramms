@@ -38,7 +38,18 @@ int pop(struct data *d)
 		queue_pop(d);
 	}
 }
+int upload(struct data *d)
+{
+	if (d->data_structure == STACK) {
+		stack_upload(d);
+	}
+	else {
+		queue_upload(d);
+	}
+}
 void print(struct data *d)
 {
-	printf("Printing all this stuff\n");
+	if (d->data_structure == STACK) {
+		stack_print(d);
+	}
 }

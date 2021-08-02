@@ -12,11 +12,13 @@ struct {
 struct data {
 	int data_type;
 	int data_structure;
+	void *act_data;
 	void **data_p;
 	int (*push)(struct data *d);
 	int (*pop)(struct data *d);
 	int (*init)(struct data *d);
 	void (*print)(struct data *d);
+	int (*upload)(struct data *d);
 	int structure_size;
 	struct 
 	{
@@ -32,3 +34,4 @@ int push(struct data *d);
 int pop(struct data *d);
 int init(struct data *d);
 void print(struct data *d);
+int upload(struct data *d);

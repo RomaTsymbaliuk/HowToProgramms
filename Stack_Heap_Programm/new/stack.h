@@ -11,7 +11,7 @@
 
 struct stack{
         int top;
-	struct data *d;
+	void **arr;
 } Stack;
 
 int stack_init(struct data *d);
@@ -19,6 +19,6 @@ int stack_push(struct data *d);
 int stack_pop(struct data *d);
 int stack_is_full(struct data *d);
 int stack_is_empty(struct data *d);
-
-	
+int stack_upload(struct data *d);
+int stack_print(struct data *d);	
 

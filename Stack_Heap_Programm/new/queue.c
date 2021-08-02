@@ -46,5 +46,8 @@ int queue_is_empty(struct data *d)
 {
 	printf("Queue us empty!\n");
 }
-
+int queue_upload(struct data *d)
+{
+	printf("Queue uploading ...\n");
+}
             

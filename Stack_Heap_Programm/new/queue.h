@@ -20,4 +20,4 @@ int queue_push(struct data *d);
 int queue_pop(struct data *d);
 int queue_is_full(struct data *d);
 int queue_is_empty(struct data *d);
-
+int queue_upload(struct data *d);

@@ -9,13 +9,17 @@
 
 void executor(struct data *d)
 {
+	printf("Actual data in executor : %s\n", d->act_data);
 	if (d->init) {
 		d->init(d);
-	} else if (d->push) {
+	} 
+	if (d->push) {
 		d->push(d);
-	} else if (d->pop) {
+	} 
+	if (d->pop) {
 		d->pop(d);
-	} else if (d->print) {
+	} 
+       	if (d->print) {
 		d->print(d);
 	}
 }
