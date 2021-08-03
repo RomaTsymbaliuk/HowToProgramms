@@ -17,7 +17,7 @@ int static_stack_is_empty(struct data *d);
 int static_stack_is_full(struct data *d);
 int static_stack_print(struct data *d);
 
-static struct data s_stack_obj = {.data_ptr = NULL, .data_type = STATIC_ARR_STACK, .init = static_stack_init, .push = static_stack_push, .pop = static_stack_pop, .print = static_stack_print};
+static struct data s_stack_obj = {.data_ptr = NULL, .data_type = STATIC_ARR_STACK, .init = static_stack_init, .push = static_stack_push, .pop = static_stack_pop, .print = static_stack_print, .size = 0};
 
 #endif /* _STATIC_STACK_H */
 

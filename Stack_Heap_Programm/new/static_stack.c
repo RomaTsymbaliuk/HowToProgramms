@@ -1,6 +1,7 @@
 #include "static_stack.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <stddef.h>
 
 int static_stack_init(struct data *d)
 {

@@ -14,7 +14,6 @@ struct data *process_user_input(int argc, char *argv[])
 	struct data *d = (struct data*)malloc(sizeof(struct data));
         struct data **objs = (struct data**)malloc(sizeof(struct data) * 6);
         objs[STATIC_ARR_STACK] = &s_stack_obj;
-        
 
         while (1) {
 
@@ -52,13 +51,14 @@ struct data *process_user_input(int argc, char *argv[])
                         break;
 
                 case 'a':
+
 			if (optarg) {
+                                
 		  		d->data_ptr = optarg;
 			}
                         break;
                 case 'b':
 		
-			printf("Pop chosen\n");
                         break;
                 case 'd':
                         if (optarg){
@@ -70,14 +70,12 @@ struct data *process_user_input(int argc, char *argv[])
                 case 'e':
                         if (optarg){
                                 size = atoi(optarg);
-				printf("Static Queue chosen with size : %d\n", size);
 				
                         }
                         break;
                 case 'x':
                         if (optarg){
                                 size = atoi(optarg);
-                                printf("Dynamic Stack choosen with size : %d!\n", size);
         
                         }
                         break;
@@ -85,14 +83,12 @@ struct data *process_user_input(int argc, char *argv[])
                         if (optarg){
                                 
                                 size = atoi(optarg);
-                                printf("Dynamic Queue chosen with size : %d\n", size);
                                 
                         }
                         break;
                 case 'q':
                         if (optarg){
                                 size = atoi(optarg);
-                                printf("List Stack choosen with size : %d!\n", size);
         
                         }
                         break;
@@ -100,7 +96,6 @@ struct data *process_user_input(int argc, char *argv[])
                         if (optarg){
                                 
                                 size = atoi(optarg);
-                                printf("List Queue chosen with size : %d\n", size);
                                 
                         }
                         break;
