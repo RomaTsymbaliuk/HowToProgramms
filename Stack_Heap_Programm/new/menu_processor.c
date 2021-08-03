@@ -3,16 +3,16 @@
 #include <getopt.h>
 #include <stdio.h>
 
-struct obj *choice = NULL;
+struct data *choice = NULL;
 
-struct obj *process_user_input(int argc, char *argv[])
+struct data *process_user_input(int argc, char *argv[])
 {
         
 	char *filename;
 	int c;
 	int size;
 	struct data *d = (struct data*)malloc(sizeof(struct data));
-        struct obj **objs = (struct obj**)malloc(sizeof(struct obj) * 6);
+        struct data **objs = (struct data**)malloc(sizeof(struct data) * 6);
         objs[STATIC_ARR_STACK] = &s_stack_obj;
         
 
@@ -53,8 +53,7 @@ struct obj *process_user_input(int argc, char *argv[])
 
                 case 'a':
 			if (optarg) {
-		  		printf("Push choosen\n");
-				
+		  		d->data_ptr = optarg;
 			}
                         break;
                 case 'b':
@@ -64,15 +63,12 @@ struct obj *process_user_input(int argc, char *argv[])
                 case 'd':
                         if (optarg){
                                 size = atoi(optarg);
-				printf("Static Stack choosen with size : %d!\n", size);
-                                choice = objs[STATIC_ARR_STACK];
-                                printf("Choice row : %s", choice->row);
-                                return choice;
+                                d = objs[STATIC_ARR_STACK];
+                                d->size = size;
                         }
                         break;
                 case 'e':
                         if (optarg){
-				
                                 size = atoi(optarg);
 				printf("Static Queue chosen with size : %d\n", size);
 				
@@ -123,10 +119,12 @@ struct obj *process_user_input(int argc, char *argv[])
 
         }
 
-
+        return d;
 }
 
-struct data *run_user_cmd(struct obj *choice)
+struct data *run_user_cmd(struct data *choice)
 {
-        struct data *d;
+        choice->init(choice);
+        choice->push(choice);
+        choice->print(choice);
 }
