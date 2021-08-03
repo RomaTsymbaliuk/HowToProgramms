@@ -1,18 +1,7 @@
-#ifndef STDIO
-#define STDIO
-#include <stdio.h>
-#endif
-#ifndef MENU_H
-#define MENU_H
-#include "menu.h"
-#endif
-#ifndef DATA_H
-#define DATA_H
-#include "data.h"
-#endif
+#include "menu_processor.h"
 
 int main(int argc, char *argv[]) {
-	struct data *d;
-	menu(argc, argv, d);
+	struct obj *c = process_user_input(argc, argv);
+	run_user_cmd(c);
 	return 1;
 }

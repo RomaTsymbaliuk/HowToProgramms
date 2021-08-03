@@ -7,7 +7,7 @@
 #include "lists.h"
 #endif
 
-void list_init_d(struct data *d)
+void list_stack_init(struct data *d)
 {
 	struct list *l = (struct list*)malloc(sizeof(struct list));
 	if (!l) {

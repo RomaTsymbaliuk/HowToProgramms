@@ -1,31 +1,4 @@
-#ifndef STDIO
-#define STDIO
-#include <stdio.h>
-#endif
-#ifndef STDLIB
-#define STDLIN
-#include <stdlib.h>
-#endif
-#ifndef DATA_H
-#define DATA_H
-#include "data.h"
-#endif
-#ifndef MENU_H
-#define MENU_H
 #include "menu.h"
-#endif
-#ifndef GETOPT
-#define GETOPT
-#include <getopt.h>
-#endif
-#ifndef STRING_H
-#define STRING_H
-#include <string.h>
-#endif
-#ifndef EXECTR
-#define EXECTR
-#include "executor.h"
-#endif
 
 struct data *menu(int argc, char *argv[], struct data *d)
 {

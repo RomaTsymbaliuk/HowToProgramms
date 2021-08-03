@@ -25,7 +25,6 @@
 
 int stack_init(struct data *d)
 {
-	printf("Stack initialization!\n");
 	(d->anon_s).str_pnt = &Stack;
 	struct stack *st = malloc(sizeof(struct stack));
 	st->top = -1;
@@ -57,8 +56,6 @@ int stack_push(struct data *d)
 	if (stack_is_full(d) == FALSE) {
 		struct stack *st = d->anon_s.str_pnt;
 		d->data_p[++st->top] = d->act_data;
-		printf("Pushed : %s\n", d->act_data);
-		printf("Stack push!\n");
 		return TRUE;
 	}
 	else {
@@ -77,7 +74,6 @@ int stack_is_empty(struct data *d)
 }
 int stack_pop(struct data *d)
 {
-	printf("Stack pop!\n");
 	struct stack *st = d->anon_s.str_pnt;
 	if (stack_is_empty(d) == FALSE) {
 		d->data_p[st->top--] = NULL;
@@ -98,7 +94,6 @@ int stack_upload(struct data *d)
 int stack_print(struct data *d)
 {
 	struct stack *st = d->anon_s.str_pnt;
-	printf("Printing stack, top : %d \n", st->top);
 	for (int i = 0; i <= st->top; i++) {
 		printf("%s\n", d->data_p[i]);
 	}
