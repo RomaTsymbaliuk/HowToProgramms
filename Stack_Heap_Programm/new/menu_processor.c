@@ -13,6 +13,8 @@ struct data *process_user_input(int argc, char *argv[])
 	int c;
 	int size;
 	struct data *d;
+        struct cmd cm[CMD_NUMBER] = {NULL};
+        int i = 0;
 
         while (1) {
 
@@ -54,10 +56,14 @@ struct data *process_user_input(int argc, char *argv[])
                                         printf("Too big string! \n");
                                         return NULL;
                                 }
-		  		d->data_ptr = optarg;
+                                d->data_ptr = optarg;
 			}
                         break;
                 case 'b':
+//                        cm[i]->fn = pop;
+//                        d->data_ptr = NULL;
+//                        cm[i]->d = d;
+//                        i++; 
                         break;
                 case 'd':
                         if (optarg){
@@ -94,7 +100,12 @@ struct data *process_user_input(int argc, char *argv[])
                 case 'q':
                         if (optarg){
                                 size = atoi(optarg);
-        
+                                if (size > MAX_SIZE || size < MIN_SIZE) {
+                                        printf("NOT ALLOWED SIZE : %d\n", size);
+                                        return NULL;
+                                }
+                                d = &l_stack_obj;
+                                d->size = size;
                         }
                         break;
                 case 'w':
@@ -126,5 +137,6 @@ struct data *run_user_cmd(struct data *choice)
 {
         choice->init(choice);
         choice->push(choice);
+        choice->pop(choice);
         choice->print(choice);
 }
