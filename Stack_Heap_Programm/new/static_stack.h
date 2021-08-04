@@ -1,5 +1,5 @@
-#ifndef _STATIC_STACK_H
-#define _STATIC_STACK_H
+#ifndef __STATIC_STACK_H
+#define __STATIC_STACK_H
 
 #include "type.h"
 #include <stddef.h>
@@ -19,5 +19,5 @@ int static_stack_print(struct data *d);
 
 static struct data s_stack_obj = {.data_ptr = NULL, .data_type = STATIC_ARR_STACK, .init = static_stack_init, .push = static_stack_push, .pop = static_stack_pop, .print = static_stack_print, .size = 0};
 
-#endif /* _STATIC_STACK_H */
+#endif /* __STATIC_STACK_H */
 

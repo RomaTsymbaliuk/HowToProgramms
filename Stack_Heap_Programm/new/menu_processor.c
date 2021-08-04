@@ -49,20 +49,24 @@ struct data *process_user_input(int argc, char *argv[])
                         }
                         printf("\n");
                         break;
-
                 case 'a':
-
 			if (optarg) {
-                                
+                                if (strlen(optarg) > MAX_STR_LEN) {
+                                        printf("Too big string! \n");
+                                        return NULL;
+                                }
 		  		d->data_ptr = optarg;
 			}
                         break;
                 case 'b':
-		
                         break;
                 case 'd':
                         if (optarg){
                                 size = atoi(optarg);
+                                if (size > MAX_SIZE || size < MIN_SIZE) {
+                                        printf("NOT ALLOWED SIZE : %d\n", size);
+                                        return NULL;
+                                }
                                 d = objs[STATIC_ARR_STACK];
                                 d->size = size;
                         }
@@ -70,20 +74,16 @@ struct data *process_user_input(int argc, char *argv[])
                 case 'e':
                         if (optarg){
                                 size = atoi(optarg);
-				
                         }
                         break;
                 case 'x':
                         if (optarg){
                                 size = atoi(optarg);
-        
                         }
                         break;
                 case 'y':
                         if (optarg){
-                                
                                 size = atoi(optarg);
-                                
                         }
                         break;
                 case 'q':

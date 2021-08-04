@@ -44,11 +44,11 @@ int static_stack_pop(struct data *d)
 {
 	
 	struct static_stack *st = d->anon_s.structure_pointer;
-	/*
+	
 	if (static_stack_is_empty(d) == FALSE) {
-		d->data_p[st->top--] = NULL;
+		st->arr[st->top--] = NULL;
 	}
-	*/
+	
 	return TRUE;
 	
 }

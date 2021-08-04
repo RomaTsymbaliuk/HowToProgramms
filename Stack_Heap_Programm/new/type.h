@@ -1,10 +1,8 @@
-#ifndef TYPE_H
-#define TYPE_H
+#ifndef __TYPE_H
+#define __TYPE_H
 #define TRUE 1
 #define FALSE 0
 #define MAX_SIZE 100
-
-
 
 enum {STATIC_ARR_STACK, DYNAMIC_ARR_STACK, LIST_STACK, STATIC_ARR_QUEUE, DYNAMIC_ARR_QUEUE, LIST_QUEUE};
 
@@ -23,4 +21,4 @@ struct data {
 };
 
 
-#endif
+#endif /* __TYPE_H  */
