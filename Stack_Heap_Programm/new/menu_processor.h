@@ -4,7 +4,7 @@
 #define MAX_SIZE 100
 #define MAX_STR_LEN 50
 #include "static_stack.h"
-#include "string.h"
+#include "dynamic_stack.h"
 
 struct data *process_user_input(int argc, char *argv[]);
 struct data *run_user_cmd(struct data *c);

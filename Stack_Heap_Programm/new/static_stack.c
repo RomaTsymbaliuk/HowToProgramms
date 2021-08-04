@@ -56,7 +56,7 @@ int static_stack_is_full(struct data *d)
 {
 	
 	struct static_stack *st = d->anon_s.structure_pointer;
-		if (st->top == d->size) {
+		if (st->top == MAX_SIZE) {
 		return TRUE;
 	}
 	return FALSE;
@@ -68,4 +68,12 @@ int static_stack_print(struct data *d)
 	for (int i = 0; i <= st->top; i++) {
 		printf("\n%s\n", st->arr[i]);
 	}
+}
+int static_stack_upload(struct data *d)
+{
+	return TRUE;
+}
+int static_stack_download(struct data *d)
+{
+	return TRUE;
 }

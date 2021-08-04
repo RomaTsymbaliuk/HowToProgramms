@@ -14,10 +14,13 @@ struct data {
 	int data_type;
 	int size;
 	void *data_ptr;
+	char *filename;
 	int (*init)(struct data *d);
 	int (*push)(struct data *d);
 	int (*pop)(struct data *d);
 	int (*print)(struct data *d);
+	int (*download)(struct data *d);
+	int (*upload)(struct data *d);
 };
 
 

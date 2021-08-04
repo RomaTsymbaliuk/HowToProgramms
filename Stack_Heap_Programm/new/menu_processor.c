@@ -1,4 +1,5 @@
 #include "menu_processor.h"
+#include "string.h"
 #include <stdlib.h>
 #include <getopt.h>
 #include <stdio.h>
@@ -8,12 +9,10 @@ struct data *choice = NULL;
 struct data *process_user_input(int argc, char *argv[])
 {
         
-	char *filename;
+	
 	int c;
 	int size;
-	struct data *d = (struct data*)malloc(sizeof(struct data));
-        struct data **objs = (struct data**)malloc(sizeof(struct data) * 6);
-        objs[STATIC_ARR_STACK] = &s_stack_obj;
+	struct data *d;
 
         while (1) {
 
@@ -67,7 +66,7 @@ struct data *process_user_input(int argc, char *argv[])
                                         printf("NOT ALLOWED SIZE : %d\n", size);
                                         return NULL;
                                 }
-                                d = objs[STATIC_ARR_STACK];
+                                d = &s_stack_obj;
                                 d->size = size;
                         }
                         break;
@@ -79,6 +78,12 @@ struct data *process_user_input(int argc, char *argv[])
                 case 'x':
                         if (optarg){
                                 size = atoi(optarg);
+                                if (size > MAX_SIZE || size < MIN_SIZE) {
+                                        printf("NOT ALLOWED SIZE : %d\n", size);
+                                        return NULL;
+                                }
+                                d = &d_stack_obj;
+                                d->size = size;
                         }
                         break;
                 case 'y':
@@ -102,7 +107,7 @@ struct data *process_user_input(int argc, char *argv[])
 		case 'u':
 			break;
                 case 'f':
-                        filename = optarg;
+                        d->filename = optarg;
                         break;
                 case 'p':
                         break;
