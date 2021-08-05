@@ -9,6 +9,7 @@
 #include "list_stack.h"
 
 struct cmd {
+	void *user_data;
 	struct data *d;
 	int (*fn)(struct data *d);
 };

@@ -62,8 +62,9 @@ struct cmd **process_user_input(int argc, char *argv[])
                                 d->data_ptr = optarg;
                                 cm[i] = (struct cmd*)malloc(sizeof(struct cmd));
                                 cm[i]->d = (struct data*)malloc(sizeof(struct data));
-                                *(cm[i]->d) = *d;
+                                cm[i]->d = d;
                                 cm[i]->fn = (cm[i]->d)->push;
+                                cm[i]->user_data = optarg;
                                 i++;
 			}
                         break;
@@ -85,7 +86,8 @@ struct cmd **process_user_input(int argc, char *argv[])
                                 d->size = size;
                                 cm[i] = (struct cmd*)malloc(sizeof(struct cmd));
                                 cm[i]->d = (struct data*)malloc(sizeof(struct data));
-                                *(cm[i]->d) = *d;
+                                cm[i]->d = d;
+                                cm[i]->user_data = NULL;
                                 cm[i]->fn = (cm[i]->d)->init;
                                 i++;
                         }
@@ -157,14 +159,10 @@ void run_user_cmd(struct cmd **cm)
         choice->push(choice);
         choice->pop(choice);
         choice->print(choice);
-        
-        (cm[0]->d)->init(cm[0]->d);
-        (cm[0]->d)->push(cm[0]->d);
-        (cm[0]->d)->pop(cm[0]->d);
-        (cm[0]->d)->print(cm[0]->d);
         */
         int i = 0;
         while (cm[i]) {
+                (cm[i]->d)->data_ptr = cm[i]->user_data;
                 cm[i]->fn(cm[i]->d);
                 i = i + 1;
         }
