@@ -67,9 +67,22 @@ int static_stack_print(struct data *d)
 {
 
 	struct static_stack *st = d->anon_s.structure_pointer;
-	for (int i = 0; i <= st->top; i++) {
-		printf("\n%s\n", st->arr[i]);
+	FILE *stream;
+	if (d->filename) {
+		FILE *f = fopen(d->filename, "w");
+		if (!f)
+			return FALSE;
+		stream = f;
 	}
+	else {
+		stream = stdout;
+	}
+	for (int i = 0; i <= st->top; i++) {
+		fprintf(stream, "\n%s\n", st->arr[i]);
+	}
+	if (stream)
+		fclose(stream);
+	return TRUE;
 }
 int static_stack_upload(struct data *d)
 {

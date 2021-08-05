@@ -50,8 +50,20 @@ int list_stack_download(struct data *d)
 int list_stack_print(struct data *d)
 {
 	struct stack_list *st = d->anon_s.structure_pointer;
+	FILE *stream;
+	if (d->filename) {
+		FILE *f = fopen(d->filename, "w");
+		if (!f)
+			return FALSE;
+		stream = f;
+	}
+	else {
+		stream = stdout;
+	}
 	while (st->next != NULL) {
 		st = st->next;
-		printf("%s\n", st->item);
+		fprintf(stream, "%s\n", st->item);
 	}
+	if (stream)
+		fclose(stream);
 }
