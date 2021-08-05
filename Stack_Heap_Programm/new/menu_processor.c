@@ -27,7 +27,7 @@ struct cmd **process_user_input(int argc, char *argv[])
                         {"create-static-queue", required_argument, 0, 'e'},
                         {"create-dynamic-stack", required_argument, 0, 'x'},
                         {"create-dynamic-queue", required_argument, 0, 'y'},
-                        {"create-list-stack", required_argument, 0, 'q'},
+                        {"create-list-stack", no_argument, 0, 'q'},
                         {"create-list-queue", required_argument, 0, 'w'},
                         {"push", required_argument, 0, 'a'},
                         {"pop", no_argument, 0, 'b'},
@@ -120,15 +120,14 @@ struct cmd **process_user_input(int argc, char *argv[])
                         }
                         break;
                 case 'q':
-                        if (optarg){
-                                size = atoi(optarg);
-                                if (size > MAX_SIZE || size < MIN_SIZE) {
-                                        printf("NOT ALLOWED SIZE : %d\n", size);
-                                        return NULL;
-                                }
-                                d = &d_stack_obj;
-                                d->size = size;
-                        }
+
+                        d = &l_stack_obj;
+                        cm[i] = (struct cmd*)malloc(sizeof(struct cmd));
+                        cm[i]->d = (struct data*)malloc(sizeof(struct data));
+                        cm[i]->d = d;
+                        cm[i]->user_data = NULL;
+                        cm[i]->fn = (cm[i]->d)->init;
+                        i++;
                         break;
                 case 'w':
                         if (optarg){
@@ -160,12 +159,6 @@ struct cmd **process_user_input(int argc, char *argv[])
 
 void run_user_cmd(struct cmd **cm)
 {
-        /*
-        choice->init(choice);
-        choice->push(choice);
-        choice->pop(choice);
-        choice->print(choice);
-        */
         int i = 0;
         while (cm[i]) {
                 (cm[i]->d)->data_ptr = cm[i]->user_data;

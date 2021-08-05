@@ -17,18 +17,13 @@ int list_stack_init(struct data *d)
 int list_stack_push(struct data *d)
 {
 	struct stack_list *st = d->anon_s.structure_pointer;
-	struct stack_list *tmp = st;
-	while (tmp->next != NULL) {
-		tmp = tmp->next;
+	while (st->next != NULL) {
+		st = st->next;
 	}
-	if (tmp == st) {
-		tmp->item = d->data_ptr;
-	}
-	else {
-		tmp->next = (struct stack_list*)malloc(sizeof(struct stack_list));
-		(tmp->next)->next = NULL;
-		tmp->item = d->data_ptr;
-	}
+	st->next = (struct stack_list*)malloc(sizeof(struct stack_list));
+	st = st->next;
+	st->item = d->data_ptr;
+	st->next = NULL;
 	return TRUE;
 }
 int list_stack_pop(struct data *d)
@@ -40,10 +35,8 @@ int list_stack_pop(struct data *d)
 		st = st->next;
 	}
 	
-	st = NULL;
+	q->next = NULL;
 	free(st);
-
-	
 	
 }
 int list_stack_upload(struct data *d)
@@ -57,8 +50,8 @@ int list_stack_download(struct data *d)
 int list_stack_print(struct data *d)
 {
 	struct stack_list *st = d->anon_s.structure_pointer;
-	while (st != NULL) {
-		printf("%s\n", st->item);
+	while (st->next != NULL) {
 		st = st->next;
+		printf("%s\n", st->item);
 	}
 }
