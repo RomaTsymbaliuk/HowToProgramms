@@ -1,19 +1,22 @@
 #include "menu_processor.h"
-#include "string.h"
+#include <string.h>
 #include <stdlib.h>
 #include <getopt.h>
 #include <stdio.h>
 
 struct data *choice = NULL;
 
-struct data *process_user_input(int argc, char *argv[])
+struct cmd **process_user_input(int argc, char *argv[])
 {
         
 	
 	int c;
 	int size;
 	struct data *d;
-        struct cmd cm[CMD_NUMBER] = {NULL};
+        struct cmd **cm = (struct cmd **)malloc(sizeof(struct cmd *) * CMD_NUMBER);
+        for (int j = 0; j < CMD_NUMBER; j++) {
+                cm[j] = NULL;
+        }
         int i = 0;
 
         while (1) {
@@ -57,13 +60,18 @@ struct data *process_user_input(int argc, char *argv[])
                                         return NULL;
                                 }
                                 d->data_ptr = optarg;
+                                cm[i] = (struct cmd*)malloc(sizeof(struct cmd));
+                                cm[i]->d = d;
+                                cm[i]->fn = (cm[i]->d)->push;
+                                i++;
 			}
                         break;
                 case 'b':
-//                        cm[i]->fn = pop;
-//                        d->data_ptr = NULL;
-//                        cm[i]->d = d;
-//                        i++; 
+                        d->data_ptr = NULL;
+                        cm[i] = (struct cmd*)malloc(sizeof(struct cmd));
+                        cm[i]->d = d;
+                        cm[i]->fn = (cm[i]->d)->pop;
+                        i++; 
                         break;
                 case 'd':
                         if (optarg){
@@ -74,6 +82,10 @@ struct data *process_user_input(int argc, char *argv[])
                                 }
                                 d = &s_stack_obj;
                                 d->size = size;
+                                cm[i] = (struct cmd*)malloc(sizeof(struct cmd));
+                                cm[i]->d = d;
+                                cm[i]->fn = (cm[i]->d)->init;
+                                i++;
                         }
                         break;
                 case 'e':
@@ -110,9 +122,7 @@ struct data *process_user_input(int argc, char *argv[])
                         break;
                 case 'w':
                         if (optarg){
-                                
-                                size = atoi(optarg);
-                                
+                                size = atoi(optarg); 
                         }
                         break;
 		case 'u':
@@ -121,6 +131,11 @@ struct data *process_user_input(int argc, char *argv[])
                         d->filename = optarg;
                         break;
                 case 'p':
+                        d->data_ptr = NULL;
+                        cm[i] = (struct cmd*)malloc(sizeof(struct cmd));
+                        cm[i]->d = d;
+                        cm[i]->fn = (cm[i]->d)->print;
+                        i++;
                         break;
                 case '?':
                         break;
@@ -130,13 +145,25 @@ struct data *process_user_input(int argc, char *argv[])
 
         }
 
-        return d;
+        return cm;
 }
 
-struct data *run_user_cmd(struct data *choice)
+void run_user_cmd(struct cmd **cm)
 {
+        /*
         choice->init(choice);
         choice->push(choice);
         choice->pop(choice);
         choice->print(choice);
+        
+        (cm[0]->d)->init(cm[0]->d);
+        (cm[0]->d)->push(cm[0]->d);
+        (cm[0]->d)->pop(cm[0]->d);
+        (cm[0]->d)->print(cm[0]->d);
+        */
+        int i = 0;
+        while (cm[i]) {
+                cm[i]->fn(cm[i]->d);
+                i = i + 1;
+        }
 }

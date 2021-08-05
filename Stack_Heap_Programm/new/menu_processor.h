@@ -11,11 +11,10 @@
 struct cmd {
 	struct data *d;
 	int (*fn)(struct data *d);
-	void *get_data;
 };
 
-struct data *process_user_input(int argc, char *argv[]);
-struct data *run_user_cmd(struct data *c);
+struct cmd **process_user_input(int argc, char *argv[]);
+void run_user_cmd(struct cmd **c);
 extern struct data s_stack_obj;
 extern struct data d_stack_obj;
 
