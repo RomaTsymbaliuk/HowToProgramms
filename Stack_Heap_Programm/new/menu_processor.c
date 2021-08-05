@@ -106,6 +106,12 @@ struct cmd **process_user_input(int argc, char *argv[])
                                 }
                                 d = &d_stack_obj;
                                 d->size = size;
+                                cm[i] = (struct cmd*)malloc(sizeof(struct cmd));
+                                cm[i]->d = (struct data*)malloc(sizeof(struct data));
+                                cm[i]->d = d;
+                                cm[i]->user_data = NULL;
+                                cm[i]->fn = (cm[i]->d)->init;
+                                i++;
                         }
                         break;
                 case 'y':
