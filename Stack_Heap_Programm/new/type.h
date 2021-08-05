@@ -6,11 +6,14 @@
 
 enum {STATIC_ARR_STACK, DYNAMIC_ARR_STACK, LIST_STACK, STATIC_ARR_QUEUE, DYNAMIC_ARR_QUEUE, LIST_QUEUE};
 
+
+
 struct data {
-	struct 
-	{
+	
+	struct {
 		void *structure_pointer;
 	} anon_s;
+	
 	int data_type;
 	int size;
 	void *data_ptr;

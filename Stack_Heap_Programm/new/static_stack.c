@@ -12,7 +12,7 @@ int static_stack_init(struct data *d)
 	st->top = -1;
 	static char *arr[MAX_SIZE] = {""};
 	st->arr = arr;
-	d->anon_s.structure_pointer = st;
+	(d->anon_s).structure_pointer = st;
 
 	return TRUE;
 }
@@ -21,7 +21,7 @@ int static_stack_push(struct data *d)
 	
 	
 	printf("PUSH CALLED\n");
-	struct static_stack *st = d->anon_s.structure_pointer;
+	struct static_stack *st = (d->anon_s).structure_pointer;
 	if (static_stack_is_full(d) == FALSE) {
 		st->arr[++st->top] = d->data_ptr;
 

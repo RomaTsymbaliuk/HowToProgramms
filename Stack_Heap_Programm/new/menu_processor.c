@@ -12,8 +12,8 @@ struct cmd **process_user_input(int argc, char *argv[])
 	
 	int c;
 	int size;
-	struct data *d;
         struct cmd **cm = (struct cmd **)malloc(sizeof(struct cmd *) * CMD_NUMBER);
+        struct data *d;
         for (int j = 0; j < CMD_NUMBER; j++) {
                 cm[j] = NULL;
         }
@@ -61,7 +61,8 @@ struct cmd **process_user_input(int argc, char *argv[])
                                 }
                                 d->data_ptr = optarg;
                                 cm[i] = (struct cmd*)malloc(sizeof(struct cmd));
-                                cm[i]->d = d;
+                                cm[i]->d = (struct data*)malloc(sizeof(struct data));
+                                *(cm[i]->d) = *d;
                                 cm[i]->fn = (cm[i]->d)->push;
                                 i++;
 			}
@@ -83,7 +84,8 @@ struct cmd **process_user_input(int argc, char *argv[])
                                 d = &s_stack_obj;
                                 d->size = size;
                                 cm[i] = (struct cmd*)malloc(sizeof(struct cmd));
-                                cm[i]->d = d;
+                                cm[i]->d = (struct data*)malloc(sizeof(struct data));
+                                *(cm[i]->d) = *d;
                                 cm[i]->fn = (cm[i]->d)->init;
                                 i++;
                         }
@@ -116,7 +118,7 @@ struct cmd **process_user_input(int argc, char *argv[])
                                         printf("NOT ALLOWED SIZE : %d\n", size);
                                         return NULL;
                                 }
-                                d = &l_stack_obj;
+                                d = &d_stack_obj;
                                 d->size = size;
                         }
                         break;
