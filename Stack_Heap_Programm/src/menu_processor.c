@@ -32,7 +32,6 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                         {"push", required_argument, 0, 'a'},
                         {"pop", no_argument, 0, 'b'},
                         {"file", required_argument, 0, 'f'},
-                        {"print", no_argument, 0, 'p'},
 			{"upload", no_argument, 0, 'u'},
                         {0, 0, 0, 0}
                 };
@@ -100,6 +99,7 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                                         return NULL;
                                 }
                                 d = &d_stack_obj;
+                                d->size = size;
                                 cm[i] = (struct cmd*)malloc(sizeof(struct cmd));
                                 cm[i]->user_data = NULL;
                                 cm[i]->size = size;
@@ -128,13 +128,6 @@ struct cmd_data *process_user_input(int argc, char *argv[])
 			break;
                 case 'f':
                         d->filename = optarg;
-                        break;
-                case 'p':
-                        cm[i] = (struct cmd*)malloc(sizeof(struct cmd));
-                        cm[i]->size = 0;
-                        cm[i]->user_data = NULL;
-                        cm[i]->cmd_type = PRINT;
-                        i++;
                         break;
                 case '?':
                         break;
@@ -172,4 +165,5 @@ void run_user_cmd(struct cmd_data *cm_d)
                 }
                 i = i + 1;
         }
+        d->print(d);
 }
