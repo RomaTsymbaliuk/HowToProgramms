@@ -4,16 +4,16 @@
 #include <getopt.h>
 #include <stdio.h>
 
-struct data *choice = NULL;
+struct data *d;
 
-struct cmd **process_user_input(int argc, char *argv[])
+struct cmd_data *process_user_input(int argc, char *argv[])
 {
-        
-	
+
 	int c;
 	int size;
+        struct cmd_data *cm_d = (struct cmd_data*)malloc(sizeof(struct cmd_data));
         struct cmd **cm = (struct cmd **)malloc(sizeof(struct cmd *) * CMD_NUMBER);
-        struct data *d;
+        
         for (int j = 0; j < CMD_NUMBER; j++) {
                 cm[j] = NULL;
         }
@@ -59,20 +59,18 @@ struct cmd **process_user_input(int argc, char *argv[])
                                         printf("Too big string! \n");
                                         return NULL;
                                 }
-                                d->data_ptr = optarg;
-                                cm[i] = (struct cmd*)malloc(sizeof(struct cmd));
-                                cm[i]->d = (struct data*)malloc(sizeof(struct data));
-                                cm[i]->d = d;
-                                cm[i]->fn = (cm[i]->d)->push;
-                                cm[i]->user_data = optarg;
-                                i++;
+                        cm[i] = (struct cmd*)malloc(sizeof(struct cmd));
+                        cm[i]->cmd_type = PUSH;
+                        cm[i]->user_data = optarg;
+                        cm[i]->size = 0;
+                        i++;
 			}
                         break;
                 case 'b':
-                        d->data_ptr = NULL;
                         cm[i] = (struct cmd*)malloc(sizeof(struct cmd));
-                        cm[i]->d = d;
-                        cm[i]->fn = (cm[i]->d)->pop;
+                        cm[i]->cmd_type = POP;
+                        cm[i]->user_data = NULL;
+                        cm[i]->size = 0;
                         i++; 
                         break;
                 case 'd':
@@ -83,12 +81,9 @@ struct cmd **process_user_input(int argc, char *argv[])
                                         return NULL;
                                 }
                                 d = &s_stack_obj;
-                                d->size = size;
                                 cm[i] = (struct cmd*)malloc(sizeof(struct cmd));
-                                cm[i]->d = (struct data*)malloc(sizeof(struct data));
-                                cm[i]->d = d;
                                 cm[i]->user_data = NULL;
-                                cm[i]->fn = (cm[i]->d)->init;
+                                cm[i]->size = size;
                                 i++;
                         }
                         break;
@@ -105,12 +100,9 @@ struct cmd **process_user_input(int argc, char *argv[])
                                         return NULL;
                                 }
                                 d = &d_stack_obj;
-                                d->size = size;
                                 cm[i] = (struct cmd*)malloc(sizeof(struct cmd));
-                                cm[i]->d = (struct data*)malloc(sizeof(struct data));
-                                cm[i]->d = d;
                                 cm[i]->user_data = NULL;
-                                cm[i]->fn = (cm[i]->d)->init;
+                                cm[i]->size = size;
                                 i++;
                         }
                         break;
@@ -123,10 +115,8 @@ struct cmd **process_user_input(int argc, char *argv[])
 
                         d = &l_stack_obj;
                         cm[i] = (struct cmd*)malloc(sizeof(struct cmd));
-                        cm[i]->d = (struct data*)malloc(sizeof(struct data));
-                        cm[i]->d = d;
                         cm[i]->user_data = NULL;
-                        cm[i]->fn = (cm[i]->d)->init;
+                        cm[i]->size = 0;
                         i++;
                         break;
                 case 'w':
@@ -140,10 +130,10 @@ struct cmd **process_user_input(int argc, char *argv[])
                         d->filename = optarg;
                         break;
                 case 'p':
-                        d->data_ptr = NULL;
                         cm[i] = (struct cmd*)malloc(sizeof(struct cmd));
-                        cm[i]->d = d;
-                        cm[i]->fn = (cm[i]->d)->print;
+                        cm[i]->size = 0;
+                        cm[i]->user_data = NULL;
+                        cm[i]->cmd_type = PRINT;
                         i++;
                         break;
                 case '?':
@@ -154,15 +144,32 @@ struct cmd **process_user_input(int argc, char *argv[])
 
         }
 
-        return cm;
+        cm_d->d = d;
+        cm_d->commands = cm;
+
+        return cm_d;
 }
 
-void run_user_cmd(struct cmd **cm)
+void run_user_cmd(struct cmd_data *cm_d)
 {
+        
         int i = 0;
+        struct data *d = cm_d->d;
+        struct cmd **cm = cm_d->commands; 
+        d->init(d);
         while (cm[i]) {
-                (cm[i]->d)->data_ptr = cm[i]->user_data;
-                cm[i]->fn(cm[i]->d);
+
+                switch(cm[i]->cmd_type){
+                        case PUSH:
+                                d->push(d, cm[i]->user_data);
+                                break;
+                        case POP:
+                                d->pop(d);
+                                break;
+                        case PRINT:
+                                d->print(d);
+                                break;
+                }
                 i = i + 1;
         }
 }

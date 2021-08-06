@@ -4,27 +4,26 @@
 
 int dynamic_stack_init(struct data *d)
 {
-	(d->anon_s).structure_pointer = &Dynamic_Stack;
 	char **arr = (char**)malloc(sizeof(char*) * d->size);
 	struct dynamic_stack *st = malloc(sizeof(struct dynamic_stack));
 	st->top = -1;
 	st->arr = arr;
-	d->anon_s.structure_pointer = st;
+	d->data_type_pnt = st;
 	return TRUE;
 }
 
-int dynamic_stack_push(struct data *d)
+int dynamic_stack_push(struct data *d, void *data)
 {
-	struct dynamic_stack *st = d->anon_s.structure_pointer;
+	struct dynamic_stack *st = (struct dynamic_stack*)d->data_type_pnt;
 	if (dynamic_stack_is_full(d) == FALSE) {
-		st->arr[++st->top] = d->data_ptr;
+		st->arr[++st->top] = data;
 		return TRUE;
 	}
 	return FALSE;
 }
 int dynamic_stack_is_empty(struct data *d)
 {
-	struct dynamic_stack *st = d->anon_s.structure_pointer;
+	struct dynamic_stack *st = (struct dynamic_stack*)d->data_type_pnt;
 	if (st->top == -1) {
 		return TRUE;
 	} else {
@@ -33,7 +32,7 @@ int dynamic_stack_is_empty(struct data *d)
 }
 int dynamic_stack_pop(struct data *d)
 {
-	struct dynamic_stack *st = d->anon_s.structure_pointer;
+	struct dynamic_stack *st = (struct dynamic_stack*)d->data_type_pnt;
 	if (dynamic_stack_is_empty(d) == FALSE) {
 		st->arr[st->top--] = NULL;
 		return TRUE;
@@ -42,7 +41,7 @@ int dynamic_stack_pop(struct data *d)
 }
 int dynamic_stack_is_full(struct data *d)
 {
-	struct dynamic_stack *st = d->anon_s.structure_pointer;
+	struct dynamic_stack *st = (struct dynamic_stack*)d->data_type_pnt;;
 	if (st->top == d->size) {
 		return TRUE;
 	}
@@ -50,7 +49,7 @@ int dynamic_stack_is_full(struct data *d)
 }
 int dynamic_stack_print(struct data *d)
 {
-	struct dynamic_stack *st = d->anon_s.structure_pointer;
+	struct dynamic_stack *st = (struct dynamic_stack*)d->data_type_pnt;
 	FILE *stream;
 	if (d->filename) {
 		FILE *f = fopen(d->filename, "w");

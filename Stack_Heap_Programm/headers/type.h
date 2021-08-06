@@ -10,16 +10,12 @@ enum {STATIC_ARR_STACK, DYNAMIC_ARR_STACK, LIST_STACK, STATIC_ARR_QUEUE, DYNAMIC
 
 struct data {
 	
-	struct {
-		void *structure_pointer;
-	} anon_s;
-	
+	void *data_type_pnt;
 	int data_type;
 	int size;
-	void *data_ptr;
 	char *filename;
 	int (*init)(struct data *d);
-	int (*push)(struct data *d);
+	int (*push)(struct data *d, void *data);
 	int (*pop)(struct data *d);
 	int (*print)(struct data *d);
 	int (*download)(struct data *d);

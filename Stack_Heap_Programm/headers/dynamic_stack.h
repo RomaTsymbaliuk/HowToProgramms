@@ -9,7 +9,7 @@ struct dynamic_stack {
 	void **arr;
 }Dynamic_Stack;
 
-int dynamic_stack_push(struct data *d);
+int dynamic_stack_push(struct data *d, void *data);
 int dynamic_stack_pop(struct data *d);
 int dynamic_stack_is_full(struct data *d);
 int dynamic_stack_is_empty(struct data *d);
@@ -18,7 +18,7 @@ int dynamic_stack_upload(struct data *d);
 int dynamic_stack_print(struct data *d);
 int dynamic_stack_init(struct data *d);
 
-static struct data d_stack_obj = {.data_ptr = NULL, .data_type = DYNAMIC_ARR_STACK, 
+static struct data d_stack_obj = {.data_type = DYNAMIC_ARR_STACK, 
 								  .init = dynamic_stack_init, .push = dynamic_stack_push, 
 								  .pop = dynamic_stack_pop, .print = dynamic_stack_print,
 								  .upload = dynamic_stack_upload, .download = dynamic_stack_upload, 

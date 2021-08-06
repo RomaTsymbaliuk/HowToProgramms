@@ -7,31 +7,29 @@
 int static_stack_init(struct data *d)
 {
 
-	(d->anon_s).structure_pointer = &Static_Stack;
 	struct static_stack *st = malloc(sizeof(struct static_stack));
 	st->top = -1;
 	static char *arr[MAX_SIZE] = {""};
 	st->arr = arr;
-	(d->anon_s).structure_pointer = st;
-
+	d->data_type_pnt = st;
 	return TRUE;
+
 }
-int static_stack_push(struct data *d)
+int static_stack_push(struct data *d, void *data)
 {
 	
-	struct static_stack *st = (d->anon_s).structure_pointer;
+	struct static_stack *st = (struct static_stack*)(d->data_type_pnt);
 	if (static_stack_is_full(d) == FALSE) {
-		st->arr[++st->top] = d->data_ptr;
+		st->arr[++st->top] = data;
 
 		return TRUE;
 	}
-
 	return FALSE;
 }
 int static_stack_is_empty(struct data *d)
 {
 	
-	struct static_stack *st = d->anon_s.structure_pointer;
+	struct static_stack *st = (struct static_stack*)(d->data_type_pnt);
 	if (st->top == -1) {
 
 		return TRUE;
@@ -44,8 +42,7 @@ int static_stack_is_empty(struct data *d)
 int static_stack_pop(struct data *d)
 {
 
-	struct static_stack *st = d->anon_s.structure_pointer;
-	
+	struct static_stack *st = (struct static_stack*)(d->data_type_pnt);
 	if (static_stack_is_empty(d) == FALSE) {
 		st->arr[st->top--] = NULL;
 	}
@@ -56,7 +53,7 @@ int static_stack_pop(struct data *d)
 int static_stack_is_full(struct data *d)
 {
 	
-	struct static_stack *st = d->anon_s.structure_pointer;
+	struct static_stack *st = (struct static_stack*)(d->data_type_pnt);
 		if (st->top == MAX_SIZE) {
 		return TRUE;
 	}
@@ -66,7 +63,7 @@ int static_stack_is_full(struct data *d)
 int static_stack_print(struct data *d)
 {
 
-	struct static_stack *st = d->anon_s.structure_pointer;
+	struct static_stack *st = (struct static_stack*)(d->data_type_pnt);
 	FILE *stream;
 	if (d->filename) {
 		FILE *f = fopen(d->filename, "w");

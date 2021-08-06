@@ -9,13 +9,13 @@ struct stack_list{
 }List_Stack;
 
 int list_stack_init(struct data *d);
-int list_stack_push(struct data *d);
+int list_stack_push(struct data *d, void *data);
 int list_stack_pop(struct data *d);
 int list_stack_print(struct data *d);
 int list_stack_upload(struct data *d);
 int list_stack_download(struct data *d);
 
-static struct data l_stack_obj = {.data_ptr = NULL, .data_type = LIST_STACK, 
+static struct data l_stack_obj = {.data_type = LIST_STACK, 
 								  .init = list_stack_init, .push = list_stack_push, 
 								  .pop = list_stack_pop, .print = list_stack_print,
 								  .upload = list_stack_upload, .download = list_stack_download,

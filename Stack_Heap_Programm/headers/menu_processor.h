@@ -8,14 +8,21 @@
 #include "dynamic_stack.h"
 #include "list_stack.h"
 
+enum {PUSH, POP, PRINT};
+
 struct cmd {
 	void *user_data;
-	struct data *d;
-	int (*fn)(struct data *d);
+	int cmd_type;
+	int size;
 };
 
-struct cmd **process_user_input(int argc, char *argv[]);
-void run_user_cmd(struct cmd **c);
+struct cmd_data {
+	struct cmd **commands;
+	struct data *d;
+};
+
+struct cmd_data *process_user_input(int argc, char *argv[]);
+void run_user_cmd(struct cmd_data *c);
 extern struct data s_stack_obj;
 extern struct data d_stack_obj;
 

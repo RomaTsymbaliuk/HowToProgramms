@@ -4,31 +4,30 @@
 
 int list_stack_init(struct data *d)
 {
-	(d->anon_s).structure_pointer = &List_Stack;
 	struct stack_list *st = (struct stack_list*)malloc(sizeof(struct stack_list));
 	if (st) {
 		st->item = NULL;
 		st->next = NULL;
-		d->anon_s.structure_pointer = st;
+		d->data_type_pnt = st;
 		return TRUE;
 	}
 	return FALSE;
 }
-int list_stack_push(struct data *d)
+int list_stack_push(struct data *d, void *data)
 {
-	struct stack_list *st = d->anon_s.structure_pointer;
+	struct stack_list *st = d->data_type_pnt;
 	while (st->next != NULL) {
 		st = st->next;
 	}
 	st->next = (struct stack_list*)malloc(sizeof(struct stack_list));
 	st = st->next;
-	st->item = d->data_ptr;
+	st->item = data;
 	st->next = NULL;
 	return TRUE;
 }
 int list_stack_pop(struct data *d)
 {
-	struct stack_list *st = d->anon_s.structure_pointer;
+	struct stack_list *st = d->data_type_pnt;
 	struct stack_list *q = st;	
 	while (st->next != NULL ){
 		q = st;
@@ -49,7 +48,7 @@ int list_stack_download(struct data *d)
 }
 int list_stack_print(struct data *d)
 {
-	struct stack_list *st = d->anon_s.structure_pointer;
+	struct stack_list *st = d->data_type_pnt;
 	FILE *stream;
 	if (d->filename) {
 		FILE *f = fopen(d->filename, "w");
