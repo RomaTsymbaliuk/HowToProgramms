@@ -15,7 +15,7 @@ int static_stack_push(struct data *d, void *data);
 int static_stack_pop(struct data *d);
 int static_stack_is_empty(struct data *d);
 int static_stack_is_full(struct data *d);
-int static_stack_print(struct data *d);
+int static_stack_print(struct data *d, int flag);
 int static_stack_upload(struct data *d);
 int static_stack_download(struct data *d);
 

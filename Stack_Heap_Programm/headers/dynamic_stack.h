@@ -15,7 +15,7 @@ int dynamic_stack_is_full(struct data *d);
 int dynamic_stack_is_empty(struct data *d);
 int dynamic_stack_download(struct data *d);
 int dynamic_stack_upload(struct data *d);
-int dynamic_stack_print(struct data *d);
+int dynamic_stack_print(struct data *d, int flag);
 int dynamic_stack_init(struct data *d);
 
 static struct data d_stack_obj = {.data_type = DYNAMIC_ARR_STACK, 

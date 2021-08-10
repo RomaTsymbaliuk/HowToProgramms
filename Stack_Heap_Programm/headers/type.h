@@ -6,7 +6,8 @@
 
 enum {STATIC_ARR_STACK, DYNAMIC_ARR_STACK, LIST_STACK, STATIC_ARR_QUEUE, DYNAMIC_ARR_QUEUE, LIST_QUEUE};
 
-
+/* Print */
+enum {TO_FILE, TO_STDOUT};
 
 struct data {
 	
@@ -17,7 +18,7 @@ struct data {
 	int (*init)(struct data *d);
 	int (*push)(struct data *d, void *data);
 	int (*pop)(struct data *d);
-	int (*print)(struct data *d);
+	int (*print)(struct data *d, int flag);
 	int (*download)(struct data *d);
 	int (*upload)(struct data *d);
 };

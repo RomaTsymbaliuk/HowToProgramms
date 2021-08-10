@@ -11,7 +11,7 @@ struct stack_list{
 int list_stack_init(struct data *d);
 int list_stack_push(struct data *d, void *data);
 int list_stack_pop(struct data *d);
-int list_stack_print(struct data *d);
+int list_stack_print(struct data *d, int flag);
 int list_stack_upload(struct data *d);
 int list_stack_download(struct data *d);
 

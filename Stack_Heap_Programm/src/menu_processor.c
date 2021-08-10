@@ -4,8 +4,6 @@
 #include <getopt.h>
 #include <stdio.h>
 
-struct data *d;
-
 struct cmd_data *process_user_input(int argc, char *argv[])
 {
 
@@ -13,6 +11,7 @@ struct cmd_data *process_user_input(int argc, char *argv[])
 	int size;
         struct cmd_data *cm_d = (struct cmd_data*)malloc(sizeof(struct cmd_data));
         struct cmd **cm = (struct cmd **)malloc(sizeof(struct cmd *) * CMD_NUMBER);
+        struct data *d;
         
         for (int j = 0; j < CMD_NUMBER; j++) {
                 cm[j] = NULL;
@@ -33,6 +32,7 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                         {"pop", no_argument, 0, 'b'},
                         {"file", required_argument, 0, 'f'},
 			{"upload", no_argument, 0, 'u'},
+                        {"print", no_argument, 0, 'p'}, 
                         {0, 0, 0, 0}
                 };
                 int option_index = 0;
@@ -72,6 +72,14 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                         cm[i]->size = 0;
                         i++; 
                         break;
+                case 'p':
+                        cm[i] = (struct cmd*)malloc(sizeof(struct cmd));
+                        cm[i]->cmd_type = PRINT;
+                        cm[i]->user_data = NULL;
+                        cm[i]->size = 0;
+                        i++; 
+                        break;
+
                 case 'd':
                         if (optarg){
                                 size = atoi(optarg);
@@ -80,10 +88,6 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                                         return NULL;
                                 }
                                 d = &s_stack_obj;
-                                cm[i] = (struct cmd*)malloc(sizeof(struct cmd));
-                                cm[i]->user_data = NULL;
-                                cm[i]->size = size;
-                                i++;
                         }
                         break;
                 case 'e':
@@ -100,10 +104,6 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                                 }
                                 d = &d_stack_obj;
                                 d->size = size;
-                                cm[i] = (struct cmd*)malloc(sizeof(struct cmd));
-                                cm[i]->user_data = NULL;
-                                cm[i]->size = size;
-                                i++;
                         }
                         break;
                 case 'y':
@@ -114,10 +114,6 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                 case 'q':
 
                         d = &l_stack_obj;
-                        cm[i] = (struct cmd*)malloc(sizeof(struct cmd));
-                        cm[i]->user_data = NULL;
-                        cm[i]->size = 0;
-                        i++;
                         break;
                 case 'w':
                         if (optarg){
@@ -143,15 +139,15 @@ struct cmd_data *process_user_input(int argc, char *argv[])
         return cm_d;
 }
 
-void run_user_cmd(struct cmd_data *cm_d)
+int run_user_cmd(struct cmd_data *cm_d)
 {
         
         int i = 0;
         struct data *d = cm_d->d;
         struct cmd **cm = cm_d->commands; 
         d->init(d);
+        d->upload(d);
         while (cm[i]) {
-
                 switch(cm[i]->cmd_type){
                         case PUSH:
                                 d->push(d, cm[i]->user_data);
@@ -160,10 +156,14 @@ void run_user_cmd(struct cmd_data *cm_d)
                                 d->pop(d);
                                 break;
                         case PRINT:
-                                d->print(d);
+                                d->print(d, TO_STDOUT);
                                 break;
+                        default:
+                                printf("Unrecognized function. Abort");
+                                return FALSE;
                 }
                 i = i + 1;
         }
-        d->print(d);
+        d->download(d);
+        return TRUE;
 }
