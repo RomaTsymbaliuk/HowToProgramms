@@ -75,6 +75,7 @@ int dynamic_stack_print(struct data *d, int flag)
 			else
 				printf("\nNULL\n");
 		}
+		printf("\n======================================\n");
 	}
 }
 int dynamic_stack_upload(struct data *d)

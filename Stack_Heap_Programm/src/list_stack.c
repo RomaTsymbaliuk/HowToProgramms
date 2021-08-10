@@ -79,4 +79,5 @@ int list_stack_print(struct data *d, int flag)
 				printf("\nNULL\n");
 		}
 	}
+	printf("\n======================================\n");
 }

@@ -129,6 +129,7 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                         break;
                 default:
                         abort();
+                        return NULL;
                 }
 
         }

@@ -21,7 +21,7 @@ int static_stack_init(struct data *d)
 int static_stack_push(struct data *d, void *data)
 {
 	
-	struct static_stack *st = (struct static_stack*)(d->data_type_pnt);
+	struct static_stack *st = (d->data_type_pnt);
 	if (static_stack_is_full(d) == FALSE) {
 		st->arr[++st->top] = data;
 
@@ -32,7 +32,7 @@ int static_stack_push(struct data *d, void *data)
 int static_stack_is_empty(struct data *d)
 {
 	
-	struct static_stack *st = (struct static_stack*)(d->data_type_pnt);
+	struct static_stack *st = (d->data_type_pnt);
 	if (st->top == -1)
 		return TRUE;
 	else 
@@ -42,7 +42,7 @@ int static_stack_is_empty(struct data *d)
 int static_stack_pop(struct data *d)
 {
 
-	struct static_stack *st = (struct static_stack*)(d->data_type_pnt);
+	struct static_stack *st = (d->data_type_pnt);
 	if (static_stack_is_empty(d) == FALSE) {
 		st->arr[st->top--] = NULL;
 	}
@@ -52,7 +52,7 @@ int static_stack_pop(struct data *d)
 }
 int static_stack_is_full(struct data *d)
 {
-	struct static_stack *st = (struct static_stack*)(d->data_type_pnt);
+	struct static_stack *st = (d->data_type_pnt);
 
 		if (st->top == MAX_SIZE) 
 			return TRUE;
@@ -62,7 +62,7 @@ int static_stack_is_full(struct data *d)
 }
 int static_stack_print(struct data *d, int flag)
 {
-	struct static_stack *st = (struct static_stack*)(d->data_type_pnt);
+	struct static_stack *st = (d->data_type_pnt);
 
 	if (flag == TO_FILE) {
 		if (d->filename) { 
@@ -74,7 +74,8 @@ int static_stack_print(struct data *d, int flag)
 					fprintf(f, "\n%s\n", st->arr[i]);
 				else
 					fprintf(f, "\n%s\n", "NULL");
-			}	
+			}
+
 		fclose(f);
 		}
 
@@ -85,6 +86,7 @@ int static_stack_print(struct data *d, int flag)
 			else
 				printf("\nNULL\n");
 		}
+		printf("\n======================================\n");
 	}
 	
 	return TRUE;
