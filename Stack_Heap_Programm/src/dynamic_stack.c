@@ -24,6 +24,7 @@ int dynamic_stack_push(struct data *d, void *data)
 	}
 	return FALSE;
 }
+
 int dynamic_stack_is_empty(struct data *d)
 {
 	struct dynamic_stack *st = (struct dynamic_stack*)d->data_type_pnt;
@@ -33,6 +34,7 @@ int dynamic_stack_is_empty(struct data *d)
 		return FALSE;
 	}
 }
+
 int dynamic_stack_pop(struct data *d)
 {
 	struct dynamic_stack *st = (struct dynamic_stack*)d->data_type_pnt;
@@ -42,6 +44,7 @@ int dynamic_stack_pop(struct data *d)
 	}
 	return FALSE;
 }
+
 int dynamic_stack_is_full(struct data *d)
 {
 	struct dynamic_stack *st = (struct dynamic_stack*)d->data_type_pnt;
@@ -50,6 +53,7 @@ int dynamic_stack_is_full(struct data *d)
 	}
 	return FALSE;
 }
+
 int dynamic_stack_print(struct data *d, int flag)
 {
 	struct dynamic_stack *st = (struct dynamic_stack*)d->data_type_pnt;
@@ -78,10 +82,12 @@ int dynamic_stack_print(struct data *d, int flag)
 		printf("\n======================================\n");
 	}
 }
+
 int dynamic_stack_upload(struct data *d)
 {
 	return TRUE;
 }
+
 int dynamic_stack_download(struct data *d)
 {
 	return static_stack_print(d, TO_FILE);

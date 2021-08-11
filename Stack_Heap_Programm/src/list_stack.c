@@ -13,6 +13,7 @@ int list_stack_init(struct data *d)
 	}
 	return FALSE;
 }
+
 int list_stack_push(struct data *d, void *data)
 {
 	struct stack_list *st = d->data_type_pnt;
@@ -28,6 +29,7 @@ int list_stack_push(struct data *d, void *data)
 	}
 	return FALSE;
 }
+
 int list_stack_pop(struct data *d)
 {
 	struct stack_list *st = d->data_type_pnt;
@@ -44,14 +46,17 @@ int list_stack_pop(struct data *d)
 	free(st);
 	
 }
+
 int list_stack_upload(struct data *d)
 {
 	return TRUE;
 }
+
 int list_stack_download(struct data *d)
 {
 	return static_stack_print(d, TO_FILE);
 }
+
 int list_stack_print(struct data *d, int flag)
 {
 	struct stack_list *st = d->data_type_pnt;

@@ -18,6 +18,7 @@ int static_stack_init(struct data *d)
 	
 
 }
+
 int static_stack_push(struct data *d, void *data)
 {
 	
@@ -29,6 +30,7 @@ int static_stack_push(struct data *d, void *data)
 	}
 	return FALSE;
 }
+
 int static_stack_is_empty(struct data *d)
 {
 	
@@ -39,6 +41,7 @@ int static_stack_is_empty(struct data *d)
 		return FALSE;
 	
 }
+
 int static_stack_pop(struct data *d)
 {
 
@@ -50,6 +53,7 @@ int static_stack_pop(struct data *d)
 	return TRUE;
 	
 }
+
 int static_stack_is_full(struct data *d)
 {
 	struct static_stack *st = (d->data_type_pnt);
@@ -60,6 +64,7 @@ int static_stack_is_full(struct data *d)
 	return FALSE;
 	
 }
+
 int static_stack_print(struct data *d, int flag)
 {
 	struct static_stack *st = (d->data_type_pnt);
