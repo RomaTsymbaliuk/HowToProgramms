@@ -1,6 +1,7 @@
 #include "dynamic_stack.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 int dynamic_stack_init(struct data *d)
 {
@@ -65,9 +66,9 @@ int dynamic_stack_print(struct data *d, int flag)
 				return FALSE;
 			for (int i = 0; i <= st->top; i++) {
 				if (st->arr[i]) 
-					fprintf(f, "\n%s\n", st->arr[i]);
+					fprintf(f, "%s\n", st->arr[i]);
 				else
-					fprintf(f, "\n%s\n", "NULL");
+					fprintf(f, "%s\n", "NULL");
 			}
 			fclose(f);
 		}
@@ -75,9 +76,9 @@ int dynamic_stack_print(struct data *d, int flag)
 	} else if (flag == TO_STDOUT) {
 		for (int i = 0; i <= st->top; i++) {
 			if (st->arr[i]) 
-				printf("\n%s\n", st->arr[i]);
+				printf("%s\n", st->arr[i]);
 			else
-				printf("\nNULL\n");
+				printf("NULL\n");
 		}
 		printf("\n======================================\n");
 	}
@@ -85,10 +86,27 @@ int dynamic_stack_print(struct data *d, int flag)
 
 int dynamic_stack_upload(struct data *d)
 {
-	return TRUE;
+	if (d->filename) {
+		
+	FILE *file = fopen("st.txt", "r");
+   char line[256];
+   if (file) {
+	   while (fgets(line, sizeof(line), file)) {
+	      	void *str = line;
+	      	printf("\nstr:%s\n", str);
+	      	dynamic_stack_push(d, str);
+	   }
+	   fclose(file);
+	   return TRUE;
+	}
+	else {
+		printf("File opening error ! \n");
+		return FALSE;
+		}
+	}
 }
 
 int dynamic_stack_download(struct data *d)
 {
-	return static_stack_print(d, TO_FILE);
+	return dynamic_stack_print(d, TO_FILE);
 }

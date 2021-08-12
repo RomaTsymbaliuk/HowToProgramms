@@ -20,8 +20,10 @@ struct cmd_data *process_user_input(int argc, char *argv[])
 
         while (1) {
 
+
                 static struct option long_options[] =
                 {
+                        
                         {"create-static-stack", required_argument, 0, 'd'},
                         {"create-static-queue", required_argument, 0, 'e'},
                         {"create-dynamic-stack", required_argument, 0, 'x'},

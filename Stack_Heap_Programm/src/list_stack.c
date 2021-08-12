@@ -54,7 +54,7 @@ int list_stack_upload(struct data *d)
 
 int list_stack_download(struct data *d)
 {
-	return static_stack_print(d, TO_FILE);
+	return list_stack_print(d, TO_FILE);
 }
 
 int list_stack_print(struct data *d, int flag)

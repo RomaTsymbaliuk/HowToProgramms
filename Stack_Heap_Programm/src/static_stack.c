@@ -99,7 +99,21 @@ int static_stack_print(struct data *d, int flag)
 
 int static_stack_upload(struct data *d)
 {
-	return TRUE;
+	int c;
+	FILE *file;
+	file = fopen("st.txt", "r");
+	if (file != NULL) {
+		char *str;
+	    char chunk[128];
+ 
+     while(fgets(chunk, sizeof(chunk), file) != NULL) {
+         printf("%s", chunk);
+         static_stack_push(d, chunk);
+     }
+	  	fclose(file);
+	} else {
+		printf("Error\n");
+	}
 }
 
 int static_stack_download(struct data *d)
