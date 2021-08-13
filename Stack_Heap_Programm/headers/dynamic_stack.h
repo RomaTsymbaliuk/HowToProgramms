@@ -22,5 +22,5 @@ static struct data d_stack_obj = {.data_type = DYNAMIC_ARR_STACK,
 								  .init = dynamic_stack_init, .push = dynamic_stack_push, 
 								  .pop = dynamic_stack_pop, .print = dynamic_stack_print,
 								  .upload = dynamic_stack_upload, .download = dynamic_stack_download, 
-								  .size = 0, .filename = NULL};
+								  .size = 0, .filename_upload = NULL, .filename_download = NULL};
 #endif /* __DYNAMIC_STACK_H  */

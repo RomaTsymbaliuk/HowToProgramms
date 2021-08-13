@@ -32,7 +32,8 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                         {"create-list-queue", required_argument, 0, 'w'},
                         {"push", required_argument, 0, 'a'},
                         {"pop", no_argument, 0, 'b'},
-                        {"file", required_argument, 0, 'f'},
+                        {"file-upload", required_argument, 0, 'f'},
+                        {"file-download", required_argument, 0, 't'},
 			{"upload", no_argument, 0, 'u'},
                         {"print", no_argument, 0, 'p'}, 
                         {0, 0, 0, 0}
@@ -125,7 +126,10 @@ struct cmd_data *process_user_input(int argc, char *argv[])
 		case 'u':
 			break;
                 case 'f':
-                        d->filename = optarg;
+                        d->filename_upload = optarg;
+                        break;
+                case 't':
+                        d->filename_download = optarg;
                         break;
                 case '?':
                         break;
@@ -167,6 +171,6 @@ int run_user_cmd(struct cmd_data *cm_d)
                 }
                 i = i + 1;
         }
-//        d->download(d);
+        d->download(d);
         return TRUE;
 }

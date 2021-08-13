@@ -14,7 +14,8 @@ struct data {
 	void *data_type_pnt;
 	int data_type;
 	int size;
-	char *filename;
+	char *filename_upload;
+	char *filename_download;
 	int (*init)(struct data *d);
 	int (*push)(struct data *d, void *data);
 	int (*pop)(struct data *d);

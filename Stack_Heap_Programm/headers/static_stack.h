@@ -23,7 +23,7 @@ static struct data s_stack_obj = {.data_type = STATIC_ARR_STACK,
 								  .init = static_stack_init, .push = static_stack_push, 
 								  .pop = static_stack_pop, .print = static_stack_print,
 								  .upload = static_stack_upload, .download = static_stack_download,
-								  .size = 0, .filename = NULL};
+								  .size = 0, .filename_upload = NULL, .filename_download = NULL};
 
 #endif /* __STATIC_STACK_H */
 

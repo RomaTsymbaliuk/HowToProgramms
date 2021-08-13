@@ -60,13 +60,15 @@ int dynamic_stack_print(struct data *d, int flag)
 	struct dynamic_stack *st = (struct dynamic_stack*)d->data_type_pnt;
 	
 	if (flag == TO_FILE) {
-		if (d->filename) {
-			FILE *f = fopen(d->filename, "w");
+
+		if (d->filename_download) {
+
+			FILE *f = fopen(d->filename_download, "w");
 			if (!f)
 				return FALSE;
 			for (int i = 0; i <= st->top; i++) {
 				if (st->arr[i]) 
-					fprintf(f, "%s\n", st->arr[i]);
+					fprintf(f, "%s\n", (char*)st->arr[i]);
 				else
 					fprintf(f, "%s\n", "NULL");
 			}
@@ -74,9 +76,11 @@ int dynamic_stack_print(struct data *d, int flag)
 		}
 		
 	} else if (flag == TO_STDOUT) {
+
 		for (int i = 0; i <= st->top; i++) {
+			
 			if (st->arr[i]) 
-				printf("%s\n", st->arr[i]);
+				printf("%s\n", (char*)st->arr[i]);
 			else
 				printf("NULL\n");
 		}
@@ -86,13 +90,15 @@ int dynamic_stack_print(struct data *d, int flag)
 
 int dynamic_stack_upload(struct data *d)
 {
-	if (d->filename) {
+	if (d->filename_upload) {
 		
-	FILE *file = fopen(d->filename, "r");
+	FILE *file = fopen(d->filename_upload, "r");
    char line[256];
 
    if (file) {
+
 	   while (fgets(line, sizeof(line), file)) {
+
 	   		line[strlen(line) - 1] = '\0';
 	      	dynamic_stack_push(d, strdup(line));
 	   }
@@ -100,6 +106,7 @@ int dynamic_stack_upload(struct data *d)
 	   return TRUE;
 	}
 	else {
+
 		printf("File opening error ! \n");
 		return FALSE;
 		}

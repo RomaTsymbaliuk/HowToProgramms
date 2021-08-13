@@ -19,6 +19,6 @@ static struct data l_stack_obj = {.data_type = LIST_STACK,
 								  .init = list_stack_init, .push = list_stack_push, 
 								  .pop = list_stack_pop, .print = list_stack_print,
 								  .upload = list_stack_upload, .download = list_stack_download,
-								  .size = 0, .filename = NULL};
+								  .size = 0, .filename_upload = NULL, .filename_download = NULL};
 
 #endif /* __LIST_STACK_H */

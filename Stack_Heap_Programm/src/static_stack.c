@@ -70,11 +70,14 @@ int static_stack_print(struct data *d, int flag)
 	struct static_stack *st = (d->data_type_pnt);
 
 	if (flag == TO_FILE) {
-		if (d->filename) { 
-			FILE *f = fopen(d->filename, "w");
+
+		if (d->filename_download) { 
+
+			FILE *f = fopen(d->filename_download, "w");
 			if (!f)
 				return FALSE;
 			for (int i = 0; i <= st->top; i++) {
+				
 				if (st->arr[i]) 
 					fprintf(f, "\n%s\n", (char*)st->arr[i]);
 				else
@@ -99,13 +102,15 @@ int static_stack_print(struct data *d, int flag)
 
 int static_stack_upload(struct data *d)
 {
-	if (d->filename) {
+	if (d->filename_upload) {
 		
-	FILE *file = fopen(d->filename, "r");
+	FILE *file = fopen(d->filename_upload, "r");
    	char line[256];
 
    	if (file) {
+
 	   while (fgets(line, sizeof(line), file)) {
+
 	   		line[strlen(line) - 1] = '\0';
 	      	static_stack_push(d, strdup(line));
 	   }
