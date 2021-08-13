@@ -167,6 +167,6 @@ int run_user_cmd(struct cmd_data *cm_d)
                 }
                 i = i + 1;
         }
-        d->download(d);
+//        d->download(d);
         return TRUE;
 }

@@ -88,13 +88,13 @@ int dynamic_stack_upload(struct data *d)
 {
 	if (d->filename) {
 		
-	FILE *file = fopen("st.txt", "r");
+	FILE *file = fopen(d->filename, "r");
    char line[256];
+
    if (file) {
 	   while (fgets(line, sizeof(line), file)) {
-	      	void *str = line;
-	      	printf("\nstr:%s\n", str);
-	      	dynamic_stack_push(d, str);
+	   		line[strlen(line) - 1] = '\0';
+	      	dynamic_stack_push(d, strdup(line));
 	   }
 	   fclose(file);
 	   return TRUE;

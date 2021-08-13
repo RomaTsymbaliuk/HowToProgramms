@@ -76,9 +76,9 @@ int static_stack_print(struct data *d, int flag)
 				return FALSE;
 			for (int i = 0; i <= st->top; i++) {
 				if (st->arr[i]) 
-					fprintf(f, "\n%s\n", st->arr[i]);
+					fprintf(f, "\n%s\n", (char*)st->arr[i]);
 				else
-					fprintf(f, "\n%s\n", "NULL");
+					fprintf(f, "%s\n", "NULL");
 			}
 
 		fclose(f);
@@ -87,7 +87,7 @@ int static_stack_print(struct data *d, int flag)
 	} else if (flag == TO_STDOUT) {
 		for (int i = 0; i <= st->top; i++) {
 			if (st->arr[i]) 
-				printf("\n%s\n", st->arr[i]);
+				printf("\n%s\n", (char*)st->arr[i]);
 			else
 				printf("\nNULL\n");
 		}
@@ -99,20 +99,23 @@ int static_stack_print(struct data *d, int flag)
 
 int static_stack_upload(struct data *d)
 {
-	int c;
-	FILE *file;
-	file = fopen("st.txt", "r");
-	if (file != NULL) {
-		char *str;
-	    char chunk[128];
- 
-     while(fgets(chunk, sizeof(chunk), file) != NULL) {
-         printf("%s", chunk);
-         static_stack_push(d, chunk);
-     }
-	  	fclose(file);
-	} else {
-		printf("Error\n");
+	if (d->filename) {
+		
+	FILE *file = fopen(d->filename, "r");
+   	char line[256];
+
+   	if (file) {
+	   while (fgets(line, sizeof(line), file)) {
+	   		line[strlen(line) - 1] = '\0';
+	      	static_stack_push(d, strdup(line));
+	   }
+	   fclose(file);
+	   return TRUE;
+	}
+	else {
+		printf("File opening error ! \n");
+		return FALSE;
+		}
 	}
 }
 
