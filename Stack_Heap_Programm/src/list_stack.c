@@ -1,7 +1,7 @@
-#include "list_stack.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "list_stack.h"
 
 int list_stack_init(struct data *d)
 {
@@ -18,13 +18,13 @@ int list_stack_init(struct data *d)
 int list_stack_push(struct data *d, void *data)
 {
 	struct stack_list *st = d->data_type_pnt;
+
 	while (st->next != NULL) {
 
 		st = st->next;
 	}
 	st->next = (struct stack_list*)malloc(sizeof(struct stack_list));
 	if (st->next) {
-
 		st = st->next;
 		st->item = data;
 		st->next = NULL;
@@ -46,37 +46,9 @@ int list_stack_pop(struct data *d)
 	if (q)
 		q->next = NULL;
 	
-	free(st);
-	
-}
+	free(st); //check
 
-int list_stack_upload(struct data *d)
-{
-	if (d->filename_upload) {
-		
-		FILE *file = fopen(d->filename_upload, "r");
-	   	char line[256];
-
-	   	if (file) {
-
-		   while (fgets(line, sizeof(line), file)) {
-
-		   		line[strlen(line) - 1] = '\0';
-		      	list_stack_push(d, strdup(line));
-		}
-		   fclose(file);
-		   return TRUE;
-		} else {
-
-			printf("File opening error ! \n");
-			return FALSE;
-		}
-	}
-}
-
-int list_stack_download(struct data *d)
-{
-	return list_stack_print(d, TO_FILE);
+	return TRUE;
 }
 
 int list_stack_print(struct data *d, int flag)
@@ -98,12 +70,10 @@ int list_stack_print(struct data *d, int flag)
 				else
 					fprintf(f, "%s\n", "NULL");
 			}
-		fclose(f);
+			fclose(f);
 		}
 	} else if (flag == TO_STDOUT) {
-
 		while(st->next != NULL) {
-
 			st = st->next;
 			if (st->item) 
 				printf("%s\n", (char*)st->item);
@@ -112,4 +82,33 @@ int list_stack_print(struct data *d, int flag)
 		}
 	}
 	printf("\n======================================\n");
+}
+
+int list_stack_upload(struct data *d)
+{
+	if (d->filename_upload) {
+		
+		FILE *file = fopen(d->filename_upload, "r"); // moveto heder
+	   	char line[256];
+
+	   	if (file) {
+
+		   while (fgets(line, sizeof(line), file)) {
+
+		   		line[strlen(line) - 1] = '\0';  // find \n and del
+		      	list_stack_push(d, strdup(line)); //check
+		}
+		   fclose(file);
+		   return TRUE;
+		} else {
+
+			printf("File opening error ! \n");
+			return FALSE;
+		}
+	}
+}
+
+int list_stack_download(struct data *d)
+{
+	return list_stack_print(d, TO_FILE); 
 }

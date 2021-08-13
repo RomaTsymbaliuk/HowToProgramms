@@ -1,8 +1,9 @@
 #ifndef __TYPE_H
 #define __TYPE_H
-#define TRUE 1
-#define FALSE 0
-#define MAX_SIZE 100
+
+#define TRUE 0
+#define FALSE 1
+#define MAX_SIZE 100 // max size of what>??
 
 enum {STATIC_ARR_STACK, DYNAMIC_ARR_STACK, LIST_STACK, STATIC_ARR_QUEUE, DYNAMIC_ARR_QUEUE, LIST_QUEUE};
 
@@ -10,7 +11,6 @@ enum {STATIC_ARR_STACK, DYNAMIC_ARR_STACK, LIST_STACK, STATIC_ARR_QUEUE, DYNAMIC
 enum {TO_FILE, TO_STDOUT};
 
 struct data {
-	
 	void *data_type_pnt;
 	int data_type;
 	int size;

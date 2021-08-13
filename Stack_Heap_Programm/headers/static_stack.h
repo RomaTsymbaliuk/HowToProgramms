@@ -26,4 +26,3 @@ static struct data s_stack_obj = {.data_type = STATIC_ARR_STACK,
 								  .size = 0, .filename_upload = NULL, .filename_download = NULL};
 
 #endif /* __STATIC_STACK_H */
-

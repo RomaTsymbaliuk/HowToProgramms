@@ -6,8 +6,8 @@
 
 int static_stack_init(struct data *d)
 {
-
 	struct static_stack *st = malloc(sizeof(struct static_stack));
+
 	if (st) {
 		st->top = -1;
 		static char *arr[MAX_SIZE] = {NULL};
@@ -16,13 +16,13 @@ int static_stack_init(struct data *d)
 		return TRUE;
 	}
 	
-
+	return FALSE; 
 }
 
 int static_stack_push(struct data *d, void *data)
 {
-	
 	struct static_stack *st = (d->data_type_pnt);
+
 	if (static_stack_is_full(d) == FALSE) {
 		st->arr[++st->top] = data;
 
@@ -33,36 +33,33 @@ int static_stack_push(struct data *d, void *data)
 
 int static_stack_is_empty(struct data *d)
 {
-	
 	struct static_stack *st = (d->data_type_pnt);
+
 	if (st->top == -1)
 		return TRUE;
-	else 
-		return FALSE;
 	
+	return FALSE;
 }
 
 int static_stack_pop(struct data *d)
 {
-
 	struct static_stack *st = (d->data_type_pnt);
+
 	if (static_stack_is_empty(d) == FALSE) {
 		st->arr[st->top--] = NULL;
 	}
 	
 	return TRUE;
-	
 }
 
 int static_stack_is_full(struct data *d)
 {
 	struct static_stack *st = (d->data_type_pnt);
 
-		if (st->top == MAX_SIZE) 
-			return TRUE;
+	if (st->top == MAX_SIZE) 
+		return TRUE;
 	
-	return FALSE;
-	
+	return FALSE;	
 }
 
 int static_stack_print(struct data *d, int flag)
@@ -84,7 +81,7 @@ int static_stack_print(struct data *d, int flag)
 					fprintf(f, "%s\n", "NULL");
 			}
 
-		fclose(f);
+			fclose(f);
 		}
 
 	} else if (flag == TO_STDOUT) {
@@ -112,14 +109,14 @@ int static_stack_upload(struct data *d)
 	   while (fgets(line, sizeof(line), file)) {
 
 	   		line[strlen(line) - 1] = '\0';
-	      	static_stack_push(d, strdup(line));
+	      	static_stack_push(d, strdup(line)); //check
 	   }
+
 	   fclose(file);
 	   return TRUE;
-	}
-	else {
-		printf("File opening error ! \n");
-		return FALSE;
+	} else {
+			printf("File opening error ! \n");
+			return FALSE;
 		}
 	}
 }
@@ -128,3 +125,6 @@ int static_stack_download(struct data *d)
 {
 	return static_stack_print(d, TO_FILE);
 }
+
+
+
