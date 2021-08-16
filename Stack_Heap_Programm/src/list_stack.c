@@ -43,17 +43,23 @@ int list_stack_pop(struct data *d)
 	struct stack_list *st = d->data_type_pnt;
 	struct stack_list *q = st;	
 
-	while (st->next != NULL ){
-		q = st;
-		st = st->next;
-	}
+	if (st->next) {
+		while (st->next != NULL ){
+			q = st;
+			st = st->next;
+		}
 	
-	if (q)
-		q->next = NULL;
-	
-	free(st); //check
+		if (q)
+			q->next = NULL;
+		
+		free(st); //check
 
-	return TRUE;
+		return TRUE;
+	} else {
+		printf("List empty!\n");
+	}
+	return FALSE;
+	
 }
 
 int list_stack_print(struct data *d, int flag)

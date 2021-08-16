@@ -4,7 +4,26 @@
 #include <getopt.h>
 #include <stdio.h>
 
-// TABI !!!!!!
+int help() 
+{
+        FILE *f;
+        char line[256];
+
+        f = fopen("help.txt", "r");
+        if (!f) {
+                printf("file help opening failed");
+                return FALSE;
+        } else {
+                while (fgets(line, sizeof(line), f)) {
+                        printf("%s", line);
+                }
+        fclose(f);
+        return TRUE;      
+        }
+
+        return FALSE;
+}
+
 struct cmd_data *process_user_input(int argc, char *argv[])
 {
 
@@ -12,7 +31,7 @@ struct cmd_data *process_user_input(int argc, char *argv[])
 	int size;
         int option_index;
         int i = 0;
-        struct cmd_data *cm_d = (struct cmd_data*)malloc(sizeof(struct cmd_data)); // DE proverki????
+        struct cmd_data *cm_d = (struct cmd_data*)malloc(sizeof(struct cmd_data)); 
         struct data *d;
         struct cmd **cm = (struct cmd**)malloc(sizeof(struct cmd*) * CMD_NUMBER);
 
@@ -26,9 +45,40 @@ struct cmd_data *process_user_input(int argc, char *argv[])
 
         static struct option long_options[] =
         {
+
+                /*
+
+                NAME
+                        main - create stack programm
+
+                SYNOPSIS
+                        ./main [OPTIONS]
+
+                DESCRIPTION
+                        
+                        --create-static-stack           create stack with static array data structure, no size specified
+
+                        --create-dynamic-stack [%d]     create stack with dynamic array data structure, specify stack size 
+
+                        --create-list-stack             create stack with linked list data structure
+
+                        --push                          add an element to the stack
+
+                        --pop                           pop an element from the stack
+
+                        --print                         print the stack
+
+                LIMITS
+                        DYNAMIC STACK  SIZE             100 elements
+
+                        STRING LENGTH                   50 symbols
+
+                        OPTIONS NUMBER                  30 options
+
+                */
                 
-                {"create-static-stack", required_argument, 0, 'd'},
-                {"create-static-queue", required_argument, 0, 'e'},
+                {"create-static-stack", no_argument, 0, 'd'},
+                {"create-static-queue", no_argument, 0, 'e'},
                 {"create-dynamic-stack", required_argument, 0, 'x'},
                 {"create-dynamic-queue", required_argument, 0, 'y'},
                 {"create-list-stack", no_argument, 0, 'q'},
@@ -37,9 +87,7 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                 {"pop", no_argument, 0, 'b'},
                 {"file-upload", required_argument, 0, 'f'},
                 {"file-download", required_argument, 0, 't'},
-                {"upload", no_argument, 0, 'u'},
                 {"print", no_argument, 0, 'p'},
-                //help gde??? 
                 {0, 0, 0, 0}
         };
 
@@ -47,7 +95,7 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                 return NULL;
         }
 
-        while (1) { // Proverka na i > CMD_NUMBER
+        while (1) { 
 
                 if (i > CMD_NUMBER) {
                         printf("Too many commands ! Max commands number : %d\n", CMD_NUMBER);
@@ -56,10 +104,21 @@ struct cmd_data *process_user_input(int argc, char *argv[])
 
                 option_index = 0;
                 c = getopt_long(argc, argv, "d:f:c:a:be", long_options, &option_index); // recheck
+
+                
                 if (c == -1){
-                        //help gde???
+                        
+                        /*
+                        if (help() == FALSE) {
+                                printf("Help error!\n");
+                                return NULL;
+                        }
+                        */
                         break;
+                        return NULL;
+
                 }
+                
 
                 switch (c) {
                 case 0: // ??? 
@@ -78,7 +137,7 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                                         printf("Too big string! Max size is %d\n", MAX_STR_LEN);
                                         return NULL;
                                 }
-                                cm[i] = (struct cmd*)malloc(sizeof(struct cmd)); //Proverka
+                                cm[i] = (struct cmd*)malloc(sizeof(struct cmd)); 
                                 if (cm[i]) {
                                         cm[i]->cmd_type = PUSH;
                                         cm[i]->user_data = optarg;
@@ -94,7 +153,7 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                         }
                         break;
                 case 'b':
-                        cm[i] = (struct cmd*)malloc(sizeof(struct cmd)); //Proverka
+                        cm[i] = (struct cmd*)malloc(sizeof(struct cmd)); 
                         if (cm[i]) {
                                 cm[i]->cmd_type = POP;
                                 cm[i]->user_data = NULL;
@@ -108,7 +167,7 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                         
                         break;
                 case 'p':
-                        cm[i] = (struct cmd*)malloc(sizeof(struct cmd)); //Proverka
+                        cm[i] = (struct cmd*)malloc(sizeof(struct cmd)); 
                         if (cm[i]) {
                                 cm[i]->cmd_type = PRINT;
                                 cm[i]->user_data = NULL;
@@ -121,18 +180,8 @@ struct cmd_data *process_user_input(int argc, char *argv[])
 
                         break;
 
-                case 'd':
-                        if (optarg){
-                                size = atoi(optarg);
-                                if (size > MAX_SIZE || size < MIN_SIZE) {
-                                        printf("NOT ALLOWED SIZE : %d\n", size);
-                                        return NULL;
-                                }
-                                d = &s_stack_obj;
-                        } else {
-                                printf("Arg required\n");
-                                return NULL;
-                        }
+                case 'd':      
+                        d = &s_stack_obj;
                         break;
                 case 'e':
                         if (optarg) {
@@ -142,7 +191,7 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                 case 'x':
                         if (optarg) {
                                 size = atoi(optarg);
-                                if (size > MAX_SIZE || size < MIN_SIZE) {
+                                if (size > MAX_STACK_SIZE || size < MIN_STACK_SIZE) {
                                         printf("NOT ALLOWED SIZE : %d\n", size);
                                         return NULL;
                                 }
@@ -175,11 +224,19 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                         d->filename_download = optarg;
                         break;
                 case '?':
-                        //help
+                        
+                        /*
+                        if (help() == FALSE) {
+                                printf("Help error\n");
+                                return NULL;
+                        };
+                        */
                         break;
                 default:
-                        //help
-                        abort();
+
+                        if (help() == FALSE) {
+                              return NULL;
+                        }
                         return NULL;
                 }
 
@@ -189,7 +246,13 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                 cm_d->d = d;
                 cm_d->commands = cm;  
         } else {
-                printf("No options specified\n");
+                
+                if (help() == FALSE){
+                        printf("Help error!\n");
+                        return NULL;
+                }
+
+                printf("\nNo options specified. Abort\n");
                 return NULL;
         }
 

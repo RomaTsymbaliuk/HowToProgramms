@@ -10,7 +10,7 @@ int static_stack_init(struct data *d)
 
 	if (st) {
 		st->top = -1;
-		static char *arr[MAX_SIZE] = {NULL};
+		static char *arr[MAX_STACK_SIZE] = {NULL};
 		st->arr = arr;
 		d->data_type_pnt = st;
 		return TRUE;
@@ -59,7 +59,7 @@ int static_stack_is_full(struct data *d)
 {
 	struct static_stack *st = (d->data_type_pnt);
 
-	if (st->top == MAX_SIZE) 
+	if (st->top == MAX_STACK_SIZE) 
 		return TRUE;
 	
 	return FALSE;	

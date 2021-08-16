@@ -1,0 +1,26 @@
+NAME
+        main - create stack programm
+
+SYNOPSIS
+        ./main [OPTIONS]
+
+DESCRIPTION
+                        
+        --create-static-stack           create stack with static array data structure, no size specified
+
+        --create-dynamic-stack [%d]     create stack with dynamic array data structure, specify stack size 
+
+        --create-list-stack             create stack with linked list data structure
+
+        --push                          add an element to the stack
+
+         --pop                           pop an element from the stack
+
+        --print                         print the stack
+
+LIMITS
+        DYNAMIC STACK  SIZE             100 elements
+
+        STRING LENGTH                   50 symbols
+
+        OPTIONS NUMBER                  30 options

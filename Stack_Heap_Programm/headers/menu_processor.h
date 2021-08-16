@@ -5,8 +5,8 @@
 #include "dynamic_stack.h"
 #include "list_stack.h"
 
-#define MIN_SIZE 2
-#define MAX_SIZE 100
+#define MIN_STACK_SIZE 2
+#define MAX_STACK_SIZE 100
 #define MAX_STR_LEN 50
 #define CMD_NUMBER 30
 

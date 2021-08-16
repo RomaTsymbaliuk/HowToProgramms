@@ -3,7 +3,7 @@
 
 #define TRUE 0
 #define FALSE 1
-#define MAX_SIZE 100 // max size of what>??
+#define MAX_STACK_SIZE 100 // max size of what>??
 
 enum {STATIC_ARR_STACK, DYNAMIC_ARR_STACK, LIST_STACK, STATIC_ARR_QUEUE, DYNAMIC_ARR_QUEUE, LIST_QUEUE};
 
