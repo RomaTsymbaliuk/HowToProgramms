@@ -34,18 +34,8 @@ struct cmd_data *process_user_input(int argc, char *argv[])
         struct cmd_data *cm_d = (struct cmd_data*)malloc(sizeof(struct cmd_data)); 
         struct data *d;
         struct cmd **cm = (struct cmd**)malloc(sizeof(struct cmd*) * CMD_NUMBER);
-
-        if (!cm) {
-                printf("Memory leak\n");
-                return NULL;
-        }
-        for (int i = 0; i < CMD_NUMBER; i++) {
-                cm[i] = NULL;
-        }
-
         static struct option long_options[] =
         {
-
                 /*
 
                 NAME
@@ -91,10 +81,17 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                 {0, 0, 0, 0}
         };
 
-        if (!cm_d) {
+        if (!cm) {
+                printf("Memory leak\n");
                 return NULL;
         }
-
+        if (!cm_d) {
+                printf("Memory leak\n");
+                return NULL;
+        }
+        for (int i = 0; i < CMD_NUMBER; i++) {
+                cm[i] = NULL;
+        }
         while (1) { 
 
                 if (i > CMD_NUMBER) {
@@ -118,8 +115,6 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                         return NULL;
 
                 }
-                
-
                 switch (c) {
                 case 0: // ??? 
                         if (long_options[option_index].flag != 0){
@@ -223,8 +218,7 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                 case 't':
                         d->filename_download = optarg;
                         break;
-                case '?':
-                        
+                case '?':      
                         /*
                         if (help() == FALSE) {
                                 printf("Help error\n");
@@ -266,14 +260,12 @@ int run_user_cmd(struct cmd_data *cm_d)
         struct data *d = cm_d->d;
         struct cmd **cm = cm_d->commands; 
         int status;
- 
-        status = d->init(d);
-        if (status == FALSE) {
+
+        if (d->init(d) == FALSE) {
                 printf("Init crashed\n");
                 return FALSE;
         }
-        status = d->upload(d);
-        if (status == FALSE) {
+        if (d->upload(d) == FALSE) {
                 printf("upload crashed\n");
                 return FALSE;
         }
@@ -287,35 +279,30 @@ int run_user_cmd(struct cmd_data *cm_d)
 
                 switch(cm[i]->cmd_type){
                         case PUSH:
-                                status = d->push(d, cm[i]->user_data);
-                                if (status == FALSE) {
+                                if (d->push(d, cm[i]->user_data) == FALSE) {
                                         printf("Push crashed\n");
                                         return FALSE;
                                 }
                                 break;
                         case POP:
-                                status = d->pop(d);
-                                if (status == FALSE) {
+                                if (d->pop(d) == FALSE) {
                                         printf("Pop crashed\n");
                                         return FALSE;
                                 } 
                                 break;
                         case PRINT:
-                                status = d->print(d, TO_STDOUT);
-                                if (status == FALSE) {
+                                if (d->print(d, TO_STDOUT) == FALSE) {
                                         printf("Print crashed\n");
                                         return FALSE;
                                 }
                                 break;
                         default:
-                                printf("Unrecognized function. Abort");
+                                printf("Unrecognized option. Abort");
                                 return FALSE;
                 }
                 i = i + 1;
         }
-
-        status = d->download(d);
-        if (status == FALSE) {
+        if (d->download(d) == FALSE) {
                 printf("Download crashed\n");
                 return FALSE;
         }
