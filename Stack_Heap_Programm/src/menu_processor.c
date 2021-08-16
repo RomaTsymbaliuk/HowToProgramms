@@ -13,7 +13,6 @@ struct cmd_data *process_user_input(int argc, char *argv[])
         int option_index;
         int i = 0;
         struct cmd_data *cm_d = (struct cmd_data*)malloc(sizeof(struct cmd_data)); // DE proverki????
- //       static struct cmd *cm[CMD_NUMBER] = {NULL};
         struct data *d;
         struct cmd **cm = (struct cmd**)malloc(sizeof(struct cmd*) * CMD_NUMBER);
 
@@ -220,6 +219,7 @@ int run_user_cmd(struct cmd_data *cm_d)
 
                 if (i > CMD_NUMBER) {
                         printf("To much commands number %d\n", CMD_NUMBER);
+                        return FALSE;
                 }
 
                 switch(cm[i]->cmd_type){

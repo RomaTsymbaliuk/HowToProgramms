@@ -69,10 +69,11 @@ int dynamic_stack_is_full(struct data *d)
 int dynamic_stack_print(struct data *d, int flag)
 {
 	struct dynamic_stack *st = (struct dynamic_stack*)d->data_type_pnt;
-	
+	FILE *f;
+
 	if (flag == TO_FILE) {
 		if (d->filename_download) {
-			FILE *f = fopen(d->filename_download, "w");
+			f = fopen(d->filename_download, "w");
 			if (!f) {
 				printf("File opening error\n");
 				return FALSE;
@@ -112,8 +113,12 @@ int dynamic_stack_upload(struct data *d)
 		file = fopen(d->filename_upload, "r");
 		if (file) {
 		   while (fgets(line, sizeof(line), file)) {
+		   		//delete last \n charachter
 		   		line[strlen(line) - 1] = '\0';
-		      	dynamic_stack_push(d, strdup(line)); //check
+		      	if (dynamic_stack_push(d, strdup(line)) == FALSE) {
+		      		printf("Push crashed\n");
+		      		return FALSE;
+		      	}
 		   }
 		   fclose(file);
 		   

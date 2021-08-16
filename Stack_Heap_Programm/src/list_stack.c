@@ -13,6 +13,7 @@ int list_stack_init(struct data *d)
 		return TRUE;
 	} else {
 		printf("Memory leak\n");
+		return FALSE;
 	}
 	return FALSE;
 }

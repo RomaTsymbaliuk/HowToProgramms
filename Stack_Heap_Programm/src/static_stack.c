@@ -16,6 +16,7 @@ int static_stack_init(struct data *d)
 		return TRUE;
 	} else {
 		printf("Memory leak\n");
+		return FALSE;
 	}	
 	return FALSE; 
 }
@@ -86,9 +87,11 @@ int static_stack_print(struct data *d, int flag)
 			}
 
 			fclose(f);
+
 			return TRUE;
 		} else {
 			printf("No download file specified!\n");
+
 			return FALSE;
 		}
 
@@ -102,6 +105,7 @@ int static_stack_print(struct data *d, int flag)
 				printf("\nNULL\n");
 		}
 		printf("\n======================================\n");
+
 		return TRUE;
 	}
 	
@@ -110,17 +114,20 @@ int static_stack_print(struct data *d, int flag)
 
 int static_stack_upload(struct data *d)
 {
+	FILE *file;
+	char line[256];
+
 	if (d->filename_upload) {
 		
-		FILE *file = fopen(d->filename_upload, "r");
-	   	char line[256];
-
+		file = fopen(d->filename_upload, "r");
 	   	if (file) {
 
 		   while (fgets(line, sizeof(line), file)) {
-
+		   		//delete last \n symbol 
 		   		line[strlen(line) - 1] = '\0';
-		      	static_stack_push(d, strdup(line)); //check
+		      	if (static_stack_push(d, strdup(line)) == FALSE) {
+		      		return FALSE;
+		      	} //check
 		   }
 
 		   fclose(file);
