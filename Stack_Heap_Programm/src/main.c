@@ -3,7 +3,9 @@
 int main(int argc, char *argv[]) {
 	struct cmd_data *c = process_user_input(argc, argv);
 	if (c) {
-		run_user_cmd(c);
+		if (run_user_cmd(c) == FALSE)
+			return FALSE;
+		
 		return TRUE;
 	}
 	else {

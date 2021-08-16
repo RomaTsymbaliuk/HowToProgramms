@@ -13,15 +13,18 @@ struct cmd_data *process_user_input(int argc, char *argv[])
         int option_index;
         int i = 0;
         struct cmd_data *cm_d = (struct cmd_data*)malloc(sizeof(struct cmd_data)); // DE proverki????
-        struct cmd **cm = (struct cmd **)malloc(sizeof(struct cmd *) * CMD_NUMBER); // peredevat na static
-        //struct cmd *cm[CMD_NUMBER] = {NULL};
-
+ //       static struct cmd *cm[CMD_NUMBER] = {NULL};
         struct data *d;
-        
-        if (!cm_d) {
+        struct cmd **cm = (struct cmd**)malloc(sizeof(struct cmd*) * CMD_NUMBER);
+
+        if (!cm) {
+                printf("Memory leak\n");
                 return NULL;
         }
-        
+        for (int i = 0; i < CMD_NUMBER; i++) {
+                cm[i] = NULL;
+        }
+
         static struct option long_options[] =
         {
                 
@@ -41,11 +44,17 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                 {0, 0, 0, 0}
         };
 
-        for (int j = 0; j < CMD_NUMBER; j++) { /// Peredevat na static init cm[CMD_NUMBER] = {0};
-                cm[j] = NULL;
+        if (!cm_d) {
+                return NULL;
         }
 
         while (1) { // Proverka na i > CMD_NUMBER
+
+                if (i > CMD_NUMBER) {
+                        printf("Too many commands ! Max commands number : %d\n", CMD_NUMBER);
+                        return NULL;
+                }
+
                 option_index = 0;
                 c = getopt_long(argc, argv, "d:f:c:a:be", long_options, &option_index); // recheck
                 if (c == -1){
@@ -71,25 +80,46 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                                         return NULL;
                                 }
                                 cm[i] = (struct cmd*)malloc(sizeof(struct cmd)); //Proverka
-                                cm[i]->cmd_type = PUSH;
-                                cm[i]->user_data = optarg;
-                                cm[i]->size = 0;
-                                i++;
-			}
+                                if (cm[i]) {
+                                        cm[i]->cmd_type = PUSH;
+                                        cm[i]->user_data = optarg;
+                                        cm[i]->size = 0;
+                                        i++;  
+                                } else {
+                                        printf("Memory leak \n");
+                                        return NULL;
+                                }
+			} else {
+                                printf("Push arg required\n");
+                                return NULL;
+                        }
                         break;
                 case 'b':
                         cm[i] = (struct cmd*)malloc(sizeof(struct cmd)); //Proverka
-                        cm[i]->cmd_type = POP;
-                        cm[i]->user_data = NULL;
-                        cm[i]->size = 0;
-                        i++; 
+                        if (cm[i]) {
+                                cm[i]->cmd_type = POP;
+                                cm[i]->user_data = NULL;
+                                cm[i]->size = 0;
+                                i++;
+
+                        } else {
+                                printf("Memory leak \n");
+                                return NULL;
+                        }
+                        
                         break;
                 case 'p':
                         cm[i] = (struct cmd*)malloc(sizeof(struct cmd)); //Proverka
-                        cm[i]->cmd_type = PRINT;
-                        cm[i]->user_data = NULL;
-                        cm[i]->size = 0;
-                        i++; 
+                        if (cm[i]) {
+                                cm[i]->cmd_type = PRINT;
+                                cm[i]->user_data = NULL;
+                                cm[i]->size = 0;
+                                i++;  
+                        } else {
+                                printf("Memory leak \n");
+                                return NULL;
+                        }
+
                         break;
 
                 case 'd':
@@ -100,6 +130,9 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                                         return NULL;
                                 }
                                 d = &s_stack_obj;
+                        } else {
+                                printf("Arg required\n");
+                                return NULL;
                         }
                         break;
                 case 'e':
@@ -116,6 +149,9 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                                 }
                                 d = &d_stack_obj;
                                 d->size = size;
+                        } else {
+                                printf("Arg required \n");
+                                return NULL;
                         }
                         break;
                 case 'y':
@@ -150,13 +186,13 @@ struct cmd_data *process_user_input(int argc, char *argv[])
 
         }
 
-        cm_d->d = d;
-        cm_d->commands = cm;
-
-/*
-➜  Stack_Heap_Programm git:(master) ✗ ./main                                                                                       
-[1]    21705 segmentation fault (core dumped)  ./main
-*/
+        if ( i != 0) {
+                cm_d->d = d;
+                cm_d->commands = cm;  
+        } else {
+                printf("No options specified\n");
+                return NULL;
+        }
 
         return cm_d; 
 }
@@ -167,20 +203,46 @@ int run_user_cmd(struct cmd_data *cm_d)
         int i = 0;
         struct data *d = cm_d->d;
         struct cmd **cm = cm_d->commands; 
-
-        d->init(d); // Check result 
-        d->upload(d);
+        int status;
+ 
+        status = d->init(d);
+        if (status == FALSE) {
+                printf("Init crashed\n");
+                return FALSE;
+        }
+        status = d->upload(d);
+        if (status == FALSE) {
+                printf("upload crashed\n");
+                return FALSE;
+        }
 
         while (cm[i]) { //Ochibka na 101 elenete
+
+                if (i > CMD_NUMBER) {
+                        printf("To much commands number %d\n", CMD_NUMBER);
+                }
+
                 switch(cm[i]->cmd_type){
                         case PUSH:
-                                d->push(d, cm[i]->user_data); // Check result 
+                                status = d->push(d, cm[i]->user_data);
+                                if (status == FALSE) {
+                                        printf("Push crashed\n");
+                                        return FALSE;
+                                }
                                 break;
                         case POP:
-                                d->pop(d); // Check result 
+                                status = d->pop(d);
+                                if (status == FALSE) {
+                                        printf("Pop crashed\n");
+                                        return FALSE;
+                                } 
                                 break;
                         case PRINT:
-                                d->print(d, TO_STDOUT); // Check result 
+                                status = d->print(d, TO_STDOUT);
+                                if (status == FALSE) {
+                                        printf("Print crashed\n");
+                                        return FALSE;
+                                }
                                 break;
                         default:
                                 printf("Unrecognized function. Abort");
@@ -189,7 +251,11 @@ int run_user_cmd(struct cmd_data *cm_d)
                 i = i + 1;
         }
 
-        d->download(d);
+        status = d->download(d);
+        if (status == FALSE) {
+                printf("Download crashed\n");
+                return FALSE;
+        }
 
         return TRUE;
 }

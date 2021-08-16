@@ -14,8 +14,9 @@ int static_stack_init(struct data *d)
 		st->arr = arr;
 		d->data_type_pnt = st;
 		return TRUE;
-	}
-	
+	} else {
+		printf("Memory leak\n");
+	}	
 	return FALSE; 
 }
 
@@ -47,9 +48,10 @@ int static_stack_pop(struct data *d)
 
 	if (static_stack_is_empty(d) == FALSE) {
 		st->arr[st->top--] = NULL;
+		return TRUE;
 	}
 	
-	return TRUE;
+	return FALSE;
 }
 
 int static_stack_is_full(struct data *d)
@@ -71,8 +73,10 @@ int static_stack_print(struct data *d, int flag)
 		if (d->filename_download) { 
 
 			FILE *f = fopen(d->filename_download, "w");
-			if (!f)
+			if (!f) {
+				printf("File opening error\n");
 				return FALSE;
+			}
 			for (int i = 0; i <= st->top; i++) {
 				
 				if (st->arr[i]) 
@@ -82,7 +86,13 @@ int static_stack_print(struct data *d, int flag)
 			}
 
 			fclose(f);
+			return TRUE;
+		} else {
+			printf("No download file specified!\n");
+			return FALSE;
 		}
+
+		return FALSE;
 
 	} else if (flag == TO_STDOUT) {
 		for (int i = 0; i <= st->top; i++) {
@@ -92,33 +102,35 @@ int static_stack_print(struct data *d, int flag)
 				printf("\nNULL\n");
 		}
 		printf("\n======================================\n");
+		return TRUE;
 	}
 	
-	return TRUE;
+	return FALSE;
 }
 
 int static_stack_upload(struct data *d)
 {
 	if (d->filename_upload) {
 		
-	FILE *file = fopen(d->filename_upload, "r");
-   	char line[256];
+		FILE *file = fopen(d->filename_upload, "r");
+	   	char line[256];
 
-   	if (file) {
+	   	if (file) {
 
-	   while (fgets(line, sizeof(line), file)) {
+		   while (fgets(line, sizeof(line), file)) {
 
-	   		line[strlen(line) - 1] = '\0';
-	      	static_stack_push(d, strdup(line)); //check
-	   }
+		   		line[strlen(line) - 1] = '\0';
+		      	static_stack_push(d, strdup(line)); //check
+		   }
 
-	   fclose(file);
-	   return TRUE;
+		   fclose(file);
+		   return TRUE;
+		} 
 	} else {
-			printf("File opening error ! \n");
-			return FALSE;
-		}
+		printf("No upload file specified\n");
+		return FALSE;
 	}
+	return FALSE;
 }
 
 int static_stack_download(struct data *d)

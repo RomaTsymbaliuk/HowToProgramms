@@ -11,6 +11,8 @@ int list_stack_init(struct data *d)
 		st->next = NULL;
 		d->data_type_pnt = st;
 		return TRUE;
+	} else {
+		printf("Memory leak\n");
 	}
 	return FALSE;
 }
@@ -29,6 +31,8 @@ int list_stack_push(struct data *d, void *data)
 		st->item = data;
 		st->next = NULL;
 		return TRUE;
+	} else {
+		printf("Memory leak\n");
 	}
 	return FALSE;
 }
@@ -71,6 +75,10 @@ int list_stack_print(struct data *d, int flag)
 					fprintf(f, "%s\n", "NULL");
 			}
 			fclose(f);
+			return TRUE;
+		} else {
+			printf("No download file specified!\n");
+			return FALSE;
 		}
 	} else if (flag == TO_STDOUT) {
 		while(st->next != NULL) {
@@ -80,32 +88,46 @@ int list_stack_print(struct data *d, int flag)
 			else
 				printf("\nNULL\n");
 		}
+		printf("\n======================================\n");
+		return TRUE;
 	}
-	printf("\n======================================\n");
+	return FALSE;
+	
 }
 
 int list_stack_upload(struct data *d)
 {
+	FILE *file;
+	char line[256];
+
 	if (d->filename_upload) {
 		
-		FILE *file = fopen(d->filename_upload, "r"); // moveto heder
-	   	char line[256];
+		file = fopen(d->filename_upload, "r"); 
 
 	   	if (file) {
 
 		   while (fgets(line, sizeof(line), file)) {
 
-		   		line[strlen(line) - 1] = '\0';  // find \n and del
-		      	list_stack_push(d, strdup(line)); //check
+		   		//delete last \n charachter
+		   		line[strlen(line) - 1] = '\0'; 
+		      	if (list_stack_push(d, strdup(line)) == TRUE) {
+		      		return TRUE;
+		      	} else {
+		      		return FALSE;
+		      	}
 		}
 		   fclose(file);
 		   return TRUE;
 		} else {
-
 			printf("File opening error ! \n");
 			return FALSE;
 		}
+	} else {
+		printf("No upload file specified!\n");
+		return FALSE;
 	}
+
+	return FALSE;
 }
 
 int list_stack_download(struct data *d)
