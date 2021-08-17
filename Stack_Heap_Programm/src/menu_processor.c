@@ -7,22 +7,6 @@
 
 static void help(void)
 {
-        /*FILE *f;
-        char line[256];
-
-        f = fopen("help.txt", "r");
-        if (!f) {
-                printf("file help opening failed");
-                return FALSE;
-        } else {
-                while (fgets(line, sizeof(line), f)) {
-                        printf("%s", line);
-                }
-        fclose(f);
-        return TRUE;
-        }
-
-        return FALSE;*/
         printf(HELP_MENU);
 }
 
@@ -91,7 +75,6 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                                 if (cm[i]) {
                                         cm[i]->cmd_type = PUSH;
                                         cm[i]->user_data = optarg;
-                                        cm[i]->size = 0;
                                         i++;  
                                 } else {
                                         printf("Memory leak \n");
@@ -107,7 +90,6 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                         if (cm[i]) {
                                 cm[i]->cmd_type = POP;
                                 cm[i]->user_data = NULL;
-                                cm[i]->size = 0;
                                 i++;
 
                         } else {
@@ -121,7 +103,6 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                         if (cm[i]) {
                                 cm[i]->cmd_type = PRINT;
                                 cm[i]->user_data = NULL;
-                                cm[i]->size = 0;
                                 i++;  
                         } else {
                                 printf("Memory leak \n");
@@ -134,9 +115,7 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                         d = &s_stack_obj;
                         break;
                 case 'e':
-                        if (optarg) {
-                                size = atoi(optarg);
-                        }
+                        d = &s_queue_obj;
                         break;
                 case 'x':
                         if (optarg) {
@@ -155,6 +134,14 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                 case 'y':
                         if (optarg) {
                                 size = atoi(optarg);
+                                if (size > MAX_STACK_SIZE || size < MIN_STACK_SIZE) {
+                                        printf("NOT ALLOWED SIZE : %d\n", size);
+                                        return NULL;
+                                }
+                                d = &d_queue_obj;
+                                d->size = size;
+                        } else {
+                                printf("Arg required");
                         }
                         break;
                 case 'q':

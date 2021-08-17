@@ -4,6 +4,8 @@
 #include "static_stack.h"
 #include "dynamic_stack.h"
 #include "list_stack.h"
+#include "static_queue.h"
+#include "dynamic_queue.h"
 
 #define MIN_STACK_SIZE 2
 #define MAX_STACK_SIZE 100
@@ -32,7 +34,6 @@ enum {PUSH, POP, PRINT, SLEEP};
 struct cmd {
 	void *user_data;
 	int cmd_type;
-	int size;
 };
 
 struct cmd_data {
@@ -40,8 +41,6 @@ struct cmd_data {
 	struct data *d;
 };
 
-extern struct data s_stack_obj;
-extern struct data d_stack_obj;
 
 struct cmd_data *process_user_input(int argc, char *argv[]);
 int run_user_cmd(struct cmd_data *c);

@@ -9,6 +9,10 @@ int dynamic_stack_init(struct data *d)
 
 	if (arr) {
 		struct dynamic_stack *st = malloc(sizeof(struct dynamic_stack));
+		
+		if (!st)
+			return FALSE;
+		
 		st->top = -1;
 		st->arr = (void **)arr;
 		d->data_type_pnt = (void *)st;
@@ -58,7 +62,8 @@ int dynamic_stack_pop(struct data *d)
 int dynamic_stack_is_full(struct data *d)
 {
 	struct dynamic_stack *st = (struct dynamic_stack*)d->data_type_pnt;
-	if (st->top == d->size) {
+	if (st->top + 1 == d->size) {
+		printf("Stack is full\n");
 		return TRUE;
 	}
 
@@ -133,5 +138,11 @@ int dynamic_stack_upload(struct data *d)
 
 int dynamic_stack_download(struct data *d)
 {
+	struct dynamic_stack *st = (struct dynamic_stack*)d->data_type_pnt;
+	if (dynamic_stack_is_empty(d) == TRUE) {
+		printf("Not creating files for an empty stack\n");
+		return FALSE;
+	}
+	
 	return dynamic_stack_print(d, TO_FILE);
 }

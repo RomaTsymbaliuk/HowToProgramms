@@ -127,7 +127,7 @@ int static_stack_upload(struct data *d)
 		   		line[strlen(line) - 1] = '\0';
 		      	if (static_stack_push(d, strdup(line)) == FALSE) {
 		      		return FALSE;
-		      	} //check
+		      	} 
 		   }
 
 		   fclose(file);
@@ -142,6 +142,10 @@ int static_stack_upload(struct data *d)
 
 int static_stack_download(struct data *d)
 {
+	if (static_stack_is_empty(d) == TRUE) {
+		printf("Not creating files for an empty stack\n");
+		return FALSE;
+	}
 	return static_stack_print(d, TO_FILE);
 }
 
