@@ -6,6 +6,7 @@
 #include "list_stack.h"
 #include "static_queue.h"
 #include "dynamic_queue.h"
+#include "list_queue.h"
 
 #define MIN_STACK_SIZE 2
 #define MAX_STACK_SIZE 100

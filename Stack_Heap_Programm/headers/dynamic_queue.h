@@ -19,7 +19,7 @@ int dynamic_queue_print(struct data *d, int flag);
 int dynamic_queue_upload(struct data *d);
 int dynamic_queue_download(struct data *d);
 
-static struct data d_queue_obj = {.data_type = STATIC_ARR_QUEUE, 
+static struct data d_queue_obj = {.data_type = DYNAMIC_ARR_QUEUE, 
 								  .init = dynamic_queue_init, .push = dynamic_queue_push, 
 								  .pop = dynamic_queue_pop, .print = dynamic_queue_print,
 								  .upload = dynamic_queue_upload, .download = dynamic_queue_download,

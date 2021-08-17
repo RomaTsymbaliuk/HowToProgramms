@@ -28,7 +28,7 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                 {"create-dynamic-stack", required_argument, 0, 'x'},
                 {"create-dynamic-queue", required_argument, 0, 'y'},
                 {"create-list-stack", no_argument, 0, 'q'},
-                {"create-list-queue", required_argument, 0, 'w'},
+                {"create-list-queue", no_argument, 0, 'w'},
                 {"push", required_argument, 0, 'a'},
                 {"pop", no_argument, 0, 'b'},
                 {"file-upload", required_argument, 0, 'f'},
@@ -148,9 +148,7 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                         d = &l_stack_obj;
                         break;
                 case 'w':
-                        if (optarg) {
-                                size = atoi(optarg); 
-                        }
+                        d = &l_queue_obj;
                         break;
 		case 'u':
 			break;

@@ -1,15 +1,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "list_stack.h"
+#include "list_queue.h"
 
-int list_stack_init(struct data *d)
+int list_queue_init(struct data *d)
 {
-	struct stack_list *st = (struct stack_list*)malloc(sizeof(struct stack_list));
-	if (st) {
-		st->item = NULL;
-		st->next = NULL;
-		d->data_type_pnt = st;
+	struct queue_list *q = (struct queue_list*)malloc(sizeof(struct queue_list));
+	if (q) {
+		q->item = NULL;
+		q->next = NULL;
+		d->data_type_pnt = q;
 		return TRUE;
 	} else {
 		printf("Memory leak\n");
@@ -18,19 +18,19 @@ int list_stack_init(struct data *d)
 	return FALSE;
 }
 
-int list_stack_push(struct data *d, void *data)
+int list_queue_push(struct data *d, void *data)
 {
-	struct stack_list *st = d->data_type_pnt;
+	struct queue_list *q = d->data_type_pnt;
 
-	while (st->next != NULL) {
+	while (q->next != NULL) {
 
-		st = st->next;
+		q = q->next;
 	}
-	st->next = (struct stack_list*)malloc(sizeof(struct stack_list));
-	if (st->next) {
-		st = st->next;
-		st->item = data;
-		st->next = NULL;
+	q->next = (struct queue_list*)malloc(sizeof(struct queue_list));
+	if (q->next) {
+		q = q->next;
+		q->item = data;
+		q->next = NULL;
 		return TRUE;
 	} else {
 		printf("Memory leak\n");
@@ -38,32 +38,32 @@ int list_stack_push(struct data *d, void *data)
 	return FALSE;
 }
 
-int list_stack_pop(struct data *d)
+int list_queue_pop(struct data *d)
 {
-	struct stack_list *st = d->data_type_pnt;
-	struct stack_list *q = st;	
+	struct queue_list *st = d->data_type_pnt;
+	struct queue_list *q = st;	
 
 	if (st->next) {
-		while (st->next != NULL ){
-			q = st;
-			st = st->next;
-		}
-	
-		if (q)
+		q = st->next; 
+		if (q->next) {
+			st->next = q->next;
 			q->next = NULL;
-		if (st)
-			free(st);
-
+		} else {
+			st->next = NULL;
+		}
+		if (q)
+			free(q);
+		
 		return TRUE;
 	} else {
-		printf("List empty!\n");
+		printf("List Queue empty!\n");
 	}
 	return FALSE;
 }
 
-int list_stack_print(struct data *d, int flag)
+int list_queue_print(struct data *d, int flag)
 {
-	struct stack_list *st = d->data_type_pnt;
+	struct queue_list *q = d->data_type_pnt;
 
 	if (flag == TO_FILE) {
 
@@ -72,11 +72,11 @@ int list_stack_print(struct data *d, int flag)
 			FILE *f = fopen(d->filename_download, "w");
 			if (!f)
 				return FALSE;
-			while(st->next != NULL) {
+			while(q->next != NULL) {
 
-				st = st->next;
-				if (st->item) 
-					fprintf(f, "%s\n", (char*)st->item);
+				q = q->next;
+				if (q->item) 
+					fprintf(f, "%s\n", (char*)q->item);
 				else
 					fprintf(f, "%s\n", "NULL");
 			}
@@ -87,10 +87,10 @@ int list_stack_print(struct data *d, int flag)
 			return FALSE;
 		}
 	} else if (flag == TO_STDOUT) {
-		while(st->next != NULL) {
-			st = st->next;
-			if (st->item) 
-				printf("%s\n", (char*)st->item);
+		while(q->next != NULL) {
+			q = q->next;
+			if (q->item) 
+				printf("%s\n", (char*)q->item);
 			else
 				printf("\nNULL\n");
 		}
@@ -101,7 +101,7 @@ int list_stack_print(struct data *d, int flag)
 	
 }
 
-int list_stack_upload(struct data *d)
+int list_queue_upload(struct data *d)
 {
 	FILE *file;
 	char line[256];
@@ -116,7 +116,7 @@ int list_stack_upload(struct data *d)
 
 		   		//delete last \n charachter
 		   		line[strlen(line) - 1] = '\0'; 
-		      	if (list_stack_push(d, strdup(line)) == FALSE) {
+		      	if (list_queue_push(d, strdup(line)) == FALSE) {
 		      		return FALSE;
 		      	}
 		}
@@ -134,13 +134,13 @@ int list_stack_upload(struct data *d)
 	return FALSE;
 }
 
-int list_stack_download(struct data *d)
+int list_queue_download(struct data *d)
 {
 	
-	struct stack_list *st = d->data_type_pnt;
-	if (st->next == NULL) {
+	struct queue_list *q = d->data_type_pnt;
+	if (q->next == NULL) {
 		printf("No file creating for empty stack\n");
 		return FALSE;
 	}
-	return list_stack_print(d, TO_FILE); 
+	return list_queue_print(d, TO_FILE); 
 }
