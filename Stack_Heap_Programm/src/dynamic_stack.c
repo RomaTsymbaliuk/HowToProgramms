@@ -10,8 +10,8 @@ int dynamic_stack_init(struct data *d)
 	if (arr) {
 		struct dynamic_stack *st = malloc(sizeof(struct dynamic_stack));
 		st->top = -1;
-		st->arr = arr;
-		d->data_type_pnt = st;
+		st->arr = (void **)arr;
+		d->data_type_pnt = (void *)st;
 		return TRUE;
 	} else {
 		printf("Memory leak\n");
@@ -41,7 +41,6 @@ int dynamic_stack_is_empty(struct data *d)
 	}
 
 	return FALSE;
-	
 }
 
 int dynamic_stack_pop(struct data *d)
@@ -125,7 +124,6 @@ int dynamic_stack_upload(struct data *d)
 		   return TRUE;
 		} else {
 			printf("File opening error ! \n");
-
 			return FALSE;
 		}
 	}

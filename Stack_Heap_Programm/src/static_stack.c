@@ -11,8 +11,8 @@ int static_stack_init(struct data *d)
 	if (st) {
 		st->top = -1;
 		static char *arr[MAX_STACK_SIZE] = {NULL};
-		st->arr = arr;
-		d->data_type_pnt = st;
+		st->arr = (void **)arr;
+		d->data_type_pnt = (void *)st;
 		return TRUE;
 	} else {
 		printf("Memory leak\n");
@@ -81,7 +81,7 @@ int static_stack_print(struct data *d, int flag)
 			for (int i = 0; i <= st->top; i++) {
 				
 				if (st->arr[i]) 
-					fprintf(f, "\n%s\n", (char*)st->arr[i]);
+					fprintf(f, "%s\n", (char*)st->arr[i]);
 				else
 					fprintf(f, "%s\n", "NULL");
 			}
@@ -100,9 +100,9 @@ int static_stack_print(struct data *d, int flag)
 	} else if (flag == TO_STDOUT) {
 		for (int i = 0; i <= st->top; i++) {
 			if (st->arr[i]) 
-				printf("\n%s\n", (char*)st->arr[i]);
+				printf("%s\n", (char*)st->arr[i]);
 			else
-				printf("\nNULL\n");
+				printf("NULL\n");
 		}
 		printf("\n======================================\n");
 

@@ -3,10 +3,11 @@
 #include <stdlib.h>
 #include <getopt.h>
 #include <stdio.h>
+#include <unistd.h>
 
-int help() 
+static void help(void)
 {
-        FILE *f;
+        /*FILE *f;
         char line[256];
 
         f = fopen("help.txt", "r");
@@ -18,10 +19,11 @@ int help()
                         printf("%s", line);
                 }
         fclose(f);
-        return TRUE;      
+        return TRUE;
         }
 
-        return FALSE;
+        return FALSE;*/
+        printf(HELP_MENU);
 }
 
 struct cmd_data *process_user_input(int argc, char *argv[])
@@ -31,42 +33,12 @@ struct cmd_data *process_user_input(int argc, char *argv[])
 	int size;
         int option_index;
         int i = 0;
-        struct cmd_data *cm_d = (struct cmd_data*)malloc(sizeof(struct cmd_data)); 
+        static struct cmd_data cm_d_obj;
+        struct cmd_data *cm_d = &cm_d_obj;
         struct data *d;
-        struct cmd **cm = (struct cmd**)malloc(sizeof(struct cmd*) * CMD_NUMBER);
+        static struct cmd *cm[CMD_NUMBER] = {NULL};
         static struct option long_options[] =
         {
-                /*
-
-                NAME
-                        main - create stack programm
-
-                SYNOPSIS
-                        ./main [OPTIONS]
-
-                DESCRIPTION
-                        
-                        --create-static-stack           create stack with static array data structure, no size specified
-
-                        --create-dynamic-stack [%d]     create stack with dynamic array data structure, specify stack size 
-
-                        --create-list-stack             create stack with linked list data structure
-
-                        --push                          add an element to the stack
-
-                        --pop                           pop an element from the stack
-
-                        --print                         print the stack
-
-                LIMITS
-                        DYNAMIC STACK  SIZE             100 elements
-
-                        STRING LENGTH                   50 symbols
-
-                        OPTIONS NUMBER                  30 options
-
-                */
-                
                 {"create-static-stack", no_argument, 0, 'd'},
                 {"create-static-queue", no_argument, 0, 'e'},
                 {"create-dynamic-stack", required_argument, 0, 'x'},
@@ -78,6 +50,7 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                 {"file-upload", required_argument, 0, 'f'},
                 {"file-download", required_argument, 0, 't'},
                 {"print", no_argument, 0, 'p'},
+                {"sleep", no_argument, 0, 's'},
                 {0, 0, 0, 0}
         };
 
@@ -85,10 +58,10 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                 printf("Memory leak\n");
                 return NULL;
         }
-        if (!cm_d) {
+        /*if (!cm_d) {
                 printf("Memory leak\n");
                 return NULL;
-        }
+        }*/
         for (int i = 0; i < CMD_NUMBER; i++) {
                 cm[i] = NULL;
         }
@@ -100,32 +73,14 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                 }
 
                 option_index = 0;
-                c = getopt_long(argc, argv, "d:f:c:a:be", long_options, &option_index); // recheck
-
-                
+                c = getopt_long(argc, argv, "d:f:c:a:bes", long_options, &option_index); // recheck
                 if (c == -1){
-                        
-                        /*
-                        if (help() == FALSE) {
-                                printf("Help error!\n");
-                                return NULL;
-                        }
-                        */
                         break;
                         return NULL;
 
                 }
+
                 switch (c) {
-                case 0: // ??? 
-                        if (long_options[option_index].flag != 0){
-                                break;
-                        }
-                        printf("option %s", long_options[option_index].name);
-                        if (optarg){
-                                printf("with arg %s", optarg);
-                        }
-                        printf("\n");
-                        break;
                 case 'a':
 			if (optarg) {
                                 if (strlen(optarg) > MAX_STR_LEN) {
@@ -218,19 +173,22 @@ struct cmd_data *process_user_input(int argc, char *argv[])
                 case 't':
                         d->filename_download = optarg;
                         break;
-                case '?':      
-                        /*
-                        if (help() == FALSE) {
-                                printf("Help error\n");
-                                return NULL;
-                        };
-                        */
-                        break;
-                default:
+                case 's':
+                        cm[i] = (struct cmd*)malloc(sizeof(struct cmd)); 
+                        if (cm[i]) {
+                                cm[i]->cmd_type = SLEEP;
+                                i++;
 
-                        if (help() == FALSE) {
-                              return NULL;
+                        } else {
+                                printf("Memory leak \n");
+                                return NULL;
                         }
+                        break;
+                case '?':
+                case 'h':
+                default:
+                        printf("\nFFFFFFFFFFFFFFFFFF %x\n", c);
+                        help();
                         return NULL;
                 }
 
@@ -238,14 +196,10 @@ struct cmd_data *process_user_input(int argc, char *argv[])
 
         if ( i != 0) {
                 cm_d->d = d;
-                cm_d->commands = cm;  
+                cm_d->commands = cm;
         } else {
                 
-                if (help() == FALSE){
-                        printf("Help error!\n");
-                        return NULL;
-                }
-
+                help();
                 printf("\nNo options specified. Abort\n");
                 return NULL;
         }
@@ -257,6 +211,7 @@ int run_user_cmd(struct cmd_data *cm_d)
 {
         
         int i = 0;
+        int res = TRUE;
         struct data *d = cm_d->d;
         struct cmd **cm = cm_d->commands; 
         int status;
@@ -266,46 +221,52 @@ int run_user_cmd(struct cmd_data *cm_d)
                 return FALSE;
         }
         if (d->upload(d) == FALSE) {
-                printf("upload crashed\n");
-                return FALSE;
+                printf("upload crashed, it will be empty\n");
+                res = FALSE;
         }
 
-        while (cm[i]) { //Ochibka na 101 elenete
+        while (cm[i]) { 
 
                 if (i > CMD_NUMBER) {
                         printf("To much commands number %d\n", CMD_NUMBER);
-                        return FALSE;
+                        res = FALSE;
+                        break;
                 }
 
                 switch(cm[i]->cmd_type){
                         case PUSH:
                                 if (d->push(d, cm[i]->user_data) == FALSE) {
                                         printf("Push crashed\n");
-                                        return FALSE;
+                                        res = FALSE;
                                 }
                                 break;
                         case POP:
                                 if (d->pop(d) == FALSE) {
                                         printf("Pop crashed\n");
-                                        return FALSE;
+                                        res = FALSE;
                                 } 
                                 break;
                         case PRINT:
                                 if (d->print(d, TO_STDOUT) == FALSE) {
                                         printf("Print crashed\n");
-                                        return FALSE;
+                                        res = FALSE;
                                 }
                                 break;
+                        case SLEEP:
+                                sleep(100000000);
                         default:
                                 printf("Unrecognized option. Abort");
-                                return FALSE;
+                                res = FALSE;
                 }
                 i = i + 1;
         }
+        while (i-- && cm[i]) {
+                free(cm[i]);
+        }
         if (d->download(d) == FALSE) {
                 printf("Download crashed\n");
-                return FALSE;
+                res = FALSE;
         }
 
-        return TRUE;
+        return res;
 }

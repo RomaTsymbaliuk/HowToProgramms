@@ -51,15 +51,14 @@ int list_stack_pop(struct data *d)
 	
 		if (q)
 			q->next = NULL;
-		
-		free(st); //check
+		if (st)
+			free(st);
 
 		return TRUE;
 	} else {
 		printf("List empty!\n");
 	}
 	return FALSE;
-	
 }
 
 int list_stack_print(struct data *d, int flag)

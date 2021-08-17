@@ -8,9 +8,26 @@
 #define MIN_STACK_SIZE 2
 #define MAX_STACK_SIZE 100
 #define MAX_STR_LEN 50
-#define CMD_NUMBER 30
+#define CMD_NUMBER 100
 
-enum {PUSH, POP, PRINT};
+# define HELP_MENU      "NAME\n" \
+                        "        main - create stack programm\n" \
+                        "SYNOPSIS\n" \
+                        "        ./main [OPTIONS]\n" \
+                        "DESCRIPTION\n" \
+                        "        \n" \
+                        "        --create-static-stack           create stack with static array data structure, no size specified\n" \
+                        "        --create-dynamic-stack [num]    create stack with dynamic array data structure, specify stack size\n" \
+                        "        --create-list-stack             create stack with linked list data structure\n" \
+                        "        --push                          add an element to the stack\n" \
+                        "        --pop                           pop an element from the stack\n" \
+                        "        --print                         print the stack\n" \
+                        "LIMITS\n" \
+                        "        DYNAMIC STACK  SIZE             100 elements\n" \
+                        "        STRING LENGTH                   50 symbols\n" \
+                        "        OPTIONS NUMBER                  30 options\n"
+
+enum {PUSH, POP, PRINT, SLEEP};
 
 struct cmd {
 	void *user_data;
