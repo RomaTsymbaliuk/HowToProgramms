@@ -12,14 +12,14 @@ int dynamic_stack_init(struct data *d)
 		
 		if (!st)
 			return FALSE;
-		
+
 		st->top = -1;
 		st->arr = (void **)arr;
 		d->data_type_pnt = (void *)st;
 		return TRUE;
 	} else {
 		printf("Memory leak\n");
-	}	
+	}
 
 	return FALSE;
 }
@@ -62,6 +62,7 @@ int dynamic_stack_pop(struct data *d)
 int dynamic_stack_is_full(struct data *d)
 {
 	struct dynamic_stack *st = (struct dynamic_stack*)d->data_type_pnt;
+
 	if (st->top + 1 == d->size) {
 		printf("Stack is full\n");
 		return TRUE;
@@ -116,17 +117,17 @@ int dynamic_stack_upload(struct data *d)
 	if (d->filename_upload) {	
 		file = fopen(d->filename_upload, "r");
 		if (file) {
-		   while (fgets(line, sizeof(line), file)) {
-		   		//delete last \n charachter
-		   		line[strlen(line) - 1] = '\0';
-		      	if (dynamic_stack_push(d, strdup(line)) == FALSE) {
-		      		printf("Push crashed\n");
-		      		return FALSE;
-		      	}
-		   }
-		   fclose(file);
-		   
-		   return TRUE;
+			while (fgets(line, sizeof(line), file)) {
+				//delete last \n charachter
+				line[strlen(line) - 1] = '\0';
+				if (dynamic_stack_push(d, strdup(line)) == FALSE) {
+					printf("Push crashed\n");
+					return FALSE;
+				}
+			}
+			fclose(file);
+
+			return TRUE;
 		} else {
 			printf("File opening error ! \n");
 			return FALSE;
@@ -143,6 +144,6 @@ int dynamic_stack_download(struct data *d)
 		printf("Not creating files for an empty stack\n");
 		return FALSE;
 	}
-	
+
 	return dynamic_stack_print(d, TO_FILE);
 }

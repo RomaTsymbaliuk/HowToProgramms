@@ -25,7 +25,6 @@ int list_queue_push(struct data *d, void *data)
 	struct queue_list *q = d->data_type_pnt;
 
 	while (q->next != NULL) {
-
 		q = q->next;
 	}
 	q->next = (struct queue_list*)malloc(sizeof(struct queue_list));
@@ -70,14 +69,11 @@ int list_queue_print(struct data *d, int flag)
 	struct queue_list *q = d->data_type_pnt;
 
 	if (flag == TO_FILE) {
-
 		if (d->filename_download) {
-
 			FILE *f = fopen(d->filename_download, "w");
 			if (!f)
 				return FALSE;
 			while(q->next != NULL) {
-
 				q = q->next;
 				if (q->item) 
 					fprintf(f, "%s\n", (char*)q->item);

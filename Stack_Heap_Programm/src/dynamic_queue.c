@@ -76,7 +76,7 @@ int dynamic_queue_push(struct data *d, void *data)
 int dynamic_queue_pop(struct data *d)
 {
 	struct dynamic_queue *q = d->data_type_pnt;
-	
+
 	if (dynamic_queue_is_empty(d) == FALSE) {
 		q->arr[(q->front++) % d->size] = NULL;
 		return TRUE;
@@ -117,11 +117,13 @@ int dynamic_queue_print(struct data *d, int flag)
 
 	} else if (flag == TO_STDOUT) {
 		do {
-			if (q->arr[cnt]) 
-				printf("%s\n", (char*)q->arr[cnt]);
+			if (q->arr[cnt])
+				printf("[%s] ", (char*)q->arr[cnt]);
+			else
+				printf("[null] ");
 			cnt = (cnt + 1) % d->size;
 		} while(cnt != ((q->rear + 1) % d->size));
-		printf("\n======================================\n");
+		printf("\n\n======================================\n");
 
 		return TRUE;
 	}

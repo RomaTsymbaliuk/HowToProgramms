@@ -87,9 +87,7 @@ int static_queue_print(struct data *d, int flag)
 	int cnt = (q->front % MAX_QUEUE_SIZE);
 	
 	if (flag == TO_FILE) {
-		
 		if (d->filename_download) { 
-
 			f = fopen(d->filename_download, "w");
 			if (!f) {
 				printf("File opening error\n");
@@ -114,11 +112,13 @@ int static_queue_print(struct data *d, int flag)
 
 	} else if (flag == TO_STDOUT) {
 		do {
-			if (q->arr[cnt]) 
-				printf("%s\n", (char*)q->arr[cnt]);
+			if (q->arr[cnt])
+				printf("[%s] ", (char*)q->arr[cnt]);
+			else
+				printf("[null] ");
 			cnt = (cnt + 1) % MAX_QUEUE_SIZE;
 		} while(cnt != ((q->rear + 1) % MAX_QUEUE_SIZE));
-		printf("\n======================================\n");
+		printf("\n\n======================================\n");
 
 		return TRUE;
 	}
@@ -132,7 +132,6 @@ int static_queue_upload(struct data *d)
 	char line[256];
 
 	if (d->filename_upload) {
-
 		file = fopen(d->filename_upload, "r");
 		if (file) {
 			while (fgets(line, sizeof(line), file)) {
