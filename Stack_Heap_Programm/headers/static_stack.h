@@ -1,8 +1,8 @@
 #ifndef __STATIC_STACK_H
 #define __STATIC_STACK_H
 
-#include "type.h"
 #include <stddef.h>
+#include "type.h"
 
 struct static_stack {
 	int size;
@@ -19,8 +19,8 @@ int static_stack_print(struct data *d, int flag);
 int static_stack_upload(struct data *d);
 int static_stack_download(struct data *d);
 
-static struct data s_stack_obj = {.data_type = STATIC_ARR_STACK, 
-								  .init = static_stack_init, .push = static_stack_push, 
+static struct data s_stack_obj = {.data_type = STATIC_ARR_STACK,
+								  .init = static_stack_init, .push = static_stack_push,
 								  .pop = static_stack_pop, .print = static_stack_print,
 								  .upload = static_stack_upload, .download = static_stack_download,
 								  .size = 0, .filename_upload = NULL, .filename_download = NULL};

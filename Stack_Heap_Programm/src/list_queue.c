@@ -6,6 +6,7 @@
 int list_queue_init(struct data *d)
 {
 	struct queue_list *q = (struct queue_list*)malloc(sizeof(struct queue_list));
+
 	if (q) {
 		q->item = NULL;
 		q->next = NULL;
@@ -15,6 +16,7 @@ int list_queue_init(struct data *d)
 		printf("Memory leak\n");
 		return FALSE;
 	}
+
 	return FALSE;
 }
 
@@ -35,6 +37,7 @@ int list_queue_push(struct data *d, void *data)
 	} else {
 		printf("Memory leak\n");
 	}
+
 	return FALSE;
 }
 
@@ -44,7 +47,7 @@ int list_queue_pop(struct data *d)
 	struct queue_list *q = st;	
 
 	if (st->next) {
-		q = st->next; 
+		q = st->next;
 		if (q->next) {
 			st->next = q->next;
 			q->next = NULL;
@@ -53,11 +56,12 @@ int list_queue_pop(struct data *d)
 		}
 		if (q)
 			free(q);
-		
+
 		return TRUE;
 	} else {
 		printf("List Queue empty!\n");
 	}
+
 	return FALSE;
 }
 
@@ -97,8 +101,8 @@ int list_queue_print(struct data *d, int flag)
 		printf("======================================\n");
 		return TRUE;
 	}
+
 	return FALSE;
-	
 }
 
 int list_queue_upload(struct data *d)
@@ -107,21 +111,17 @@ int list_queue_upload(struct data *d)
 	char line[256];
 
 	if (d->filename_upload) {
-		
 		file = fopen(d->filename_upload, "r"); 
-
-	   	if (file) {
-
-		   while (fgets(line, sizeof(line), file)) {
-
-		   		//delete last \n charachter
-		   		line[strlen(line) - 1] = '\0'; 
-		      	if (list_queue_push(d, strdup(line)) == FALSE) {
-		      		return FALSE;
-		      	}
+		if (file) {
+			while (fgets(line, sizeof(line), file)) {
+				//delete last \n charachter
+				line[strlen(line) - 1] = '\0'; 
+				if (list_queue_push(d, strdup(line)) == FALSE) {
+					return FALSE;
+				}
 		}
-		   fclose(file);
-		   return TRUE;
+		fclose(file);
+		return TRUE;
 		} else {
 			printf("File opening error ! \n");
 			return FALSE;
@@ -136,11 +136,12 @@ int list_queue_upload(struct data *d)
 
 int list_queue_download(struct data *d)
 {
-	
 	struct queue_list *q = d->data_type_pnt;
+
 	if (q->next == NULL) {
 		printf("No file creating for empty stack\n");
 		return FALSE;
 	}
+
 	return list_queue_print(d, TO_FILE); 
 }

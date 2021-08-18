@@ -24,6 +24,8 @@
                         "        --create-list-stack             create stack with linked list data structure\n" \
                         "        --push                          add an element to the stack\n" \
                         "        --pop                           pop an element from the stack\n" \
+                        "        --file-upload                   upload file for the stack\n" \
+                        "        --file-download                 download file for the stack\n" \
                         "        --print                         print the stack\n" \
                         "LIMITS\n" \
                         "        DYNAMIC STACK  SIZE             100 elements\n" \
