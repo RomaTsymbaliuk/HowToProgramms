@@ -30,25 +30,27 @@ int dynamic_queue_init(struct data *d)
 int dynamic_queue_is_full(struct data *d)
 {
 	struct dynamic_queue *q = d->data_type_pnt;
+	int full_flag = TRUE;
 
-	if (q->rear == (d->size - 1)) {
-		printf("Queue is full!\n");
-		return TRUE;
+	for (int i = 0; i < d->size; i++) {
+		if (!q->arr[i])
+			full_flag = FALSE;
 	}
 
-	return FALSE;
+	return full_flag;
 }
 
 int dynamic_queue_is_empty(struct data *d)
 {
 	struct dynamic_queue *q = d->data_type_pnt;
+	int empty_flag = TRUE;
 
-	if (q->front == -1 || q->front > q->rear) {
-		printf("Queue is empty!\n");
-		return TRUE;
+	for (int i = 0; i < d->size; i++) {
+		if (q->arr[i])
+			empty_flag = FALSE;
 	}
 
-	return FALSE;
+	return empty_flag;
 }
 
 int dynamic_queue_push(struct data *d, void *data)
@@ -59,7 +61,11 @@ int dynamic_queue_push(struct data *d, void *data)
 		q->front = 0;
 	}
 	if (dynamic_queue_is_full(d) == FALSE) {
-		q->arr[++q->rear] = data;
+		if (!q->arr[(++q->rear) % d->size]) {
+			q->arr[(q->rear) % d->size] = data;
+		} else {
+			printf("Trying to rewrite data...\n");
+		}
 
 		return TRUE;
 	}
@@ -72,7 +78,7 @@ int dynamic_queue_pop(struct data *d)
 	struct dynamic_queue *q = d->data_type_pnt;
 	
 	if (dynamic_queue_is_empty(d) == FALSE) {
-		q->front++;
+		q->arr[(q->front++) % d->size] = NULL;
 		return TRUE;
 	}
 
@@ -83,6 +89,7 @@ int dynamic_queue_print(struct data *d, int flag)
 {
 	struct dynamic_queue *q = (d->data_type_pnt);
 	FILE *f;
+	int cnt = (q->front % MAX_QUEUE_SIZE);
 
 	if (flag == TO_FILE) {
 		if (d->filename_download) { 
@@ -91,12 +98,11 @@ int dynamic_queue_print(struct data *d, int flag)
 				printf("File opening error\n");
 				return FALSE;
 			}
-			for (int i = q->front; i <= q->rear; i++) {
-				if (q->arr[i]) 
-					fprintf(f, "%s\n", (char*)q->arr[i]);
-				else
-					fprintf(f, "%s\n", "NULL");
-			}
+			do {
+				if (q->arr[cnt]) 
+					fprintf(f, "%s\n", (char*)q->arr[cnt]);
+				cnt = (cnt + 1) % d->size;
+			} while(cnt != ((q->rear + 1) % d->size));
 
 			fclose(f);
 
@@ -108,13 +114,13 @@ int dynamic_queue_print(struct data *d, int flag)
 		}
 
 		return FALSE;
+
 	} else if (flag == TO_STDOUT) {
-		for (int i = q->front; i <= q->rear; i++) {
-			if (q->arr[i]) 
-				printf("%s\n", (char*)q->arr[i]);
-			else
-				printf("NULL\n");
-		}
+		do {
+			if (q->arr[cnt]) 
+				printf("%s\n", (char*)q->arr[cnt]);
+			cnt = (cnt + 1) % d->size;
+		} while(cnt != ((q->rear + 1) % d->size));
 		printf("\n======================================\n");
 
 		return TRUE;
@@ -129,7 +135,6 @@ int dynamic_queue_upload(struct data *d)
 	char line[256];
 
 	if (d->filename_upload) {
-
 		file = fopen(d->filename_upload, "r");
 		if (file) {
 			while (fgets(line, sizeof(line), file)) {

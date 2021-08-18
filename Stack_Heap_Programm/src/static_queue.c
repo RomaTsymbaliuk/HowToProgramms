@@ -25,8 +25,8 @@ int static_queue_init(struct data *d)
 int static_queue_is_full(struct data *d)
 {
 	struct static_queue *q = d->data_type_pnt;
-
 	int full_flag = TRUE;
+
 	for (int i = 0; i < MAX_QUEUE_SIZE; i++) {
 		if (!q->arr[i])
 			full_flag = FALSE;
@@ -70,6 +70,7 @@ int static_queue_push(struct data *d, void *data)
 int static_queue_pop(struct data *d)
 {
 	struct static_queue *q = d->data_type_pnt;
+
 	if (static_queue_is_empty(d) == FALSE) {
 		q->arr[(q->front++) % MAX_QUEUE_SIZE] = NULL;
 		
@@ -83,9 +84,10 @@ int static_queue_print(struct data *d, int flag)
 {
 	struct static_queue *q = (d->data_type_pnt);
 	FILE *f;
-
+	int cnt = (q->front % MAX_QUEUE_SIZE);
+	
 	if (flag == TO_FILE) {
-
+		
 		if (d->filename_download) { 
 
 			f = fopen(d->filename_download, "w");
@@ -93,12 +95,11 @@ int static_queue_print(struct data *d, int flag)
 				printf("File opening error\n");
 				return FALSE;
 			}
-			for (int i = 0; i < MAX_QUEUE_SIZE; i++) {
-				if (q->arr[i]) 
-					fprintf(f, "%s\n", (char*)q->arr[i]);
-				else
-					fprintf(f, "%s\n", "NULL");
-			}
+			do {
+				if (q->arr[cnt]) 
+					fprintf(f, "%s\n", (char*)q->arr[cnt]);
+				cnt = (cnt + 1) % MAX_QUEUE_SIZE;
+			} while(cnt != ((q->rear + 1) % MAX_QUEUE_SIZE));
 
 			fclose(f);
 
@@ -112,7 +113,6 @@ int static_queue_print(struct data *d, int flag)
 		return FALSE;
 
 	} else if (flag == TO_STDOUT) {
-		int cnt = (q->front % MAX_QUEUE_SIZE);
 		do {
 			if (q->arr[cnt]) 
 				printf("%s\n", (char*)q->arr[cnt]);
