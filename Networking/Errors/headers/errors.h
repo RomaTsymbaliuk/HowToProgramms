@@ -1,5 +1,8 @@
-#define SUCCESS 0 
-#define MEMORY_ALLOCATION_ERROR 1
-#define FILE_NOT_EXISTS_ERROR 2
+#ifndef ERRORS_H
+#define ERRORS_H
 
-void choose_error(int err); 
+enum {SUCCESS, MEMORY_ALLOCATION_ERROR, FILE_NOT_EXISTS_ERROR, PARSING_INPUT_ERROR};
+
+int error(int err); 
+
+#endif /* ERRORS_H */

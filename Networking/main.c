@@ -5,5 +5,6 @@
 int main()
 {
 	shell_init();
+	shell_loop();
 	return SUCCESS;
 }
