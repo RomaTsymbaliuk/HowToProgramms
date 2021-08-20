@@ -4,10 +4,26 @@
 
 int shell_init()
 {
-	printf("Shell inited");
+	printf(SHELL_INIT);
 	return SUCCESS;
 }
+
 void shell_loop()
 {
 	printf("Shell loop started");
+}
+
+void shell_help()
+{
+
+}
+
+int shell_parse_input()
+{
+	return SUCCESS;
+}
+
+int shell_exec_input()
+{
+	return SUCCESS;
 }
