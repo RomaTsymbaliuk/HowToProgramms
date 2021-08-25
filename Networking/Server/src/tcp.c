@@ -7,24 +7,22 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include "tcp.h"
-#include "errors.h"
 
-int tcp_server_listen(struct tcp_server *server)
+
+int tcp_server_listen(struct server *server)
 {
-	int err = 0;
-
-	err = (server->listen_fd = socket(AF_INET, SOCK_STREAM, 0));
-	if (err == -1) {
-		printf("Failed to create socket endpoint\n");
-		return err;
-	}
+	printf("TCP listen\n");
+	return SUCCESS;
 }
 
-int tcp_server_accept(struct tcp_server *server)
+int tcp_server_accept(struct server *server)
 {
-	struct sockaddr_in server_addr = { 0 };
-	server_addr.sin_family = AF_INET;
-	server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-	server_addr.sin_port = htons(PORT);
+	printf("TCP accept\n");
+	return SUCCESS;
+}
+
+int tcp_server_bind(struct server *server)
+{
+	printf("TCP bind\n");
 	return SUCCESS;
 }

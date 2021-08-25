@@ -3,11 +3,11 @@
 
 #include "shell.h"
 #include "tcp.h"
+#include "udp.h"
 #include "errors.h"
 
-struct server {
-	int sockfd;
-	char *server_type;
-};
+
+
+enum {TCP = 1, UDP, NTP, DNS};
 
 #endif /* __SERVER_H__ */

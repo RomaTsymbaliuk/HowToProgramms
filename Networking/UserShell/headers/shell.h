@@ -35,14 +35,14 @@
 						"        MAXIMUM COMMAND LENGTH - 50\n" \
 						"FUNCTIONS\n\n" \
 						"		 help    ----  show this help\n" \
+						"		 clear 	 ----  clear the screen\n "\
 						"		connect [PORT] ----  connect to the specified port"
 
 #include <stddef.h>
 #include "errors.h"
 #include "tcp.h"
 
-enum {EXIT_ID, HELP_ID};
-enum {TCP, UDP, NTP, DNS};
+enum {EXIT_ID, HELP_ID, CONNECT_ID, CLEAR_ID};
 
 struct menu {
 	char *cmd_name;
@@ -51,18 +51,24 @@ struct menu {
 	int (*func)(void);
 };
 
-void shell_init(void *server);
+void shell_init(struct server *srv);
 void shell_loop();
 int shell_help();
 int shell_exec();
 int shell_exit();
-int shell_conect();
+int shell_connect();
+int shell_clear();
 struct menu *shell_parse_input();
 
 static struct menu menus_objs[] = {
 	{"exit", EXIT_ID, NULL, shell_exit},
-	{"help", HELP_ID, NULL, shell_help}
+	{"help", HELP_ID, NULL, shell_help},
+	{"connect", CONNECT_ID, NULL, shell_connect},
+	{"clear", CLEAR_ID, NULL, shell_clear}
 };
+
+static struct server *server_object;
+
 /*
 [/]
 [-]

@@ -3,10 +3,10 @@
 #include <string.h>
 #include "shell.h"
 
-void shell_init(void *server)
+void shell_init(struct server *srv)
 {
 	fflush(stdin);
-	printf("Server type : %s\n", (((struct tcp_server*)server)->server_type));
+	server_object = srv;
 	printf(SHELL_INIT);
 }
 
@@ -74,6 +74,10 @@ struct menu *shell_parse_input()
 		input = &menus_objs[EXIT_ID];
 	} else if (strcmp(pch, "help") == 0) {
 		input = &menus_objs[HELP_ID];
+	} else if (strcmp(pch, "connect") == 0 ) {
+		input = &menus_objs[CONNECT_ID];
+	} else if (strcmp(pch, "clear") == 0) {
+		input = &menus_objs[CLEAR_ID];
 	} else {
 		printf("No such function!\n");
 		return NULL;
@@ -97,6 +101,16 @@ int shell_exec()
 
 int shell_connect()
 {
-	
+	printf("\nWorking on connect function...\n");
+	server_object->server_listen(server_object);
 	return SUCCESS;
 }
+
+int shell_clear()
+{
+	system("clear");
+	return SUCCESS;
+} 
+
+//shell_connect - обвертка на server_connect void* 
+// reconnect for client 

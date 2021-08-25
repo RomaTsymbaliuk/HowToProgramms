@@ -4,27 +4,28 @@
 int main()
 {
 	int choice;
-	void *server = NULL;
+	struct server *srv = NULL;
 
 	printf("Choose protocol for data exchange\n");
 	printf("1 ---- TCP\n2 ---- UDP\n3 ---- DNS\n4 ---- NTP\n");
 	scanf("%d", &choice);
 
 	switch(choice) {
-		case 1 :
-			server = &tcp_obj;
+		case TCP :
+			srv = &tcp_obj;
 			break;
-		case 2 :
+		case UDP :
+			srv = &udp_obj;
 			break;
-		case 3 :
+		case NTP :
 			break;
-		case 4 :
+		case DNS :
 			break;
 		default : 
 			printf("No such protocol!\n");
 			break;
 	}
 
-	shell_init(server);
+	shell_init(srv);
 	shell_loop();
 }
