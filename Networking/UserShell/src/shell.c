@@ -2,44 +2,54 @@
 #include <stdlib.h>
 #include <string.h>
 #include "shell.h"
-#include "errors.h"
 
-int shell_init()
+void shell_init(void *server)
 {
+	fflush(stdin);
+	printf("Server type : %s\n", (((struct tcp_server*)server)->server_type));
 	printf(SHELL_INIT);
-	return SUCCESS;
 }
 
 void shell_loop()
 {
-	struct cmd *inputs[MAX_SHELL_CMD] = {NULL};
+	struct menu *input;
 	int status;
 	int i = -1;
 
 	do {
 		printf(">>>");
-		inputs[++i] = shell_parse_input();
-		printf("\n");
-	} while (i < MAX_SHELL_CMD && inputs[i] && (strcmp(inputs[i]->command, "exit") != 0 ));
+		input = shell_parse_input();
+		if (input) {
+			input->func();
+			printf("\n");
+			i++;
+		}
+	} while (i < MAX_SHELL_CMD );
 }
 
-void shell_help()
+int shell_exit()
 {
-
+	exit(SUCCESS);
 }
 
-struct cmd *shell_parse_input()
+int shell_help()
 {
-	struct cmd *input = (struct cmd*)malloc(sizeof(struct cmd));
+	printf(SHELL_HELP);
+	return SUCCESS;
+}
+
+struct menu *shell_parse_input()
+{
+	struct menu *input;
 	char str[MAX_CMD_LENGTH];
 	char *pch;
-	input->args = (char**)malloc(sizeof(char*) * MAX_ARGUMENTS_NUMBER);
+	char **args = (char**)malloc(sizeof(char*) * MAX_ARGUMENTS_NUMBER);
 
-	if (!input->args) {
+	if (!args) {
 		error(MEMORY_ALLOCATION_ERROR);
 		return NULL;
 	}
-	memset(input->args, 0, MAX_ARGUMENTS_NUMBER * sizeof(char*));
+	memset(args, 0, MAX_ARGUMENTS_NUMBER * sizeof(char*));
 	if (!input) {
 		error(MEMORY_ALLOCATION_ERROR);
 		return NULL;
@@ -48,24 +58,45 @@ struct cmd *shell_parse_input()
 		error(PARSING_INPUT_ERROR);
 		return NULL;
 	}
-	/*  Splitting line for commands and arguments  */
+	/*		Splitting line for commands and 		*/
 	pch = strtok(str, " ");
-	/*  Delete last enter in command if there are no arguments  */
+	/*		Delete last enter in command if there are no 		*/
 	if (pch[strlen(pch) - 1] == '\n') {
 		pch[strlen(pch) - 1] = '\0';
 	}
-	input->command = strdup(pch);
+
+	/*		Too short command		*/
+	if (strlen(pch) < 1) {
+		return NULL;
+	}
+	/*		Not possible create switch that`s why ...		*/
+	if (strcmp(pch, "exit") == 0) {
+		input = &menus_objs[EXIT_ID];
+	} else if (strcmp(pch, "help") == 0) {
+		input = &menus_objs[HELP_ID];
+	} else {
+		printf("No such function!\n");
+		return NULL;
+	}
 	int i = 0;
 	while (pch != NULL ) {
 		pch = strtok(NULL, " ");
 		if (i < MAX_ARGUMENTS_NUMBER && pch && strcmp(pch, "\n") != 0) {
-			input->args[i++] = strdup(pch);
+			args[i++] = strdup(pch);
 		}
 	}
+	input->args = args;
+
 	return input;
 }
 
-int shell_exec_input()
+int shell_exec()
 {
+	return SUCCESS;
+}
+
+int shell_connect()
+{
+	
 	return SUCCESS;
 }
