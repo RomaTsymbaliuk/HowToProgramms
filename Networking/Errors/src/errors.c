@@ -20,12 +20,26 @@ int error(int err)
 		case ERR_ACCEPT:
 			printf("Failed accepting connection\n")
 			return ERR_ACCEPT;
-		case ERR_SOCKET_CREATION:
-			printf("Failed to create socket!\n");
-			return ERR_SOCKET_CREATION;
 		case ERR_CHOICE:
 			printf("No such option!\n")
 			return ERR_CHOICE;
+		case ERR_BIND:
+			printf("Bind socket error\n");
+			return ERR_BIND;
+		case ERR_LISTEN:
+			printf("Socket listen error\n");
+			return ERR_LISTEN;
+		case ERR_CONNECT:
+			printf("Socket connect error\n");
+			return ERR_CONNECT;
+		case ERR_TIMEOUT:
+			printf("Time ended \n");
+			return ERR_TIMEOUT;
+		case ERR_SEND:
+			printf("Send error occured\n");
+			return ERR_SEND;
+		default:
+			break;
 	}
 	return ERR_UNKNOWN;
 }

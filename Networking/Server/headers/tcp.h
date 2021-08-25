@@ -20,8 +20,10 @@ int tcp_server_accept(struct server *server);
 
 int tcp_server_bind(struct server *server);
 
-static struct server tcp_obj = {.sockfd = -1, .server_listen = tcp_server_listen,
-								.server_bind = tcp_server_bind, .server_accept = tcp_server_accept};
+int tcp_server_read(struct server *server);
+
+static struct server tcp_obj = {.sockfd = -1, .server_listen = tcp_server_listen, .server_id = TCP,
+								.server_bind = tcp_server_bind, .server_accept = tcp_server_accept, .server_read = tcp_server_read};
 
 
 #endif /* __TCP_H__ */

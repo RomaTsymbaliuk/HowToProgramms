@@ -10,7 +10,7 @@ void shell_init(struct server *srv)
 	printf(SHELL_INIT);
 }
 
-void shell_loop()
+int shell_loop()
 {
 	struct menu *input;
 	int status;
@@ -20,7 +20,10 @@ void shell_loop()
 		printf(">>>");
 		input = shell_parse_input();
 		if (input) {
-			input->func();
+			int status = input->func();
+			if (status != SUCCESS) {
+				return error(status);
+			}
 			printf("\n");
 			i++;
 		}
@@ -102,7 +105,18 @@ int shell_exec()
 int shell_connect()
 {
 	printf("\nWorking on connect function...\n");
-	server_object->server_listen(server_object);
+	if (server_object->server_bind(server_object) != SUCCESS){
+		return ERR_BIND;
+	}
+	if (server_object->server_listen(server_object) != SUCCESS){
+		return ERR_LISTEN;
+	}
+	int sock = server_object->server_accept(server_object);
+	if (sock < 0) {
+		return ERR_ACCEPT;
+	}
+	server_object->sockfd = sock;
+	server_object->server_read(server_object);
 	return SUCCESS;
 }
 

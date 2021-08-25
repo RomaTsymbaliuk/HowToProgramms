@@ -52,7 +52,7 @@ struct menu {
 };
 
 void shell_init(struct server *srv);
-void shell_loop();
+int shell_loop();
 int shell_help();
 int shell_exec();
 int shell_exit();
@@ -66,6 +66,8 @@ static struct menu menus_objs[] = {
 	{"connect", CONNECT_ID, NULL, shell_connect},
 	{"clear", CLEAR_ID, NULL, shell_clear}
 };
+
+//move to main , add help
 
 static struct server *server_object;
 

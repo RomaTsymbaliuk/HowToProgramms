@@ -19,7 +19,7 @@ int udp_server_accept(struct server *server);
 
 int udp_server_bind(struct server *server);
 
-static struct server udp_obj = {.sockfd = -1, .server_listen = udp_server_listen,
+static struct server udp_obj = {.sockfd = -1, .server_listen = udp_server_listen, .server_id = UDP,
 								.server_bind = udp_server_bind, .server_accept = udp_server_accept};
 
 

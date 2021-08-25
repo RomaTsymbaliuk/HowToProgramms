@@ -6,8 +6,4 @@
 #include "udp.h"
 #include "errors.h"
 
-
-
-enum {TCP = 1, UDP, NTP, DNS};
-
 #endif /* __SERVER_H__ */

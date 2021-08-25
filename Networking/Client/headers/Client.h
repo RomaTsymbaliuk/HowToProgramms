@@ -5,6 +5,8 @@
 #define PORT 8080
 #define SA struct sockaddr
 
-void func(int sockfd);
+#include "errors.h"
+#include "tcp.h"
+#include "udp.h"
 
 #endif /* TCP_CLIENT */
