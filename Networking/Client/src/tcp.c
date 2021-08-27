@@ -6,7 +6,7 @@
 #include<unistd.h>
 #include "tcp.h"
 
-int tcp_client_connect(struct client *cl)
+int tcp_client_connect(struct client *cl, int port)
 {
     short sockfd;
     int iRetval = -1;
@@ -16,14 +16,16 @@ int tcp_client_connect(struct client *cl)
     if (sockfd == -1) {
         return ERR_CREATE_SOCKET;
     }
-    cl->sockfd = sockfd;
+
 
     remote.sin_addr.s_addr = inet_addr("127.0.0.1");
     remote.sin_family = AF_INET;
-    remote.sin_port = htons(PORT);
+    remote.sin_port = htons(port);
+
+    printf("\nConnecting on port : %d\n", port);
 
     iRetval = connect(sockfd, (struct sockaddr *)&remote, sizeof(struct sockaddr_in));
-
+    cl->sockfd = sockfd;
     if (iRetval == -1) {
         return ERR_CONNECT;
     }
@@ -34,9 +36,20 @@ int tcp_client_connect(struct client *cl)
 /**
  * Accepts connections, handshakes with clients
  */
-int tcp_client_send(struct client *cl, char *data)
+int tcp_client_send(struct client *cl)
 {
-    write(cl->sockfd, data, sizeof(data));
+    int n;
+    
+    n = 0;
+    while (1) {
+        char *buff = "CONNECT";
+        if (write(cl->sockfd, buff, sizeof(buff)) < 0) {
+            printf("Write error\n");
+            return ERR_WRITE;
+        }
+        sleep(1);
+    }
+
     return SUCCESS;
 }
 

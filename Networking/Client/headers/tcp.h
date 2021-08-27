@@ -11,12 +11,12 @@
 /**
  * Creates socket, waits for connections
  */
-int tcp_client_connect(struct client *cl);
+int tcp_client_connect(struct client *cl, int port);
 
 /**
  * Accepts connections, handshakes with clients
  */
-int tcp_client_send(struct client *cl, char *data);
+int tcp_client_send(struct client *cl);
 
 int tcp_client_receive(struct client *cl);
 

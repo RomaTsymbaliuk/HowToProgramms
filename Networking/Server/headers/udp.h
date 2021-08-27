@@ -10,14 +10,14 @@
 /**
  * Creates socket, waits for connections
  */
-int udp_server_listen(struct server *server);
+int udp_server_listen();
 
 /**
  * Accepts connections, handshakes with clients
  */
-int udp_server_accept(struct server *server);
+int udp_server_accept();
 
-int udp_server_bind(struct server *server);
+int udp_server_bind(int port);
 
 static struct server udp_obj = {.sockfd = -1, .server_listen = udp_server_listen, .server_id = UDP,
 								.server_bind = udp_server_bind, .server_accept = udp_server_accept};

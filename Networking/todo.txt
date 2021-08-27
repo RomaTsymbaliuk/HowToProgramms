@@ -17,3 +17,69 @@
 	1 Сервер має інтерактивний хелп (cmd? + Enter)
 	1 сервер + кліент мают хелп
 5. Код стайл та всякі приколи як в попередньому завданні
+
+
+====================================================================================================
+
+1. Shell не привязывается к серверу или клиенту
+# define SHELL_HELP -- только по управлению шелом + команды которые есть
+
+2. 
+
+struct menu {
+	char *cmd_name;
+	int cmd_id;
+	char **args;
+	int (*func)(struct menu *in);
+};
+
+
+struct menu {
+	char *cmd_name;
+	int cmd_id;
+	void *fuct;
+	void **args; // ??? хз надо ли
+	int args_size;
+	int process_flags; enum {бекграунд, фореграунд, ждать, ... }
+};
+
+struct menu menus_objs[SHELL_CMD_NUM] = {
+	{"exit", EXIT_ID, shell_exit, NULL, 0},
+	{"help", HELP_ID, shell_help, NULL, 0},
+	{"connect", CONNECT_ID, shell_connect, {int}, 1},
+	{"exploit", ECPLOIT_ID, exploit, NULL, 1}, // exploit 'echo 1233123132123123123'
+	{"clear", CLEAR_ID, shell_clear, NULL, 0},
+	{"disconnect", DISCONNECT_ID, shell_disconnect, NULL, 0},
+	{NULL, 0, NULL, NULL, 0}
+};
+
+
+struct menu *shell_parse_input(struct menu *objs) {
+	/* args parse */
+
+	/* args parse */
+	char **args  << ---- connect 8080
+
+	while(objs[i++].cmd_name != NULL) {
+		if (cmd_name == objs[i].cmd_name) {
+			cmd_obj = objs[i];
+			break;
+		}
+	}
+
+	if(cmd_obj.args_size != pars_str_num - 1) {
+		return ERROR;
+	}
+
+	new ps --> run cmd
+	while cmd run do {
+	/*
+	[/]
+	[-]
+	[\]
+	[|]
+	[/]
+	[-]
+	*/
+	}
+}

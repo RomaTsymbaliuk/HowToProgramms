@@ -4,6 +4,10 @@
 #define MAX_SHELL_CMD 100
 #define MAX_CMD_LENGTH 200
 #define MAX_ARGUMENTS_NUMBER 50
+#define MIN_PORT 1024
+#define MAX_PORT 65535
+
+#define SHELL_CMD_NUM 6
 
 #define SHELL_INIT "**********************************************\n"   \
 					"*********************************************\n"   \
@@ -22,55 +26,55 @@
 						"        \n" \
 						"It is a shell help. Enter command and arguments for the command. Special commands are writtend below\n" \
 						"\n" \
+						"			--tcp				------>								create server with tcp connection\n" \
+						"			--udp				------>								create server with udp connection\n" \
+						"			--ntp				------>								create server with ntp connection\n" \
+						"			--dns				------>								create server with dns connection\n" \
+						"			--help				------>								show this help\n" \
+						"\n" \
 						"EXAMPLE\n" \
-						"         >>>ls /Desktop\n" \
-						"         >>>ps aux \n" \
+						"         >>>connect 8080\n" \
+						"         >>>help\n" \
 						"\n" \
 						"\n" \
 						"SPECIAL COMMANDS\n\n" \
 						"         exit     ------    to exit the shell\n" \
 						"         cmd?     ------    to show this help\n" \
 						"LIMITS\n\n" \
-						"        MAXIMUM SHELL COMMANDS - 100\n" \
-						"        MAXIMUM COMMAND LENGTH - 50\n" \
+						"		PORT: 1024 --- 65535\n" \
+						"		MAXIMUM SHELL COMMANDS - 100\n" \
+						"		MAXIMUM COMMAND LENGTH - 50\n" \
 						"FUNCTIONS\n\n" \
-						"		 help    ----  show this help\n" \
-						"		 clear 	 ----  clear the screen\n "\
-						"		connect [PORT] ----  connect to the specified port"
+						"		help    ----  show this help\n" \
+						"		clear 	 ----  clear the screen\n "\
+						"		connect [PORT] ----  connect to the specified port" \
+						"		disconnect     ----  disconnect from the port"
 
 #include <stddef.h>
 #include "errors.h"
-#include "tcp.h"
 
-enum {EXIT_ID, HELP_ID, CONNECT_ID, CLEAR_ID};
+enum {EXIT_ID, HELP_ID, CONNECT_ID, CLEAR_ID, DISCONNECT_ID, START_SERVER_ID};
 
 struct menu {
 	char *cmd_name;
 	int cmd_id;
-	char **args;
-	int (*func)(void);
+	void *func;
+	void **args;
+	int args_size;
+	int process_flags;
 };
 
-void shell_init(struct server *srv);
+void shell_init();
 int shell_loop();
 int shell_help();
 int shell_exec();
 int shell_exit();
-int shell_connect();
 int shell_clear();
 struct menu *shell_parse_input();
 
-static struct menu menus_objs[] = {
-	{"exit", EXIT_ID, NULL, shell_exit},
-	{"help", HELP_ID, NULL, shell_help},
-	{"connect", CONNECT_ID, NULL, shell_connect},
-	{"clear", CLEAR_ID, NULL, shell_clear}
-};
-
 //move to main , add help
 
-static struct server *server_object;
-
+extern struct menu menus_objs[SHELL_CMD_NUM];
 /*
 [/]
 [-]

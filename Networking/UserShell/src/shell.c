@@ -3,10 +3,9 @@
 #include <string.h>
 #include "shell.h"
 
-void shell_init(struct server *srv)
+void shell_init()
 {
 	fflush(stdin);
-	server_object = srv;
 	printf(SHELL_INIT);
 }
 
@@ -15,27 +14,24 @@ int shell_loop()
 	struct menu *input;
 	int status;
 	int i = -1;
-
 	do {
 		printf(">>>");
 		input = shell_parse_input();
 		if (input) {
-			int status = input->func();
-			if (status != SUCCESS) {
-				return error(status);
-			}
-			printf("\n");
+			printf("\n***%s***\n", input->cmd_name);
 			i++;
+		} else {
+			printf("Error! Try again\n");
 		}
 	} while (i < MAX_SHELL_CMD );
 }
 
-int shell_exit()
+int shell_exit(struct menu *input)
 {
 	exit(SUCCESS);
 }
 
-int shell_help()
+int shell_help(struct menu *input)
 {
 	printf(SHELL_HELP);
 	return SUCCESS;
@@ -46,19 +42,12 @@ struct menu *shell_parse_input()
 	struct menu *input;
 	char str[MAX_CMD_LENGTH];
 	char *pch;
-	char **args = (char**)malloc(sizeof(char*) * MAX_ARGUMENTS_NUMBER);
-
+	char **args = (char**)malloc(sizeof(char*) * MAX_ARGUMENTS_NUMBER); 
 	if (!args) {
-		error(MEMORY_ALLOCATION_ERROR);
 		return NULL;
 	}
 	memset(args, 0, MAX_ARGUMENTS_NUMBER * sizeof(char*));
-	if (!input) {
-		error(MEMORY_ALLOCATION_ERROR);
-		return NULL;
-	}
 	if (!fgets(str, MAX_CMD_LENGTH, stdin)){
-		error(PARSING_INPUT_ERROR);
 		return NULL;
 	}
 	/*		Splitting line for commands and 		*/
@@ -67,60 +56,62 @@ struct menu *shell_parse_input()
 	if (pch[strlen(pch) - 1] == '\n') {
 		pch[strlen(pch) - 1] = '\0';
 	}
-
 	/*		Too short command		*/
 	if (strlen(pch) < 1) {
+		printf("Too short command\n");
 		return NULL;
 	}
-	/*		Not possible create switch that`s why ...		*/
-	if (strcmp(pch, "exit") == 0) {
-		input = &menus_objs[EXIT_ID];
-	} else if (strcmp(pch, "help") == 0) {
-		input = &menus_objs[HELP_ID];
-	} else if (strcmp(pch, "connect") == 0 ) {
-		input = &menus_objs[CONNECT_ID];
-	} else if (strcmp(pch, "clear") == 0) {
-		input = &menus_objs[CLEAR_ID];
-	} else {
-		printf("No such function!\n");
+	char *cmd_name = strdup(pch);
+	if (!cmd_name) {
+		printf("Allocation problem\n");
 		return NULL;
 	}
 	int i = 0;
-	while (pch != NULL ) {
+	while (pch != NULL) {
 		pch = strtok(NULL, " ");
 		if (i < MAX_ARGUMENTS_NUMBER && pch && strcmp(pch, "\n") != 0) {
 			args[i++] = strdup(pch);
 		}
 	}
-	input->args = args;
-
+	int parse_args_num = i;
+	i = 0;
+	while (1) {
+		int status = strcmp(cmd_name, "END");
+		if (!status) {
+			break;
+		}
+		if (!strcmp(cmd_name, menus_objs[i].cmd_name)) {
+			input = &menus_objs[i];
+			break;
+		}
+		i++;
+	}
+	if (!strcmp(menus_objs[i].cmd_name, "END")) {
+		printf("No such command <%s> !\n", cmd_name);
+		return NULL;
+	}
+	if (input->args_size != parse_args_num) {
+		printf("Arguments number doesn`t match ====>  [ parse : %d  <-->  required : %d\n ]", parse_args_num, input->args_size);
+		return NULL;
+	}
+	input->args = (void*)args;
+	int (*fn)(struct menu*);
+	if (input->func) {
+		fn = (int (*)(struct menu*))(input->func);
+		int status = fn(input);
+	} else {
+		printf("Field is empty\n");
+		return NULL;
+	}
 	return input;
 }
 
-int shell_exec()
+int shell_exec(struct menu *input)
 {
 	return SUCCESS;
 }
 
-int shell_connect()
-{
-	printf("\nWorking on connect function...\n");
-	if (server_object->server_bind(server_object) != SUCCESS){
-		return ERR_BIND;
-	}
-	if (server_object->server_listen(server_object) != SUCCESS){
-		return ERR_LISTEN;
-	}
-	int sock = server_object->server_accept(server_object);
-	if (sock < 0) {
-		return ERR_ACCEPT;
-	}
-	server_object->sockfd = sock;
-	server_object->server_read(server_object);
-	return SUCCESS;
-}
-
-int shell_clear()
+int shell_clear(struct menu *input)
 {
 	system("clear");
 	return SUCCESS;

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "errors.h"
 
-int error(int err)
+int user_error(int err)
 {
 	switch(err)
 	{
@@ -38,6 +38,9 @@ int error(int err)
 		case ERR_SEND:
 			printf("Send error occured\n");
 			return ERR_SEND;
+		case ERR_OPTION:
+			printf("No such option\n");
+			return ERR_OPTION;
 		default:
 			break;
 	}

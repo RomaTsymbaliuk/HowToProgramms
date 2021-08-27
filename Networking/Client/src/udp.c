@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "udp.h"
 
-int udp_client_connect(struct client *cl)
+int udp_client_connect(struct client *cl, int port)
 {
     printf("UDP Client connect\n");
     return SUCCESS;
@@ -10,7 +10,7 @@ int udp_client_connect(struct client *cl)
 /**
  * Accepts connections, handshakes with clients
  */
-int udp_client_send(struct client *cl, char *data)
+int udp_client_send(struct client *cl)
 {
     printf("UDP Client send\n");
     return SUCCESS;

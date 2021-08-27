@@ -10,12 +10,12 @@
 /**
  * Creates socket, waits for connections
  */
-int udp_client_connect(struct client *cl);
+int udp_client_connect(struct client *cl, int port);
 
 /**
  * Accepts connections, handshakes with clients
  */
-int udp_client_send(struct client *cl, char *data);
+int udp_client_send(struct client *cl);
 
 int udp_client_receive(struct client *cl);
 
