@@ -1,0 +1,8 @@
+struct menu menus_objs[SHELL_CMD_NUM] = {
+	{"exit", EXIT_HELP, shell_exit, NULL, EXIT_ID, 0, NONE},
+	{"start_server", START_SERVER_HELP, server_connect, NULL, START_SERVER_ID, 1, WAIT},
+	{"help", HELP, shell_help, NULL, HELP_ID, 0, NONE},
+	{"server_disconect", SERVER_DISCONNECT_HELP, server_disconnect, NULL, DISCONNECT_ID, 0, NONE},
+	{"clear", CLEAR_HELP, shell_clear, NULL, CLEAR_ID, 0, NONE},
+	{NULL, NULL, NULL, NULL, 0, 0, NONE} // Sdelat norm
+};

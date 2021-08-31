@@ -1,7 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
 #include "shell.h"
+
+int flag_executed = 0;
 
 void shell_init()
 {
@@ -12,7 +17,7 @@ void shell_init()
 int shell_loop()
 {
 	struct menu *input;
-	int status;
+	int status = 0;
 	int i = -1;
 	do {
 		printf(">>>");
@@ -37,12 +42,34 @@ int shell_help(struct menu *input)
 	return SUCCESS;
 }
 
+void sig_handler(int signal)
+{
+	flag_executed = 1;
+}
+
 struct menu *shell_parse_input()
 {
 	struct menu *input;
 	char str[MAX_CMD_LENGTH];
 	char *pch;
-	char **args = (char**)malloc(sizeof(char*) * MAX_ARGUMENTS_NUMBER); 
+	char **args = (char**)malloc(sizeof(char*) * MAX_ARGUMENTS_NUMBER);
+	int status;
+	int parse_args_num;
+	int i = 0;
+	int result;
+	char *cmd_name;
+	/*Child procces pid and execution status*/
+	pid_t fork_status;
+	pid_t child_pid;
+	pid_t child_status;
+	/* Print cmd while waiting for a client*/
+	//92 ---> '\' in ASCII
+	char WAIT_CHARS_CMD[WAIT_SYMBOLS] = {'/', '-', 92, '|'};
+	/*Shared memory between child and parent processes*/
+	void *shmem;
+	int ret;
+
+
 	if (!args) {
 		return NULL;
 	}
@@ -61,49 +88,72 @@ struct menu *shell_parse_input()
 		printf("Too short command\n");
 		return NULL;
 	}
-	char *cmd_name = strdup(pch);
+	cmd_name = strdup(pch);
 	if (!cmd_name) {
 		printf("Allocation problem\n");
 		return NULL;
 	}
-	int i = 0;
+	i = 0;
 	while (pch != NULL) {
 		pch = strtok(NULL, " ");
 		if (i < MAX_ARGUMENTS_NUMBER && pch && strcmp(pch, "\n") != 0) {
 			args[i++] = strdup(pch);
 		}
 	}
-	int parse_args_num = i;
+	parse_args_num = i;
 	i = 0;
 	while (1) {
-		int status = strcmp(cmd_name, "END");
-		if (!status) {
-			break;
+		if (menus_objs[i].cmd_name == NULL) {
+			printf("No such command <%s> !\n", cmd_name);
+			printf("%s", SHELL_HELP);
+			return NULL;
 		}
-		if (!strcmp(cmd_name, menus_objs[i].cmd_name)) {
+		// Check cmd? end print help
+		if (!strncmp(cmd_name, menus_objs[i].cmd_name, strlen(menus_objs[i].cmd_name))) {
 			input = &menus_objs[i];
+			if (strchr(cmd_name, '?')) {
+				printf("%s", input->help);
+				return NULL;
+			}
 			break;
 		}
 		i++;
 	}
-	if (!strcmp(menus_objs[i].cmd_name, "END")) {
-		printf("No such command <%s> !\n", cmd_name);
-		return NULL;
-	}
 	if (input->args_size != parse_args_num) {
-		printf("Arguments number doesn`t match ====>  [ parse : %d  <-->  required : %d\n ]", parse_args_num, input->args_size);
+		printf("%s", input->help);
+		printf("Arguments number doesn`t match ====>  [ parse : %d  <-->  required : %d ]\n", parse_args_num, input->args_size);
 		return NULL;
 	}
 	input->args = (void*)args;
 	int (*fn)(struct menu*);
+	result = 0;
 	if (input->func) {
 		fn = (int (*)(struct menu*))(input->func);
-		int status = fn(input);
+		child_pid = fork();
+		if (child_pid < 0) {
+			return NULL;
+		} else if (child_pid == 0) {
+			fn(input);
+			ret = kill(getppid(), SIGUSR1);
+			return input;
+		} else if (child_pid > 0){
+			signal(SIGUSR1,sig_handler);
+			for (int i = 0; i < 60; i++) {
+				if (flag_executed) {
+					flag_executed = 0;
+					return input;
+				}
+				printf("[%c]\n", WAIT_CHARS_CMD[i % WAIT_SYMBOLS]);
+				printf("MY PARENT : %d\n", getppid());
+				sleep(1);
+			}
+			printf("Timeout ended!\n");
+		}
 	} else {
 		printf("Field is empty\n");
 		return NULL;
 	}
-	return input;
+	return NULL;
 }
 
 int shell_exec(struct menu *input)

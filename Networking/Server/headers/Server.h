@@ -8,10 +8,10 @@
 # define SERVER_HELP     "NAME\n" \
 						"        main - server - client reverse shell programm\n" \
 						"SYNOPSIS\n" \
-						"        ./main \n" \
+						"        ./server [OPTIONS] \n" \
 						"DESCRIPTION\n" \
 						"        \n" \
-						"It is a shell help. Enter command and arguments for the command. Special commands are writtend below\n" \
+						"It is a server help. Enter specific options for different server connections. Options are written below\n" \
 						"\n" \
 						"			--tcp				------>								create server with tcp connection\n" \
 						"			--udp				------>								create server with udp connection\n" \
@@ -20,22 +20,9 @@
 						"			--help				------>								show this help\n" \
 						"\n" \
 						"EXAMPLE\n" \
-						"         >>>connect 8080\n" \
-						"         >>>help\n" \
+						"        ./server --tcp\n" \
 						"\n" \
-						"\n" \
-						"SPECIAL COMMANDS\n\n" \
-						"         exit     ------    to exit the shell\n" \
-						"         cmd?     ------    to show this help\n" \
-						"LIMITS\n\n" \
-						"		PORT: 1024 --- 65535\n" \
-						"		MAXIMUM SHELL COMMANDS - 100\n" \
-						"		MAXIMUM COMMAND LENGTH - 50\n" \
-						"FUNCTIONS\n\n" \
-						"		help    ----  show this help\n" \
-						"		clear 	 ----  clear the screen\n "\
-						"		connect [PORT] ----  connect to the specified port" \
-						"		disconnect     ----  disconnect from the port"
+						"\n"
 
 enum PROCESS_FLAGS {NONE, WAIT};
 

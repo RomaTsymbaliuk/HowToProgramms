@@ -12,12 +12,11 @@
 
 int tcp_server_init(int port)
 {
-	printf("!!///!&&>>>???\n");
+	printf("\nGOT HERE????? : %d\n", port);
 	if (tcp_server_bind(port) != SUCCESS) {
 		printf("ERROR BIND!\n");
 		return ERR_BIND;
 	}
-	printf("!!///!&&>>>???\n");
 	if (tcp_server_listen() != SUCCESS) {
 		printf("ERROR LISTEN\n");
 		return ERR_LISTEN;
@@ -45,11 +44,7 @@ int tcp_server_bind(int port)
 	if (sockfd == -1) {
 		return ERR_CREATE_SOCKET;
 	}
-	if (server_object)
-		server_object->sockfd = sockfd;
-	else {
-		printf("HYU");
-	}
+	server_object->sockfd = sockfd;
 	remote.sin_family = AF_INET;
 	remote.sin_addr.s_addr = htonl(INADDR_ANY);
 	remote.sin_port = htons(port);

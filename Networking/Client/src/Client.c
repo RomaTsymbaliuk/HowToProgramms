@@ -26,6 +26,7 @@ int main(int argc, char *argv[])
 	option_index = 0;
 	c = getopt_long(argc, argv, "p:", long_options, &option_index);
 	if (c == -1) {
+		printf(HELP);
 		return ERR_OPTION;
 	}
 	switch(c) {

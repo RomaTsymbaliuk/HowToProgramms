@@ -1,52 +1,43 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
+#include <string.h>
+#include <sys/mman.h>
 #include "Server.h"
 
 /* ------ HELP ------- */
 /*
-	NAME
-							main - server - client reverse shell programm
-						SYNOPSIS
-							./main [OPTIONS]
-						DESCRIPTION
+			NAME
+						main - server - client reverse shell programm
 
-						It is a shell help. Enter command and arguments for the command. Special commands are writtend below
+			SYNOPSIS
+						./main [OPTIONS]
+			DESCRIPTION
 
-									--tcp			----->			create server with tcp connection
-									--udp			----->			create server with udp connection
-									--ntp			----->			create server with ntp connection
-									--dns			----->			create server with dns connection
-									--help			----->			show this help
+						It is a server help. To execute programm with different server connections see the required options below.
 
-						EXAMPLE
-							>>>connect 8080
-							>>>help
-						SPECIAL COMMANDS
-							>>>exit     ------    to exit the shell
-							>>>cmd?     ------    to show this help
-						LIMITS
-								MAXIMUM SHELL COMMANDS - 100
-								MAXIMUM COMMAND LENGTH - 50
-						FUNCTIONS
-								help    ----  show this help
-								clear 	 ----  clear the screen
-								connect [PORT] ----  connect to the specified port
+						--tcp			----->			create server with tcp connection
+						--udp			----->			create server with udp connection
+						--ntp			----->			create server with ntp connection
+						--dns			----->			create server with dns connection
+						--help			----->			show this help
 */
 
 struct menu menus_objs[SHELL_CMD_NUM] = {
-	{"exit", EXIT_ID, shell_exit, NULL, 0, NONE},
-	{"start_server", START_SERVER_ID, server_connect, NULL, 1, WAIT},
-	{"help", HELP_ID, shell_help, NULL, 0, NONE},
-	{"server_disconect", DISCONNECT_ID, server_disconnect, NULL, 0, NONE},
-	{"clear", CLEAR_ID, shell_clear, 0, NONE},
-	{"END", 0, NULL, NULL, 0, NONE}
+	//+flag bg or fg
+	{"exit", EXIT_HELP, shell_exit, NULL, EXIT_ID, 0, NONE},
+	{"start_server", START_SERVER_HELP, server_connect, NULL, START_SERVER_ID, 1, WAIT},
+	{"help", SHELL_HELP, shell_help, NULL, HELP_ID, 0, NONE},
+	{"server_disconect", SERVER_DISCONNECT_HELP, server_disconnect, NULL, DISCONNECT_ID, 0, NONE},
+	{"clear", CLEAR_HELP, shell_clear, NULL, CLEAR_ID, 0, NONE},
+	{NULL, NULL, NULL, NULL, 0, 0, NONE} // Sdelat norm
 };
 
 int server_connect(struct menu *input)
 {
 	int port = atoi(input->args[0]);
-	printf("PORT : %d\n", port);
+	printf("\nadssasdlkadsaklsdlasdkads\n");
+	printf("\nPORT : %d\n", port);
 	server_object->server_init(port);
 }
 
@@ -55,6 +46,23 @@ int server_disconnect(struct menu *input)
 	server_object->server_disconnect();
 }
 
+void *create_shared_memory(size_t size)
+{
+	int protection = PROT_READ | PROT_WRITE;
+	int visibility = MAP_SHARED | MAP_ANONYMOUS;
+
+	return mmap(NULL, size, protection, visibility, -1, 0);
+}
+
+struct server *server_initialize(struct server *object)
+{
+	void *p = create_shared_memory(sizeof(object));
+	memcpy(p, object ,sizeof(object));
+	p = (struct server*)p;
+	printf("\nALLOCATED AT %p\n" ,(void*)p);
+
+	return p;
+}
 int main(int argc, char *argv[])
 {
 	int choice;
@@ -74,11 +82,15 @@ int main(int argc, char *argv[])
 	option_index = 0;
 	c = getopt_long(argc, argv, "p:", long_options, &option_index);
 	if (c == -1) {
+		printf(SERVER_HELP);
 		return ERR_OPTION;
 	}
 	switch(c) {
 	case 't':
-		server_object = &tcp_obj;
+		server_object = server_initialize(&tcp_obj);
+		memcpy(server_object, &tcp_obj, sizeof(tcp_obj));
+		server_object = (struct server *)server_object;
+		//server_object = &tcp_obj;
 		break;
 	case 'u':
 		break;

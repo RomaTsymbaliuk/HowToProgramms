@@ -17,6 +17,6 @@ struct server {
 	int (*server_init)();
 };
 
-static struct server *server_object;
+struct server *server_object;
 
 #endif

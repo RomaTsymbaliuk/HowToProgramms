@@ -4,6 +4,7 @@
 #include<sys/socket.h>
 #include<arpa/inet.h>
 #include<unistd.h>
+#include <errno.h>
 #include "tcp.h"
 
 int tcp_client_connect(struct client *cl, int port)
@@ -44,6 +45,7 @@ int tcp_client_send(struct client *cl)
     while (1) {
         char *buff = "CONNECT";
         if (write(cl->sockfd, buff, sizeof(buff)) < 0) {
+            printf("%s\n", strerror(errno));
             printf("Write error\n");
             return ERR_WRITE;
         }
