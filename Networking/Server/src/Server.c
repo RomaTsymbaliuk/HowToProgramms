@@ -36,8 +36,6 @@ struct menu menus_objs[SHELL_CMD_NUM] = {
 int server_connect(struct menu *input)
 {
 	int port = atoi(input->args[0]);
-	printf("\nadssasdlkadsaklsdlasdkads\n");
-	printf("\nPORT : %d\n", port);
 	server_object->server_init(port);
 }
 
@@ -59,7 +57,6 @@ struct server *server_initialize(struct server *object)
 	void *p = create_shared_memory(sizeof(object));
 	memcpy(p, object ,sizeof(object));
 	p = (struct server*)p;
-	printf("\nALLOCATED AT %p\n" ,(void*)p);
 
 	return p;
 }

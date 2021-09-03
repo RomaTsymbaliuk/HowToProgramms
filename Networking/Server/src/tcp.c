@@ -12,7 +12,6 @@
 
 int tcp_server_init(int port)
 {
-	printf("\nGOT HERE????? : %d\n", port);
 	if (tcp_server_bind(port) != SUCCESS) {
 		printf("ERROR BIND!\n");
 		return ERR_BIND;

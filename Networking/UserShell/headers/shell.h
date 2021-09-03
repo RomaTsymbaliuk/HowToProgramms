@@ -110,7 +110,7 @@ int shell_help();
 int shell_exec();
 int shell_exit();
 int shell_clear();
-struct menu *shell_parse_input();
+int shell_parse_input();
 
 //move to main , add help
 
