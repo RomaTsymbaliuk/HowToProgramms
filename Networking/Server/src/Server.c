@@ -44,22 +44,6 @@ int server_disconnect(struct menu *input)
 	server_object->server_disconnect();
 }
 
-void *create_shared_memory(size_t size)
-{
-	int protection = PROT_READ | PROT_WRITE;
-	int visibility = MAP_SHARED | MAP_ANONYMOUS;
-
-	return mmap(NULL, size, protection, visibility, -1, 0);
-}
-
-struct server *server_initialize(struct server *object)
-{
-	void *p = create_shared_memory(sizeof(object));
-	memcpy(p, object ,sizeof(object));
-	p = (struct server*)p;
-
-	return p;
-}
 int main(int argc, char *argv[])
 {
 	int choice;
@@ -84,10 +68,7 @@ int main(int argc, char *argv[])
 	}
 	switch(c) {
 	case 't':
-		server_object = server_initialize(&tcp_obj);
-		memcpy(server_object, &tcp_obj, sizeof(tcp_obj));
-		server_object = (struct server *)server_object;
-		//server_object = &tcp_obj;
+		server_object = &tcp_obj;
 		break;
 	case 'u':
 		break;

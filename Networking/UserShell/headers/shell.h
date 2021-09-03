@@ -89,7 +89,6 @@
 
 #include <stddef.h>
 #include "errors.h"
-#include "type.h"
 
 enum {EXIT_ID, HELP_ID, CONNECT_ID, CLEAR_ID, DISCONNECT_ID, START_SERVER_ID};
 
@@ -111,6 +110,7 @@ int shell_exec();
 int shell_exit();
 int shell_clear();
 int shell_parse_input();
+int shell_func_wrapper(void *args);
 
 //move to main , add help
 

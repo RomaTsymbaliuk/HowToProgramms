@@ -40,9 +40,8 @@ int shell_loop()
 		status = shell_parse_input();
 		if (status == SUCCESS) {
 			i++;
-		} else if (status > 20){
-			kill(status, SIGTERM);
-			printf("Error! Try again\n");
+		} else {
+			
 		}
 	} while (i < MAX_SHELL_CMD );
 }
@@ -58,15 +57,9 @@ int shell_help(struct menu *input)
 	return SUCCESS;
 }
 
-void sig_handler(int signal)
-{
-	flag_executed = 1;
-}
-
 int shell_func_wrapper(void *args)
 {
 	int (*fn)(struct menu*);
-	printf("HERE?\n");
 	args = (struct menu *) args;
 	fn = (int (*)(struct menu*))(((struct menu*)args)->func);
 
@@ -81,24 +74,18 @@ int shell_parse_input()
 	char str[MAX_CMD_LENGTH];
 	char *pch;
 	char **args = (char**)malloc(sizeof(char*) * MAX_ARGUMENTS_NUMBER);
-	int status;
 	int parse_args_num;
 	int i = 0;
 	int result;
 	char *cmd_name;
 	/*Child procces pid and execution status*/
-	pid_t fork_status;
 	pid_t child_pid;
-	pid_t child_status;
 	/* Print cmd while waiting for a client*/
 	//92 ---> '\' in ASCII
 	char WAIT_CHARS_CMD[WAIT_SYMBOLS] = {'/', '-', 92, '|'};
-	/*Shared memory between child and parent processes*/
-	void *shmem;
-	int ret;
-	int flags = 0;
 	char *stack;
 	char *stack_top;
+	int status;
 
 	stack = malloc(sizeof(STACK_SIZE));
 	if (!stack) {
@@ -164,29 +151,28 @@ int shell_parse_input()
 	if (input->func) {
 		stack = CHECKALLOC(malloc(STACK_SIZE), "malloc");
 		stack_top = stack + STACK_SIZE;
-		printf("DEBUG _ 1\n");
 		child_pid = clone(shell_func_wrapper, stack_top, CLONE_CHILD_CLEARTID | CLONE_CHILD_SETTID | CLONE_FILES | SIGCHLD, (void*)input);
-		printf("DEBUG - 2\n");
 		if (child_pid == -1) {
 			return ERR_FORK;
 		} else {
 			printf("\nChild started!\n");
 		}
-		int status;
-		for (int i = 0; i < 60; i++) {
+
+		for (int i = 0; i < 120; i++) {
 			pid_t result_id = waitpid(child_pid, &status, WNOHANG);
 			if (result_id == 0) {
-				printf("STILL ALIVE\n");
-			  // Child still alive
+				printf("%c\n", WAIT_CHARS_CMD[i % WAIT_SYMBOLS]);
+			// Child still alive
 			} else if (result_id == -1) {
-			  // Error 
-				printf("ERROR\n");
+			// Error 
+				printf("ERROR EXECUTION\n");
+				return ERR_FORK;
 			} else {
-			  // Child exited
-				printf("CHILD EXITED\n");
-				break;
+			//Child process ended
+				return SUCCESS;
 			}
-			sleep(1);
+			//sleep while waiting
+			usleep(500 * 1000);
 		}
 	} else {
 		printf("Field is empty\n");
