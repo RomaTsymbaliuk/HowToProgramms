@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <getopt.h>
 #include <string.h>
-#include <sys/mman.h>
 #include "Server.h"
 
 /* ------ HELP ------- */
@@ -14,24 +13,32 @@
 						./main [OPTIONS]
 			DESCRIPTION
 
-						It is a server help. To execute programm with different server connections see the required options below.
+				It is a server help. To execute programm with different server connections see the required options below.
 
-						--tcp			----->			create server with tcp connection
-						--udp			----->			create server with udp connection
-						--ntp			----->			create server with ntp connection
-						--dns			----->			create server with dns connection
-						--help			----->			show this help
+				--tcp			----->			create server with tcp connection
+				--udp			----->			create server with udp connection
+				--ntp			----->			create server with ntp connection
+				--dns			----->			create server with dns connection
+				--help			----->			show this help
 */
 
 struct menu menus_objs[SHELL_CMD_NUM] = {
 	//+flag bg or fg
-	{"exit", EXIT_HELP, shell_exit, NULL, EXIT_ID, 0, NONE},
-	{"start_server", START_SERVER_HELP, server_connect, NULL, START_SERVER_ID, 1, WAIT},
-	{"help", SHELL_HELP, shell_help, NULL, HELP_ID, 0, NONE},
-	{"server_disconect", SERVER_DISCONNECT_HELP, server_disconnect, NULL, DISCONNECT_ID, 0, NONE},
-	{"clear", CLEAR_HELP, shell_clear, NULL, CLEAR_ID, 0, NONE},
-	{NULL, NULL, NULL, NULL, 0, 0, NONE} // Sdelat norm
+	{"exit", EXIT_HELP, shell_exit, NULL, EXIT_ID, 0, FG},
+	{"start_server", START_SERVER_HELP, server_connect, NULL, START_SERVER_ID, 1, FG},
+	{"help", SHELL_HELP, shell_help, NULL, HELP_ID, 0, FG},
+	{"server_disconect", SERVER_DISCONNECT_HELP, server_disconnect, NULL, DISCONNECT_ID, 0, FG},
+	{"clear", CLEAR_HELP, shell_clear, NULL, CLEAR_ID, 0, FG},
+	{"exploit", EXPLOIT_HELP, server_exploit, NULL, EXPLOIT_ID, 1, FG},
+	{NULL, NULL, NULL, NULL, 0, 0, 0}
 };
+
+int server_exploit(struct menu *input)
+{
+	printf("Sending %s\n", input->cmd_name);
+
+	server_object->server_write(input);
+}
 
 int server_connect(struct menu *input)
 {
@@ -68,7 +75,9 @@ int main(int argc, char *argv[])
 	}
 	switch(c) {
 	case 't':
-		server_object = &tcp_obj;
+		server_object = create_shared_memory(sizeof(server_object));
+		memcpy(server_object, &tcp_obj, sizeof(tcp_obj));
+		server_object = (struct server*)server_object;
 		break;
 	case 'u':
 		break;

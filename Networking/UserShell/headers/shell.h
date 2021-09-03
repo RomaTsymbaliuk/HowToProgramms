@@ -7,7 +7,7 @@
 #define MIN_PORT 1024
 #define MAX_PORT 65535
 
-#define SHELL_CMD_NUM 6
+#define SHELL_CMD_NUM 7
 
 #define SHELL_INIT "**********************************************\n"   \
 					"*********************************************\n"   \
@@ -85,23 +85,23 @@
 					"RETURN\n\n\t" \
 					"SUCCESS ----> clear is successfull\n"
 
+#define EXPLOIT_HELP		"NAME\n\n" \
+							"\texploit [COMMAND]\n" \
+							"DESCRIPTION\n\n" \
+							"\tRun a command on client computer\n" \
+							"LIST OF COMMANDS\n" \
+							"\t==>id  ---  get user id\n"
+
 #define WAIT_SYMBOLS 4
 
 #include <stddef.h>
 #include "errors.h"
+#include "type.h"
 
-enum {EXIT_ID, HELP_ID, CONNECT_ID, CLEAR_ID, DISCONNECT_ID, START_SERVER_ID};
+enum {EXIT_ID, HELP_ID, CONNECT_ID, CLEAR_ID, DISCONNECT_ID, START_SERVER_ID, EXPLOIT_ID};
+enum PROCESS_FLAGS {NONE, FG, BG};
 
-struct menu {
-	char *cmd_name;
-	char *help;
-	void *func;
-	void **args;
-	int cmd_id;
-	int args_size;
-	int process_flags;
-};
-
+void* create_shared_memory(size_t size);
 void shell_init();
 void sig_handler();
 int shell_loop();
@@ -112,6 +112,8 @@ int shell_clear();
 int shell_parse_input();
 int shell_func_wrapper(void *args);
 
+//shell state, saves previous command status
+static void *status_bar;
 //move to main , add help
 
 extern struct menu menus_objs[SHELL_CMD_NUM];

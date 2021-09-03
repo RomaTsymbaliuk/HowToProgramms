@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <linux/sched.h>
 #include <sys/syscall.h>
+#include <sys/mman.h>
 #include "shell.h"
 
 #define STACK_SIZE (1024 * 1024) /* Stack size for cloned child */
@@ -23,12 +24,25 @@
       ERREXIT(msg);                                                            \
     p;                                                                         \
   })
-int flag_executed = 0;
+
+void* create_shared_memory(size_t size) {
+
+  int protection = PROT_READ | PROT_WRITE;
+  int visibility = MAP_SHARED | MAP_ANONYMOUS;
+
+  return mmap(NULL, size, protection, visibility, -1, 0);
+}
 
 void shell_init()
 {
+	int status;
+
 	fflush(stdin);
 	printf(SHELL_INIT);
+
+	status = WAIT_CONDITION;
+	status_bar = create_shared_memory(sizeof(int));
+	memcpy(status_bar, &status, sizeof(int));
 }
 
 int shell_loop()
@@ -36,12 +50,24 @@ int shell_loop()
 	int status = 0;
 	int i = -1;
 	do {
-		printf(">>>");
+		if ( (*((int*)status_bar)) == SUCCESS) {
+			printf("\033[0;32m");
+			printf(">>> ");
+			printf("\033[0m");
+		}  else if ( (*((int*)status_bar)) == WAIT_CONDITION) {
+			printf("\033[0;33m");
+			printf(">>> ");
+			printf("\033[0m");
+		} else {
+			printf("\033[0;31m");
+			printf(">>> ");
+			printf("\033[0m");
+		}
 		status = shell_parse_input();
 		if (status == SUCCESS) {
 			i++;
 		} else {
-			
+			printf("\nTry again !\n");
 		}
 	} while (i < MAX_SHELL_CMD );
 }
@@ -62,8 +88,12 @@ int shell_func_wrapper(void *args)
 	int (*fn)(struct menu*);
 	args = (struct menu *) args;
 	fn = (int (*)(struct menu*))(((struct menu*)args)->func);
+	int status;
 
-	fn(args);
+	status = WAIT_CONDITION;
+	memcpy(status_bar, &status, sizeof(int));
+	status = fn(args);
+	memcpy(status_bar, &status, sizeof(int));
 
 	return SUCCESS;
 }
@@ -154,25 +184,32 @@ int shell_parse_input()
 		child_pid = clone(shell_func_wrapper, stack_top, CLONE_CHILD_CLEARTID | CLONE_CHILD_SETTID | CLONE_FILES | SIGCHLD, (void*)input);
 		if (child_pid == -1) {
 			return ERR_FORK;
-		} else {
-			printf("\nChild started!\n");
 		}
-
-		for (int i = 0; i < 120; i++) {
-			pid_t result_id = waitpid(child_pid, &status, WNOHANG);
-			if (result_id == 0) {
-				printf("%c\n", WAIT_CHARS_CMD[i % WAIT_SYMBOLS]);
-			// Child still alive
-			} else if (result_id == -1) {
-			// Error 
-				printf("ERROR EXECUTION\n");
-				return ERR_FORK;
-			} else {
-			//Child process ended
-				return SUCCESS;
+		if (input->process_flags == FG) {
+			for (int i = 0; i < 120; i++) {
+				pid_t result_id = waitpid(child_pid, &status, WNOHANG);
+				if (result_id == 0) {
+					printf("%c\n", WAIT_CHARS_CMD[i % WAIT_SYMBOLS]);
+				// Child still alive
+				} else if (result_id == -1) {
+				// Error 
+					printf("ERROR EXECUTION\n");
+					status = ERR_FORK;
+					memcpy(status_bar, &status, sizeof(int));
+					return ERR_FORK;
+				} else {
+				//Child process ended
+					status = SUCCESS;
+					memcpy(status_bar, &status, sizeof(int));
+					return SUCCESS;
+				}
+				//sleep while waiting
+				usleep(500 * 1000);
 			}
-			//sleep while waiting
-			usleep(500 * 1000);
+		} else if (input->process_flags == BG) {
+				status = WAIT_CONDITION;
+				memcpy(status_bar, &status, sizeof(int));
+				return SUCCESS;
 		}
 	} else {
 		printf("Field is empty\n");

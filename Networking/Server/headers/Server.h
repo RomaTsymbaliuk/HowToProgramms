@@ -24,8 +24,8 @@
 						"\n" \
 						"\n"
 
-enum PROCESS_FLAGS {NONE, WAIT};
 
+int server_exploit(struct menu *input);
 int server_connect(struct menu *input);
 int server_disconnect(struct menu *input);
 

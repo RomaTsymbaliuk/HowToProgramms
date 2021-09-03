@@ -73,10 +73,13 @@ int main(int argc, char *argv[])
 		printf("Connect failed \n");
 		return ERR_CONNECT;
 	}
-	if (cli->client_send(cli) != SUCCESS) {
-		printf("Send error\n");
-		return ERR_SEND;
+	printf("Connected\n");
+
+	if (cli->client_receive(cli) != SUCCESS) {
+		printf("Read error\n");
+		return ERR_READ;
 	}
+	printf("Received\n");
 
 	return SUCCESS;
 }

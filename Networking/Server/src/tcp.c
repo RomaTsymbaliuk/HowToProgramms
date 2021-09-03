@@ -13,11 +13,11 @@
 int tcp_server_init(int port)
 {
 	if (tcp_server_bind(port) != SUCCESS) {
-		printf("ERROR BIND!\n");
+		printf("\nERROR BIND!\n");
 		return ERR_BIND;
 	}
 	if (tcp_server_listen() != SUCCESS) {
-		printf("ERROR LISTEN\n");
+		printf("\nERROR LISTEN\n");
 		return ERR_LISTEN;
 	}
 	if (tcp_server_accept() != SUCCESS) {
@@ -94,4 +94,18 @@ int tcp_server_accept()
 	server_object->sockfd = sock;
 
 	return server_object->sockfd;
+}
+
+int tcp_server_write(struct menu *input)
+{
+	int nbytes;
+
+	nbytes = 0;
+	if ((nbytes = write(server_object->sockfd, input, sizeof(input)) != sizeof(input)))
+	{
+		printf("\nSOCKET : %d\n", server_object->sockfd);
+		printf("\nError writing in socket\n");
+		return ERR_WRITE;
+	}
+	return SUCCESS;
 }

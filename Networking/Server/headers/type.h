@@ -3,6 +3,16 @@
 
 enum {TCP = 1, UDP, NTP, DNS};
 
+struct menu {
+	char *cmd_name;
+	char *help;
+	void *func;
+	void **args;
+	int cmd_id;
+	int args_size;
+	int process_flags;
+};
+
 struct server {
 	int sockfd;
 	int server_id;
@@ -15,6 +25,7 @@ struct server {
 	int (*server_read)();
 	int (*server_disconnect)();
 	int (*server_init)();
+	int (*server_write)(struct menu *);
 };
 
 struct server *server_object;
