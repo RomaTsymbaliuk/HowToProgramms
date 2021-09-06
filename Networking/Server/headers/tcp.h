@@ -33,5 +33,6 @@ static struct server tcp_obj = {.sockfd = -1, .server_id = TCP, .cli_state = ">>
                                 .server_read = tcp_server_read, .server_init = tcp_server_init, .server_write = tcp_server_write};
 
 
+extern struct server *server_object;
 
 #endif /* __TCP_H__ */

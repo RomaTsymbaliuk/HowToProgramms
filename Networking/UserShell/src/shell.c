@@ -1,14 +1,13 @@
 #define _GNU_SOURCE
-#include <sched.h>
+#include <linux/sched.h>    /* Definition of struct clone_args */
+#include <sched.h>          /* Definition of CLONE_* constants */
+#include <sys/syscall.h>    /* Definition of SYS_* constants */
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <unistd.h>
-#include <linux/sched.h>
-#include <sys/syscall.h>
-#include <sys/mman.h>
 #include "shell.h"
 
 #define STACK_SIZE (1024 * 1024) /* Stack size for cloned child */
@@ -24,14 +23,6 @@
       ERREXIT(msg);                                                            \
     p;                                                                         \
   })
-
-void* create_shared_memory(size_t size) {
-
-  int protection = PROT_READ | PROT_WRITE;
-  int visibility = MAP_SHARED | MAP_ANONYMOUS;
-
-  return mmap(NULL, size, protection, visibility, -1, 0);
-}
 
 void shell_init()
 {
@@ -155,7 +146,9 @@ int shell_parse_input()
 	i = 0;
 	while (1) {
 		if (menus_objs[i].cmd_name == NULL) {
+			status = ERR_COMMAND;
 			printf("No such command <%s> !\n", cmd_name);
+			memcpy(status_bar, &status, sizeof(int));
 			printf("%s", SHELL_HELP);
 			return ERR_COMMAND;
 		}

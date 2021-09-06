@@ -73,10 +73,10 @@ int tcp_client_receive(struct client *cl)
 		value = (int*)recv_input;
 		*value = ntohl(*value);
 		printf(" : %d\n", *value);
-		value = value + sizeof(int);
+		value = value + 1;
 		*value = ntohl(*value);
 		printf("second : %d\n", *value);
-		value = value + sizeof(int);
+		value = value + 1;
 		*value = ntohl(*value);
 		printf("third : %d\n",*value);
 	} else {

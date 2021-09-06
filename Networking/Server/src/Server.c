@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <getopt.h>
 #include <string.h>
+#include <arpa/inet.h>
 #include "Server.h"
 
 /* ------ HELP ------- */
@@ -15,17 +16,17 @@
 
 				It is a server help. To execute programm with different server connections see the required options below.
 
-				--tcp			----->			create server with tcp connection
-				--udp			----->			create server with udp connection
-				--ntp			----->			create server with ntp connection
-				--dns			----->			create server with dns connection
-				--help			----->			show this help
+				--tcp           ----->          create server with tcp connection
+				--udp           ----->          create server with udp connection
+				--ntp           ----->          create server with ntp connection
+				--dns           ----->          create server with dns connection
+				--help          ----->          show this help
 */
 
 struct menu menus_objs[SHELL_CMD_NUM] = {
 	//+flag bg or fg
 	{"exit", EXIT_HELP, shell_exit, NULL, EXIT_ID, 0, FG},
-	{"start_server", START_SERVER_HELP, server_connect, NULL, START_SERVER_ID, 1, FG},
+	{"start_server", START_SERVER_HELP, server_connect, NULL, START_SERVER_ID, 1, BG},
 	{"help", SHELL_HELP, shell_help, NULL, HELP_ID, 0, FG},
 	{"server_disconect", SERVER_DISCONNECT_HELP, server_disconnect, NULL, DISCONNECT_ID, 0, FG},
 	{"clear", CLEAR_HELP, shell_clear, NULL, CLEAR_ID, 0, FG},

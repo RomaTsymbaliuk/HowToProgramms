@@ -97,13 +97,13 @@
 #include <stddef.h>
 #include "errors.h"
 #include "type.h"
+#include "shared.h"
+#include "menu_objs.h"
 
 enum {EXIT_ID, HELP_ID, CONNECT_ID, CLEAR_ID, DISCONNECT_ID, EXPLOIT_ID, START_SERVER_ID};
 enum PROCESS_FLAGS {NONE, FG, BG};
 
-void* create_shared_memory(size_t size);
 void shell_init();
-void sig_handler();
 int shell_loop();
 int shell_help();
 int shell_exec();
@@ -114,7 +114,6 @@ int shell_func_wrapper(void *args);
 
 //shell state, saves previous command status
 static void *status_bar;
-//move to main , add help
 
 extern struct menu menus_objs[SHELL_CMD_NUM];
 

@@ -2,8 +2,9 @@
 #define SERVER_H
 
 #include "shell.h"
-#include "type.h"
+#include "menu_objs.h"
 #include "tcp.h"
+#include "serial.h"
 
 # define SERVER_HELP     "NAME\n" \
 						"        main - server - client reverse shell programm\n" \
@@ -24,6 +25,9 @@
 						"\n" \
 						"\n"
 
+#include "shared.h"
+
+struct server *server_object;
 
 int server_exploit(struct menu *input);
 int server_connect(struct menu *input);
