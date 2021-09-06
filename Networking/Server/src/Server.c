@@ -35,9 +35,15 @@ struct menu menus_objs[SHELL_CMD_NUM] = {
 
 int server_exploit(struct menu *input)
 {
-	printf("Sending %s\n", input->cmd_name);
+	void *data;
 
-	server_object->server_write(input);
+	printf("Sending %s\n", input->cmd_name);
+	input->buf = new_buffer();
+	if (!input->buf) {
+		return MEMORY_ALLOCATION_ERROR;
+	}
+	serialize_menu(input, input->buf);
+	server_object->server_write(((input->buf)->data));
 }
 
 int server_connect(struct menu *input)

@@ -57,12 +57,28 @@ int tcp_client_send(struct client *cl)
 
 int tcp_client_receive(struct client *cl)
 {
-	struct menu *recv_input;
+	void *recv_input;
 	int size;
+	char *command_name;
+	int *value;
 
+	recv_input = malloc(sizeof(recv_input));
+	if (!recv_input) {
+		printf("Memory error occured\n");
+		return MEMORY_ALLOCATION_ERROR;
+	}
 	printf("Entered here socket : %d\n", cl->sockfd);
-	if( (size = recv ( cl->sockfd, (void*)recv_input, sizeof(recv_input), 0)) >= 0) {
-		printf("COMMAND : %s\n", recv_input->cmd_name);
+	if( (size = recv ( cl->sockfd,  recv_input, sizeof(recv_input), 0)) >= 0) {
+		recv_input = (int*)recv_input;
+		value = (int*)recv_input;
+		*value = ntohl(*value);
+		printf(" : %d\n", *value);
+		value = value + sizeof(int);
+		*value = ntohl(*value);
+		printf("second : %d\n", *value);
+		value = value + sizeof(int);
+		*value = ntohl(*value);
+		printf("third : %d\n",*value);
 	} else {
 		printf("Receive error\n");
 	}

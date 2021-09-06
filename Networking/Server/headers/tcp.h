@@ -25,7 +25,7 @@ int tcp_server_read();
 
 int tcp_server_disconnect();
 
-int tcp_server_write(struct menu *input);
+int tcp_server_write(void *data);
 
 static struct server tcp_obj = {.sockfd = -1, .server_id = TCP, .cli_state = ">>>", .server_type = NULL, .port = -1, .server_listen = tcp_server_listen,
                                 .server_disconnect = tcp_server_disconnect,

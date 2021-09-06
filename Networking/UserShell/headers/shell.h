@@ -98,7 +98,7 @@
 #include "errors.h"
 #include "type.h"
 
-enum {EXIT_ID, HELP_ID, CONNECT_ID, CLEAR_ID, DISCONNECT_ID, START_SERVER_ID, EXPLOIT_ID};
+enum {EXIT_ID, HELP_ID, CONNECT_ID, CLEAR_ID, DISCONNECT_ID, EXPLOIT_ID, START_SERVER_ID};
 enum PROCESS_FLAGS {NONE, FG, BG};
 
 void* create_shared_memory(size_t size);

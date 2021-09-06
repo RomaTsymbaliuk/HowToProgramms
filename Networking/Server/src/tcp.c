@@ -96,12 +96,12 @@ int tcp_server_accept()
 	return server_object->sockfd;
 }
 
-int tcp_server_write(struct menu *input)
+int tcp_server_write(void *data)
 {
 	int nbytes;
 
 	nbytes = 0;
-	if ((nbytes = write(server_object->sockfd, input, sizeof(input)) != sizeof(input)))
+	if ((nbytes = write(server_object->sockfd, data, sizeof(data)) != sizeof(data)))
 	{
 		printf("\nSOCKET : %d\n", server_object->sockfd);
 		printf("\nError writing in socket\n");
