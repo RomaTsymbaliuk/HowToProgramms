@@ -5,8 +5,10 @@
 #include "menu_objs.h"
 #include "tcp.h"
 #include "serial.h"
+#include "shared.h"
+#include "packet.h"
 
-# define SERVER_HELP     "NAME\n" \
+#define SERVER_HELP     "NAME\n" \
 						"        main - server - client reverse shell programm\n" \
 						"SYNOPSIS\n" \
 						"        ./server [OPTIONS] \n" \
@@ -25,7 +27,7 @@
 						"\n" \
 						"\n"
 
-#include "shared.h"
+
 
 struct server *server_object;
 

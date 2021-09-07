@@ -68,6 +68,8 @@ int tcp_client_receive(struct client *cl)
 		return MEMORY_ALLOCATION_ERROR;
 	}
 	printf("Entered here socket : %d\n", cl->sockfd);
+	
+	//cast to struct
 	if( (size = recv ( cl->sockfd,  recv_input, sizeof(recv_input), 0)) >= 0) {
 		recv_input = (int*)recv_input;
 		value = (int*)recv_input;

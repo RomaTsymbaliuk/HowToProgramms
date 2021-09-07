@@ -10,6 +10,7 @@
 #include <pthread.h>
 #include "tcp.h"
 
+//proverka na port
 int tcp_server_init(int port)
 {
 	if (tcp_server_bind(port) != SUCCESS) {
@@ -59,10 +60,10 @@ int tcp_server_bind(int port)
 int tcp_server_read()
 {
 
-	char buff[200];
+	char buff[200] = {0};
 	int num = 0;
-	bzero(buff, 200);
-	for(int i = 0; i < 20; i++) {
+	bzero(buff, 200); // ?
+	for(int i = 0; i < 20; i++) { //why 20??
 		if (read(server_object->sockfd, buff, sizeof(buff)) < 0) {
 			printf("Read error");
 			return ERR_READ;

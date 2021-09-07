@@ -24,6 +24,8 @@
     p;                                                                         \
   })
 
+// make in odna stroka
+
 void shell_init()
 {
 	int status;
@@ -32,6 +34,7 @@ void shell_init()
 	printf(SHELL_INIT);
 
 	status = WAIT_CONDITION;
+	//check result do error exit
 	status_bar = create_shared_memory(sizeof(int));
 	memcpy(status_bar, &status, sizeof(int));
 }
@@ -40,6 +43,7 @@ int shell_loop()
 {
 	int status = 0;
 	int i = -1;
+	//zapihnut v function color shell 
 	do {
 		if ( (*((int*)status_bar)) == SUCCESS) {
 			printf("\033[0;32m");
@@ -60,7 +64,7 @@ int shell_loop()
 		} else {
 			printf("\nTry again !\n");
 		}
-	} while (i < MAX_SHELL_CMD );
+	} while (i < MAX_SHELL_CMD);
 }
 
 int shell_exit(struct menu *input)
@@ -70,7 +74,7 @@ int shell_exit(struct menu *input)
 
 int shell_help(struct menu *input)
 {
-	printf(SHELL_HELP);
+	printf(SHELL_HELP); //vipilat`
 	return SUCCESS;
 }
 
@@ -94,6 +98,7 @@ int shell_parse_input()
 	struct menu *input;
 	char str[MAX_CMD_LENGTH];
 	char *pch;
+	//Ne usat` malloc esli razmer static!!!
 	char **args = (char**)malloc(sizeof(char*) * MAX_ARGUMENTS_NUMBER);
 	int parse_args_num;
 	int i = 0;
@@ -102,12 +107,13 @@ int shell_parse_input()
 	/*Child procces pid and execution status*/
 	pid_t child_pid;
 	/* Print cmd while waiting for a client*/
-	//92 ---> '\' in ASCII
-	char WAIT_CHARS_CMD[WAIT_SYMBOLS] = {'/', '-', 92, '|'};
+	//0x5c ---> '\' in ASCII
+	char WAIT_CHARS_CMD[WAIT_SYMBOLS] = {'/', '-', 0x5c, '|'};
 	char *stack;
 	char *stack_top;
 	int status;
 
+	//Ne usat` malloc esli razmer static!!!
 	stack = malloc(sizeof(STACK_SIZE));
 	if (!stack) {
 		return MEMORY_ALLOCATION_ERROR;
@@ -119,6 +125,7 @@ int shell_parse_input()
 	if (!fgets(str, MAX_CMD_LENGTH, stdin)){
 		return ERR_READ;
 	}
+
 	/*		Splitting line for commands and 		*/
 	pch = strtok(str, " ");
 	/*		Delete last enter in command if there are no 		*/
@@ -130,14 +137,16 @@ int shell_parse_input()
 		printf("Too short command\n");
 		return ERR_COMMAND;
 	}
+	//memory leak
 	cmd_name = strdup(pch);
 	if (!cmd_name) {
 		printf("Allocation problem\n");
 		return MEMORY_ALLOCATION_ERROR;
 	}
-	i = 0;
+	i = 0; //??? look def
 	while (pch != NULL) {
-		pch = strtok(NULL, " ");
+		pch = strtok(NULL, " "); 
+		 // *pch == '\n'
 		if (i < MAX_ARGUMENTS_NUMBER && pch && strcmp(pch, "\n") != 0) {
 			args[i++] = strdup(pch);
 		}
@@ -145,6 +154,7 @@ int shell_parse_input()
 	parse_args_num = i;
 	i = 0;
 	while (1) {
+		// ubrat zavisimost
 		if (menus_objs[i].cmd_name == NULL) {
 			status = ERR_COMMAND;
 			printf("No such command <%s> !\n", cmd_name);
@@ -211,6 +221,7 @@ int shell_parse_input()
 	return SUCCESS;
 }
 
+//rm
 int shell_exec(struct menu *input)
 {
 	return SUCCESS;
@@ -218,7 +229,8 @@ int shell_exec(struct menu *input)
 
 int shell_clear(struct menu *input)
 {
-	system("clear");
+	// ne uzat sleep
+	system("sleep 3 && ls -la && sleep 1 && clear");
 	return SUCCESS;
 } 
 

@@ -125,4 +125,5 @@ extern struct menu menus_objs[SHELL_CMD_NUM];
 [/]
 [-]
 */
+//do on one place
 #endif /* SHELL_H */
