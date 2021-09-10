@@ -10,6 +10,8 @@
 #include <pthread.h>
 #include "tcp.h"
 
+struct sockaddr_in remote = {0};
+
 //proverka na port
 int tcp_server_init(int port)
 {
@@ -37,7 +39,6 @@ int tcp_server_listen()
 int tcp_server_bind(int port)
 {
 	int iRetval = -1;
-	struct sockaddr_in remote = {0};
 	short sockfd;
 
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -59,7 +60,6 @@ int tcp_server_bind(int port)
 
 int tcp_server_read()
 {
-
 	char buff[200] = {0};
 	int num = 0;
 	bzero(buff, 200); // ?
@@ -97,16 +97,36 @@ int tcp_server_accept()
 	return server_object->sockfd;
 }
 
-int tcp_server_write(void *data)
+int tcp_server_write(struct menu *input)
 {
 	int nbytes;
-
+	struct packet_frame pkg;
+	uint32_t pkg_id;
+	uint32_t pkg_len;
+	uint32_t pkg_process_flags;
+	uint32_t cmd_id;
+	char pkg_args[100] = { 0 };
+	char *args[] = {"Parameter 1", "Parameter 2", "Parameter 3", "Parameter 4"};
 	nbytes = 0;
-	if ((nbytes = write(server_object->sockfd, data, sizeof(data)) != sizeof(data)))
-	{
-		printf("\nSOCKET : %d\n", server_object->sockfd);
-		printf("\nError writing in socket\n");
+	cmd_id = input->cmd_id;
+
+	pkg_id = htonl(TCP_ID);
+	cmd_id = htonl(CMD_ID);
+	printf("INPUT->cmd_id : %d \n", CMD_ID);
+
+	pkg_len = htonl(sizeof(pkg));
+
+	memcpy(&(pkg.header.packet_id), &pkg_id, sizeof(uint32_t));
+	memcpy(&(pkg.header.packet_len), &pkg_len, sizeof(uint32_t));
+	memcpy(&(pkg.cmd_id), &cmd_id, sizeof(cmd_id));
+	memcpy(&(pkg.process_flag), &cmd_id, sizeof(pkg_process_flags));
+
+	printf("PKG.CMD_ID : %d\n", pkg.cmd_id);
+
+	if ((nbytes = sendto(server_object->sockfd, (void*)&pkg, sizeof(pkg), 0, (struct sockaddr*)&remote, sizeof(remote))) != sizeof(pkg)) {
+		printf("Error writing to socket\n");
 		return ERR_WRITE;
 	}
+
 	return SUCCESS;
 }

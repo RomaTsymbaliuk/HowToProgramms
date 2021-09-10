@@ -2,11 +2,14 @@
 #define TCP_H
 
 #define MAX 80
+#define TCP_ID 3
+#define CMD_ID 100
 #define PORT 8080
 #define SA struct sockaddr
 
 #include "type.h"
 #include "errors.h"
+#include "packet.h"
 
 /**
  * Creates socket, waits for connections
@@ -25,7 +28,7 @@ int tcp_server_read();
 
 int tcp_server_disconnect();
 
-int tcp_server_write(void *data);
+int tcp_server_write(struct menu *input);
 
 static struct server tcp_obj = {.sockfd = -1, .server_id = TCP, .cli_state = ">>>", .server_type = NULL, .port = -1, .server_listen = tcp_server_listen,
                                 .server_disconnect = tcp_server_disconnect,

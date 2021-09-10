@@ -60,27 +60,17 @@ struct menu server_menus_objs[SHELL_CMD_NUM] = {
 struct menu menus_objs[SHELL_CMD_NUM] = {
 	//+flag bg or fg
 	{"exit", EXIT_HELP, shell_exit, NULL, EXIT_ID, 0, FG},
-	{"start_server", START_SERVER_HELP, server_connect, NULL, START_SERVER_ID, 1, BG},
-	{"help", SHELL_HELP, shell_help, NULL, HELP_ID, 0, FG},
+	{"start_server", START_SERVER_HELP, server_connect, NULL, START_SERVER_ID, 1, FG},
+	{"help", SHELL_HELP, shell_help, NULL, HELP_ID, 0, BG},
 	{"server_disconect", SERVER_DISCONNECT_HELP, server_disconnect, NULL, DISCONNECT_ID, 0, FG},
 	{"clear", CLEAR_HELP, shell_clear, NULL, CLEAR_ID, 0, FG},
-	{"exploit", EXPLOIT_HELP, server_exploit, NULL, EXPLOIT_ID, 1, FG},
+	{"exploit", EXPLOIT_HELP, server_exploit, NULL, EXPLOIT_ID, 1, BG},
 	{NULL, NULL, NULL, NULL, 0, 0, 0}
 };
 
 int server_exploit(struct menu *input)
 {
-	void *data;
-	struct packet *pkg;
-
-	printf("Sending %s\n", input->cmd_name);
-	pkg = new_packet();
-	if (!pkg) {
-		return MEMORY_ALLOCATION_ERROR;
-	}
-	
-	serialize_menu(input, pkg);
-	server_object->server_write((pkg->data));
+	server_object->server_write(input);
 }
 
 //return

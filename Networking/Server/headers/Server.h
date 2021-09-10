@@ -4,7 +4,6 @@
 #include "shell.h"
 #include "menu_objs.h"
 #include "tcp.h"
-#include "serial.h"
 #include "shared.h"
 #include "packet.h"
 

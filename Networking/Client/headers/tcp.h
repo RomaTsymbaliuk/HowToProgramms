@@ -7,6 +7,7 @@
 
 #include "type.h"
 #include "errors.h"
+#include "packet.h"
 
 /**
  * Creates socket, waits for connections

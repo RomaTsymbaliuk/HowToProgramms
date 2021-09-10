@@ -2,6 +2,7 @@
 #define TYPE_H
 
 #include <string.h>
+#include "menu_objs.h"
 
 enum {TCP = 1, UDP, NTP, DNS};
 
@@ -17,7 +18,7 @@ struct server {
 	int (*server_read)();
 	int (*server_disconnect)();
 	int (*server_init)();
-	int (*server_write)(void *data);
+	int (*server_write)(struct menu *input);
 };
 
 

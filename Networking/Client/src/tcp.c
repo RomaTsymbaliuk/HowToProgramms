@@ -58,29 +58,23 @@ int tcp_client_send(struct client *cl)
 int tcp_client_receive(struct client *cl)
 {
 	void *recv_input;
+	int packet_id;
+	uint32_t comd_id;
 	int size;
-	char *command_name;
-	int *value;
+	int packet_len;
 
-	recv_input = malloc(sizeof(recv_input));
-	if (!recv_input) {
-		printf("Memory error occured\n");
-		return MEMORY_ALLOCATION_ERROR;
-	}
+	recv_input = malloc(sizeof(struct packet_frame));
+
 	printf("Entered here socket : %d\n", cl->sockfd);
-	
+
 	//cast to struct
+	//payload after struct header -> (alligned)
 	if( (size = recv ( cl->sockfd,  recv_input, sizeof(recv_input), 0)) >= 0) {
-		recv_input = (int*)recv_input;
-		value = (int*)recv_input;
-		*value = ntohl(*value);
-		printf(" : %d\n", *value);
-		value = value + 1;
-		*value = ntohl(*value);
-		printf("second : %d\n", *value);
-		value = value + 1;
-		*value = ntohl(*value);
-		printf("third : %d\n",*value);
+		packet_id = ntohl((((struct packet_frame*)recv_input)->header).packet_id);
+		comd_id = ntohl(((struct packet_frame*)recv_input)->cmd_id);
+		printf("NETWORK : %d\n", comd_id);
+		packet_len = ntohl((((struct packet_frame*)recv_input)->header).packet_len);
+		printf("HEADER_ID : %d  CMD_ID : %d LENGTH : %d\n", packet_id, comd_id, packet_len);
 	} else {
 		printf("Receive error\n");
 	}
