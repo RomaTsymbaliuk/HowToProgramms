@@ -57,33 +57,45 @@ struct menu server_menus_objs[SHELL_CMD_NUM] = {
 };
 */
 
-struct menu menus_objs[SHELL_CMD_NUM] = {
-	//+flag bg or fg
-	{"exit", EXIT_HELP, shell_exit, NULL, EXIT_ID, 0, FG},
-	{"start_server", START_SERVER_HELP, server_connect, NULL, START_SERVER_ID, 1, FG},
-	{"help", SHELL_HELP, shell_help, NULL, HELP_ID, 0, BG},
-	{"server_disconect", SERVER_DISCONNECT_HELP, server_disconnect, NULL, DISCONNECT_ID, 0, FG},
-	{"clear", CLEAR_HELP, shell_clear, NULL, CLEAR_ID, 0, FG},
-	{"exploit", EXPLOIT_HELP, server_exploit, NULL, EXPLOIT_ID, 1, BG},
-	{NULL, NULL, NULL, NULL, 0, 0, 0}
+static struct menu menus_objs[] = {
+	{"exit", EXIT_HELP, shell_exit, NULL, EXIT_ID, 0, 0, FG},
+	{"start_server", START_SERVER_HELP, server_connect, NULL, START_SERVER_ID, 1, 1, FG},
+	{"help", SHELL_HELP, shell_help, NULL, HELP_ID, 0, 0, FG},
+	{"server_disconect", SERVER_DISCONNECT_HELP, server_disconnect, NULL, DISCONNECT_ID, 0, 0, FG},
+	{"clear", CLEAR_HELP, shell_clear, NULL, CLEAR_ID, 0, 0, FG},
+	{"exploit", EXPLOIT_HELP, server_exploit, NULL, EXPLOIT_ID, 0, 20, BG},
+	{NULL, NULL, NULL, NULL, 0, 0, 0, 0}
 };
 
 int server_exploit(struct menu *input)
 {
-	server_object->server_write(input);
+	if (server_object->server_write(input) != SUCCESS) {
+		return ERR_EXPLOIT;
+	}
+
+	return SUCCESS;
 }
 
 //return
 int server_connect(struct menu *input)
 {
 	int port = atoi(input->args[0]);
-	server_object->server_init(port);
+
+	if (server_object->server_init(port) != SUCCESS) {
+		return ERR_INIT;
+	}
+
+	return SUCCESS;
 }
 
 //return
 int server_disconnect(struct menu *input)
 {
-	server_object->server_disconnect();
+	if (server_object->server_disconnect() != SUCCESS) {
+		return ERR_DISCONNECT;
+	}
+
+	return SUCCESS;
 }
 
 
@@ -95,6 +107,7 @@ int main(int argc, char *argv[])
 	int c;
 	int size;
 	int option_index;
+
 	static struct option long_options[] = 
 	{
 		{"tcp", no_argument, 0, 't'},
@@ -133,5 +146,8 @@ int main(int argc, char *argv[])
 		return ERR_OPTION;
 	}
 	shell_init();
+	if (shell_menu_initializer(menus_objs, sizeof(menus_objs)/sizeof(struct menu)) != SUCCESS) {
+		return ERR_MENU;
+	}
 	return shell_loop();
 }

@@ -39,13 +39,9 @@ void shell_init()
 	memcpy(status_bar, &status, sizeof(int));
 }
 
-int shell_loop()
+void shell_color()
 {
-	int status = 0;
-	int i = -1;
-	//zapihnut v function color shell 
-	do {
-		if ( (*((int*)status_bar)) == SUCCESS) {
+	if ((*((int*)status_bar)) == SUCCESS) {
 			printf("\033[0;32m");
 			printf(">>> ");
 			printf("\033[0m");
@@ -58,6 +54,15 @@ int shell_loop()
 			printf(">>> ");
 			printf("\033[0m");
 		}
+}
+
+int shell_loop()
+{
+	int status = 0;
+	int i = -1;
+	//zapihnut v function color shell 
+	do {
+		shell_color();
 		status = shell_parse_input();
 		if (status == SUCCESS) {
 			i++;
@@ -70,11 +75,16 @@ int shell_loop()
 int shell_exit(struct menu *input)
 {
 	exit(SUCCESS);
+
+	return SUCCESS;
 }
 
 int shell_help(struct menu *input)
 {
-	printf(SHELL_HELP); //vipilat`
+	for (int i = 0; i < sizeof(helps)/sizeof(char*); i++){
+		printf("%s\n", helps[i]);
+	}
+
 	return SUCCESS;
 }
 
@@ -93,13 +103,29 @@ int shell_func_wrapper(void *args)
 	return SUCCESS;
 }
 
-int shell_parse_input()
+int shell_menu_initializer(struct menu *menus_objs, int size)
+{
+	struct menu *shell_menu_objs;
+
+	shell_menu_objs = malloc(sizeof(struct menu) * size);
+	if (!shell_menu_objs) {
+		printf("Memory problem\n");
+		return MEMORY_ALLOCATION_ERROR;
+	}
+	for (int i = 0; i < size; i++) {
+		shell_menu_objs[i] = menus_objs[i];
+	}
+	shell_menu = shell_menu_objs;
+
+	return SUCCESS;
+}
+
+int shell_parse_input(struct menu *menus_objs)
 {
 	struct menu *input;
 	char str[MAX_CMD_LENGTH];
 	char *pch;
-	//Ne usat` malloc esli razmer static!!!
-	char **args = (char**)malloc(sizeof(char*) * MAX_ARGUMENTS_NUMBER);
+	char *args[MAX_ARGUMENTS_NUMBER] = {NULL};
 	int parse_args_num;
 	int i = 0;
 	int result;
@@ -113,15 +139,6 @@ int shell_parse_input()
 	char *stack_top;
 	int status;
 
-	//Ne usat` malloc esli razmer static!!!
-	stack = malloc(sizeof(STACK_SIZE));
-	if (!stack) {
-		return MEMORY_ALLOCATION_ERROR;
-	}
-	if (!args) {
-		return MEMORY_ALLOCATION_ERROR;
-	}
-	memset(args, 0, MAX_ARGUMENTS_NUMBER * sizeof(char*));
 	if (!fgets(str, MAX_CMD_LENGTH, stdin)){
 		return ERR_READ;
 	}
@@ -143,7 +160,6 @@ int shell_parse_input()
 		printf("Allocation problem\n");
 		return MEMORY_ALLOCATION_ERROR;
 	}
-	i = 0; //??? look def
 	while (pch != NULL) {
 		pch = strtok(NULL, " "); 
 		 // *pch == '\n'
@@ -154,8 +170,7 @@ int shell_parse_input()
 	parse_args_num = i;
 	i = 0;
 	while (1) {
-		// ubrat zavisimost
-		if (menus_objs[i].cmd_name == NULL) {
+		if (shell_menu[i].cmd_name == NULL) {
 			status = ERR_COMMAND;
 			printf("No such command <%s> !\n", cmd_name);
 			memcpy(status_bar, &status, sizeof(int));
@@ -163,8 +178,8 @@ int shell_parse_input()
 			return ERR_COMMAND;
 		}
 		// Check cmd? end print help
-		if (!strncmp(cmd_name, menus_objs[i].cmd_name, strlen(menus_objs[i].cmd_name))) {
-			input = &menus_objs[i];
+		if (!strncmp(cmd_name, shell_menu[i].cmd_name, strlen(shell_menu[i].cmd_name))) {
+			input = &shell_menu[i];
 			if (strchr(cmd_name, '?')) {
 				printf("%s", input->help);
 				return ERR_COMMAND;
@@ -173,9 +188,9 @@ int shell_parse_input()
 		}
 		i++;
 	}
-	if (input->args_size != parse_args_num) {
+	if (parse_args_num < input->min_args_size || parse_args_num > input->max_args_size) {
 		printf("%s", input->help);
-		printf("Arguments number doesn`t match ====>  [ parse : %d  <-->  required : %d ]\n", parse_args_num, input->args_size);
+		printf("Arguments number doesn`t match ====>  [ parse : %d  <-->  required : [%d:%d] ]\n", parse_args_num, input->min_args_size, input->max_args_size);
 		return ERR_COMMAND;
 	}
 	input->args = (void*)args;
@@ -218,19 +233,16 @@ int shell_parse_input()
 		printf("Field is empty\n");
 		return MEMORY_ALLOCATION_ERROR;
 	}
-	return SUCCESS;
-}
 
-//rm
-int shell_exec(struct menu *input)
-{
+	free(cmd_name);
+
 	return SUCCESS;
 }
 
 int shell_clear(struct menu *input)
 {
 	// ne uzat sleep
-	system("sleep 3 && ls -la && sleep 1 && clear");
+	system("/usr/bin/clear");
 	return SUCCESS;
 } 
 

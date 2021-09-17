@@ -7,8 +7,6 @@
 #define MIN_PORT 1024
 #define MAX_PORT 65535
 
-#define SHELL_CMD_NUM 7
-
 #define SHELL_INIT "**********************************************\n"   \
 					"*********************************************\n"   \
 					"***************   USER SHELL   **************\n"   \
@@ -101,22 +99,21 @@
 #include "menu_objs.h"
 
 enum {EXIT_ID, HELP_ID, CONNECT_ID, CLEAR_ID, DISCONNECT_ID, EXPLOIT_ID, START_SERVER_ID};
-enum PROCESS_FLAGS {NONE, FG, BG};
 
 void shell_init();
 int shell_loop();
 int shell_help();
-int shell_exec();
 int shell_exit();
 int shell_clear();
 int shell_parse_input();
 int shell_func_wrapper(void *args);
-
+int shell_menu_initializer(struct menu *menus_objs, int size);
+void shell_color();
 //shell state, saves previous command status
 static void *status_bar;
-
-extern struct menu menus_objs[SHELL_CMD_NUM];
-
+static struct menu *shell_menu;
+static char *helps[] = {EXIT_HELP, START_SERVER_HELP, SERVER_DISCONNECT_HELP, CLEAR_HELP, EXPLOIT_HELP};
+enum PROCESS_FLAGS {NONE, FG, BG};
 /*
 [/]
 [-]

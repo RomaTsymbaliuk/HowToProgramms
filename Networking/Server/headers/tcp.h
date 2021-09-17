@@ -5,6 +5,8 @@
 #define TCP_ID 3
 #define CMD_ID 100
 #define PORT 8080
+#define MIN_PORT 1024
+#define MAX_PORT 65535
 #define SA struct sockaddr
 
 #include "type.h"

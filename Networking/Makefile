@@ -6,12 +6,12 @@ CLIENT=Client
 ERRORS=Errors
 USERSHELL=UserShell
 SERIALIZE=Serialize
-MENU=Menu
+MENU=MENU
 SHARED=SharedMemory
 PACKET=Packet
 
-main: Server/src/*.c Client/src/*.c $(ERRORS)/src/*.c $(USERSHELL)/src/*.c $(SHARED)/src/*.c $(PACKET)/src/*.c
-	$(CC) -o server -IServer/headers -I$(ERRORS)/headers -I$(USERSHELL)/headers -I$(MENU) -I$(SHARED)/headers -I$(PACKET)/headers Server/src/*.c $(USERSHELL)/src/*.c $(SHARED)/src/*.c $(PACKET)/src/*.c
+main: Server/src/*.c Client/src/*.c $(ERRORS)/src/*.c $(USERSHELL)/src/*.c $(SHARED)/src/*.c $(PACKET)/src/*.c 
+	$(CC) -o server -IServer/headers -I$(ERRORS)/headers -I$(USERSHELL)/headers -I$(SHARED)/headers -I$(PACKET)/headers -I$(MENU) Server/src/*.c $(USERSHELL)/src/*.c $(SHARED)/src/*.c $(PACKET)/src/*.c menu_objs.h
 	$(CC) -o client -IClient/headers -I$(ERRORS)/headers -I$(PACKET)/headers Client/src/*.c 
 
 debug: Server/src/*.c Client/src/*.c $(ERRORS)/src/*.c

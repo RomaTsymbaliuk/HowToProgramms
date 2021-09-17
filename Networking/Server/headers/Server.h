@@ -26,8 +26,6 @@
 						"\n" \
 						"\n"
 
-
-
 struct server *server_object;
 
 int server_exploit(struct menu *input);

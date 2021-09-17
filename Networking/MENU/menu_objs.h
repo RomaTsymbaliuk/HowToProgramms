@@ -7,9 +7,9 @@ struct menu {
 	void *func;
 	void **args;
 	int cmd_id;
-	int args_size;
+	int min_args_size;
+	int max_args_size;
 	int process_flags;
-	struct buffer *buf;
 };
 
 #endif

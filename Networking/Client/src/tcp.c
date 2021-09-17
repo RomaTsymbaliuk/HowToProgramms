@@ -6,6 +6,7 @@
 #include<unistd.h>
 #include <errno.h>
 #include "tcp.h"
+#include "executor.h"
 
 int tcp_client_connect(struct client *cl, int port)
 {
@@ -40,7 +41,7 @@ int tcp_client_connect(struct client *cl, int port)
 int tcp_client_send(struct client *cl)
 {
 	int n;
-	
+
 	n = 0;
 	while (1) {
 		char *buff = "CONNECT";
@@ -62,19 +63,34 @@ int tcp_client_receive(struct client *cl)
 	uint32_t comd_id;
 	int size;
 	int packet_len;
+	int cmd_size;
+	char *cmd_data;
+	char *result;
+	union uframe *frame;
 
 	recv_input = malloc(sizeof(struct packet_frame));
+	if (!recv_input) {
+		return MEMORY_ALLOCATION_ERROR;
+	}
 
 	printf("Entered here socket : %d\n", cl->sockfd);
+	printf("RECEIVED STRUCTURE:\n");
 
 	//cast to struct
 	//payload after struct header -> (alligned)
-	if( (size = recv ( cl->sockfd,  recv_input, sizeof(recv_input), 0)) >= 0) {
-		packet_id = ntohl((((struct packet_frame*)recv_input)->header).packet_id);
-		comd_id = ntohl(((struct packet_frame*)recv_input)->cmd_id);
-		printf("NETWORK : %d\n", comd_id);
-		packet_len = ntohl((((struct packet_frame*)recv_input)->header).packet_len);
-		printf("HEADER_ID : %d  CMD_ID : %d LENGTH : %d\n", packet_id, comd_id, packet_len);
+	if( (size = recv ( cl->sockfd,  recv_input, sizeof(struct packet_frame), 0)) >= 0) {
+		printf("SIZE : %d\n", size);
+		packet_id = ntohl((((union u_frame*)recv_input)->pkt.header).packet_id);
+		packet_len = ntohl((((union u_frame packet_frame*)recv_input)->pkt.header).packet_len);
+		cmd_size = ntohl((((union u_frame packet_frame*)recv_input)->pkt.fields).cmd_len);
+		printf("HERE3\n");
+		cmd_data = ((((struct packet_frame*)recv_input)->pkt.fields).cmd_data);
+		comd_id = ((((struct packet_frame*)recv_input)->pkt.fields).cmd_id);
+		printf("HERE4\n");
+		printf("HERE5\n");
+		printf("CMD_SIZE : %d\n", cmd_size);
+		printf("CMD_ID : %d\n", comd_id);
+		printf("CMD_DATA : %s\n", cmd_data);
 	} else {
 		printf("Receive error\n");
 	}
