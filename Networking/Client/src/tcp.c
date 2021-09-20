@@ -59,14 +59,14 @@ int tcp_client_send(struct client *cl)
 int tcp_client_receive(struct client *cl)
 {
 	void *recv_input;
-	int packet_id;
+	uint32_t packet_id;
 	uint32_t comd_id;
 	int size;
-	int packet_len;
-	int cmd_size;
+	uint32_t packet_len;
+	uint32_t cmd_size;
 	char *cmd_data;
 	char *result;
-	union uframe *frame;
+	struct packet_frame *frame;
 
 	recv_input = malloc(sizeof(struct packet_frame));
 	if (!recv_input) {
@@ -78,19 +78,16 @@ int tcp_client_receive(struct client *cl)
 
 	//cast to struct
 	//payload after struct header -> (alligned)
-	if( (size = recv ( cl->sockfd,  recv_input, sizeof(struct packet_frame), 0)) >= 0) {
+	if( (size = recv(cl->sockfd, recv_input, sizeof(union u_frame), 0)) >= 0) {
 		printf("SIZE : %d\n", size);
 		packet_id = ntohl((((union u_frame*)recv_input)->pkt.header).packet_id);
-		packet_len = ntohl((((union u_frame packet_frame*)recv_input)->pkt.header).packet_len);
-		cmd_size = ntohl((((union u_frame packet_frame*)recv_input)->pkt.fields).cmd_len);
+		packet_len = ntohl((((union u_frame*)recv_input)->pkt.header).packet_len);
+		cmd_size = ntohl((((union u_frame*)recv_input)->pkt.fields).cmd_len);
 		printf("HERE3\n");
-		cmd_data = ((((struct packet_frame*)recv_input)->pkt.fields).cmd_data);
-		comd_id = ((((struct packet_frame*)recv_input)->pkt.fields).cmd_id);
-		printf("HERE4\n");
-		printf("HERE5\n");
 		printf("CMD_SIZE : %d\n", cmd_size);
-		printf("CMD_ID : %d\n", comd_id);
-		printf("CMD_DATA : %s\n", cmd_data);
+		printf("PACKET_ID : %d\n", packet_id);
+		printf("PACLET LEN : %d\n", packet_len);
+
 	} else {
 		printf("Receive error\n");
 	}

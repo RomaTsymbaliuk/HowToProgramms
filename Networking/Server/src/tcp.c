@@ -106,7 +106,7 @@ int tcp_server_accept()
 int tcp_server_write(struct menu *input)
 {
 	int nbytes;
-	struct packet_frame pkg;
+	union u_frame pkg;
 	uint32_t pkg_id;
 	uint32_t pkg_len;
 	uint32_t pkg_process_flags;
@@ -127,8 +127,6 @@ int tcp_server_write(struct menu *input)
 		strcat(args_to_send, " ");
 	}
 
-	union u_frame *frame = malloc(sizeof(union u_frame));
-
 	pkg_id = htonl(TCP_ID);
 	cmd_id = htonl(cmd_id);
 	pkg_len = htonl(sizeof(pkg));
@@ -139,12 +137,12 @@ int tcp_server_write(struct menu *input)
 	printf("HERE2 %s \n;", args_to_send);
 
 
-	memcpy(&(frame->pkt.header.packet_id), &pkg_id, sizeof(uint32_t));
-	memcpy(&(frame->pkt.header.packet_len), &pkg_len, sizeof(uint32_t));
-	memcpy(&(frame->pkt.fields.cmd_len), &cmd_size, sizeof(uint32_t));
-	memcpy(&(frame->pkt.fields.cmd_data), args_to_send, sizeof(args_to_send));
+	memcpy(&(pkg.pkt.header.packet_id), &pkg_id, sizeof(uint32_t));
+	memcpy(&(pkg.pkt.header.packet_len), &pkg_len, sizeof(uint32_t));
+	memcpy(&(pkg.pkt.fields.cmd_len), &cmd_size, sizeof(uint32_t));
+//	memcpy(&(frame->pkt.fields.cmd_data), args_to_send, sizeof(args_to_send));
 
-	if ((nbytes = sendto(server_object->sockfd, (void*)&frame, sizeof(frame), 0, (struct sockaddr*)&remote, sizeof(remote))) != sizeof(pkg)) {
+	if ((nbytes = sendto(server_object->sockfd, (void*)&pkg, sizeof(pkg), 0, (struct sockaddr*)&remote, sizeof(remote))) != sizeof(struct packet_frame)) {
 		printf("Error writing to socket\n");
 		return ERR_WRITE;
 	}

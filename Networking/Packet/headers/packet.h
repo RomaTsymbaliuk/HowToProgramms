@@ -28,9 +28,8 @@ struct packet_frame {
 
 union u_frame {
 	struct packet_frame pkt;
-	unsigned char arr[0];
+	char u_data[0];
 };
-
 
 #endif
 
