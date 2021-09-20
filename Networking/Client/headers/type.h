@@ -8,7 +8,7 @@ struct client {
 	int client_id;
 	void *client_type;
 	int (*client_connect)(struct client *cl, int port);
-	int (*client_send)(struct client *cl);
+	int (*client_send)(struct client *cl, char *buff);
 	int (*client_receive)(struct client *cl);
 
 };

@@ -15,7 +15,7 @@ int udp_client_connect(struct client *cl, int port);
 /**
  * Accepts connections, handshakes with clients
  */
-int udp_client_send(struct client *cl);
+int udp_client_send(struct client *cl, char *buff);
 
 int udp_client_receive(struct client *cl);
 

@@ -17,7 +17,7 @@ struct packet_header {
 struct packet_field {
 	uint32_t cmd_id;
 	uint32_t cmd_len;
-	char cmd_data[0];
+	char cmd_data[1024];
 	//send only stroka change to dynamic char *cmd_data
 } __attribute__((__packed__));
 

@@ -6,6 +6,7 @@
 #include "tcp.h"
 #include "shared.h"
 #include "packet.h"
+#include "udp.h"
 
 #define SERVER_HELP     "NAME\n" \
 						"        main - server - client reverse shell programm\n" \
@@ -26,10 +27,11 @@
 						"\n" \
 						"\n"
 
-struct server *server_object;
-
 int server_exploit(struct menu *input);
 int server_connect(struct menu *input);
 int server_disconnect(struct menu *input);
+int server_register(int type);
+
+struct server *server_object;
 
 #endif /* __SERVER_H__ */

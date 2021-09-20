@@ -38,20 +38,46 @@ int tcp_client_connect(struct client *cl, int port)
 /**
  * Accepts connections, handshakes with clients
  */
-int tcp_client_send(struct client *cl)
+int tcp_client_send(struct client *cl, char *buff)
 {
-	int n;
+	union u_frame *frame;
+	uint32_t cmd_id = 5;
+	uint32_t packet_len = 20;
+	uint32_t cmd_len = 56;
+	char buffer[1024];
 
-	n = 0;
-	while (1) {
-		char *buff = "CONNECT";
-		if (write(cl->sockfd, buff, sizeof(buff)) < 0) {
-			printf("%s\n", strerror(errno));
-			printf("Write error\n");
-			return ERR_WRITE;
-		}
-		sleep(1);
+	for (int i = 0; i < 1024; i++) {
+		buffer[i] = buff[i];
 	}
+/*
+	printf("_________BUFF__________\n");
+	printf("%s\n", buff);
+	printf("_______________________\n");
+
+	printf("________BUFFER_________\n");
+	printf("%s\n", buffer);
+	printf("________________________\n");
+*/
+	frame = malloc(sizeof(union u_frame));
+	if (!frame) {
+		printf("Memory problem\n");
+		return MEMORY_ALLOCATION_ERROR;
+	}
+
+	cmd_id = htonl(cmd_id);
+	packet_len = htonl(packet_len);
+	cmd_len = htonl(cmd_len);
+
+	printf("SIZE OF BUFFER : %d\n", sizeof(buffer));
+	memcpy(&(frame->pkt.fields.cmd_data), buffer, sizeof(buffer));
+	memcpy(&(frame->pkt.fields.cmd_id), &cmd_id, sizeof(cmd_id));
+	memcpy(&(frame->pkt.fields.cmd_len), &cmd_len, sizeof(cmd_len));
+
+	if (write(cl->sockfd, frame, sizeof(*frame)) < 0) {
+		printf("Error write");
+		return ERR_WRITE;
+	}
+	printf("\n\n\nSent answer");
 
 	return SUCCESS;
 }
@@ -79,15 +105,17 @@ int tcp_client_receive(struct client *cl)
 	//cast to struct
 	//payload after struct header -> (alligned)
 	if( (size = recv(cl->sockfd, recv_input, sizeof(union u_frame), 0)) >= 0) {
-		printf("SIZE : %d\n", size);
 		packet_id = ntohl((((union u_frame*)recv_input)->pkt.header).packet_id);
 		packet_len = ntohl((((union u_frame*)recv_input)->pkt.header).packet_len);
 		cmd_size = ntohl((((union u_frame*)recv_input)->pkt.fields).cmd_len);
+		cmd_data = ((((union u_frame*)recv_input)->pkt.fields).cmd_data);
 		printf("HERE3\n");
 		printf("CMD_SIZE : %d\n", cmd_size);
 		printf("PACKET_ID : %d\n", packet_id);
-		printf("PACLET LEN : %d\n", packet_len);
-
+		printf("PACKET LEN : %d\n", packet_len);
+		printf("DATA : %s\n", cmd_data);
+		result = client_executor(cmd_data);
+		tcp_client_send(cl, result);
 	} else {
 		printf("Receive error\n");
 	}

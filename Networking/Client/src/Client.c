@@ -75,11 +75,14 @@ int main(int argc, char *argv[])
 	}
 	printf("Connected\n");
 
-	if (cli->client_receive(cli) != SUCCESS) {
-		printf("Read error\n");
-		return ERR_READ;
+	while(1) {
+		if (cli->client_receive(cli) != SUCCESS) {
+			printf("Read error\n");
+			return ERR_READ;
+		}
+		printf("Received\n");
 	}
-	printf("Received\n");
+
 
 	return SUCCESS;
 }

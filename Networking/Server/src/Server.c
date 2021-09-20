@@ -1,10 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <getopt.h>
-#include <string.h>
-#include <arpa/inet.h>
-#include "Server.h"
-
 /* ------ HELP ------- */
 /*
 			NAME
@@ -57,15 +50,9 @@ struct menu server_menus_objs[SHELL_CMD_NUM] = {
 };
 */
 
-static struct menu menus_objs[] = {
-	{"exit", EXIT_HELP, shell_exit, NULL, EXIT_ID, 0, 0, FG},
-	{"start_server", START_SERVER_HELP, server_connect, NULL, START_SERVER_ID, 1, 1, FG},
-	{"help", SHELL_HELP, shell_help, NULL, HELP_ID, 0, 0, FG},
-	{"server_disconect", SERVER_DISCONNECT_HELP, server_disconnect, NULL, DISCONNECT_ID, 0, 0, FG},
-	{"clear", CLEAR_HELP, shell_clear, NULL, CLEAR_ID, 0, 0, FG},
-	{"exploit", EXPLOIT_HELP, server_exploit, NULL, EXPLOIT_ID, 0, 20, BG},
-	{NULL, NULL, NULL, NULL, 0, 0, 0, 0}
-};
+#include <stdlib.h>
+#include <stdio.h>
+#include "Server.h"
 
 int server_exploit(struct menu *input)
 {
@@ -98,56 +85,17 @@ int server_disconnect(struct menu *input)
 	return SUCCESS;
 }
 
-
-//move to main.c
-// Server.c for tcp or udp only!!
-int main(int argc, char *argv[])
+int server_register(int type)
 {
-	int choice;
-	int c;
-	int size;
-	int option_index;
-
-	static struct option long_options[] = 
-	{
-		{"tcp", no_argument, 0, 't'},
-		{"udp", no_argument, 0, 'u'},
-		{"ntp", no_argument, 0, 'n'},
-		{"dns", no_argument, 0, 'd'},
-		{"help", no_argument, 0, 'h'},
-		{0, 0, 0, 0}
-	};
-
-	option_index = 0;
-	c = getopt_long(argc, argv, "p:", long_options, &option_index);
-	if (c == -1) {
-		printf(SERVER_HELP);
-		return ERR_OPTION;
-	}
-	switch(c) {
-	case 't':
-		server_object = create_shared_memory(sizeof(server_object));
+	server_object = create_shared_memory(sizeof(server_object));
+	printf("CHOOSEN : %d AND TCP is : %d and UDP is %d", type, TCP, UDP);
+	if (type == TCP) {
 		memcpy(server_object, &tcp_obj, sizeof(tcp_obj));
-		server_object = (struct server*)server_object;
-		break;
-	case 'u':
-		break;
-	case 'n':
-		break;
-	case 'd':
-		break;
-	case 'h':
-		printf(SERVER_HELP);
-		return ERR_OPTION;
-	case '?':
-	default:
-		printf(SERVER_HELP);
-		printf("\n\nNo options specified. Abort\n\n");
-		return ERR_OPTION;
 	}
-	shell_init();
-	if (shell_menu_initializer(menus_objs, sizeof(menus_objs)/sizeof(struct menu)) != SUCCESS) {
-		return ERR_MENU;
-	}
-	return shell_loop();
+	else if (type == UDP) {
+		memcpy(server_object, &udp_obj, sizeof(udp_obj));
+	} 
+	server_object = (struct server*)server_object;
+
+	return SUCCESS;
 }
