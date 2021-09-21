@@ -41,14 +41,11 @@ int tcp_client_connect(struct client *cl, int port)
 int tcp_client_send(struct client *cl, char *buff)
 {
 	union u_frame *frame;
-	uint32_t cmd_id = 5;
-	uint32_t packet_len = 20;
-	uint32_t cmd_len = 56;
-	char buffer[1024];
-
-	for (int i = 0; i < 1024; i++) {
-		buffer[i] = buff[i];
-	}
+	uint32_t cmd_id;
+	uint32_t packet_len;
+	uint32_t cmd_len;
+	uint32_t cmd_size;
+	uint32_t structures_size;
 /*
 	printf("_________BUFF__________\n");
 	printf("%s\n", buff);
@@ -63,20 +60,27 @@ int tcp_client_send(struct client *cl, char *buff)
 		printf("Memory problem\n");
 		return MEMORY_ALLOCATION_ERROR;
 	}
+	cmd_size = strlen(buff);
+	structures_size = sizeof(struct packet_frame);
 
+	cmd_id = TCP;
+	cmd_len = strlen(buff);
+	packet_len = cmd_size + structures_size;
+// + reconnect for client + change to u_data
 	cmd_id = htonl(cmd_id);
 	packet_len = htonl(packet_len);
 	cmd_len = htonl(cmd_len);
 
-	printf("SIZE OF BUFFER : %d\n", sizeof(buffer));
-	memcpy(&(frame->pkt.fields.cmd_data), buffer, sizeof(buffer));
+	memcpy(&(frame->pkt.fields.cmd_data), buff, sizeof(buff));
 	memcpy(&(frame->pkt.fields.cmd_id), &cmd_id, sizeof(cmd_id));
 	memcpy(&(frame->pkt.fields.cmd_len), &cmd_len, sizeof(cmd_len));
-
-	if (write(cl->sockfd, frame, sizeof(*frame)) < 0) {
+	memcpy(&(frame->pkt.header.packet_len), &packet_len, sizeof(uint32_t));
+	printf("\nstructures_size : %d cmd_size : %d\n", structures_size, cmd_size);
+	if (write(cl->sockfd, (void*)(frame->u_data), structures_size + cmd_size) < 0) {
 		printf("Error write");
 		return ERR_WRITE;
 	}
+
 	printf("\n\n\nSent answer");
 
 	return SUCCESS;
@@ -88,37 +92,59 @@ int tcp_client_receive(struct client *cl)
 	uint32_t packet_id;
 	uint32_t comd_id;
 	int size;
-	uint32_t packet_len;
 	uint32_t cmd_size;
 	char *cmd_data;
 	char *result;
-	struct packet_frame *frame;
+	union u_frame frame;
+	uint32_t tcp_size = 1024;
+	uint32_t packet_len;
+	int i = 0;
 
 	recv_input = malloc(sizeof(struct packet_frame));
 	if (!recv_input) {
+		printf("Memory problem");
 		return MEMORY_ALLOCATION_ERROR;
 	}
 
 	printf("Entered here socket : %d\n", cl->sockfd);
 	printf("RECEIVED STRUCTURE:\n");
 
-	//cast to struct
-	//payload after struct header -> (alligned)
-	if( (size = recv(cl->sockfd, recv_input, sizeof(union u_frame), 0)) >= 0) {
-		packet_id = ntohl((((union u_frame*)recv_input)->pkt.header).packet_id);
-		packet_len = ntohl((((union u_frame*)recv_input)->pkt.header).packet_len);
-		cmd_size = ntohl((((union u_frame*)recv_input)->pkt.fields).cmd_len);
-		cmd_data = ((((union u_frame*)recv_input)->pkt.fields).cmd_data);
-		printf("HERE3\n");
-		printf("CMD_SIZE : %d\n", cmd_size);
-		printf("PACKET_ID : %d\n", packet_id);
-		printf("PACKET LEN : %d\n", packet_len);
-		printf("DATA : %s\n", cmd_data);
-		result = client_executor(cmd_data);
-		tcp_client_send(cl, result);
-	} else {
-		printf("Receive error\n");
+	//cast to struct 
+	//payload after struct header -> (alligned) 
+	//read in massive in union in u_data and s union in struct and net to host
+	read(cl->sockfd, recv_input, 4);
+	packet_len = ntohl(*((uint32_t*)recv_input));
+	printf("PACKET_LEN : %d\n", packet_len);
+
+	void *recv_from = malloc(packet_len);
+	if (!recv_from) {
+		printf("Memory problem\n");
+		return MEMORY_ALLOCATION_ERROR;
 	}
 
+	if( (size = recv(cl->sockfd, frame.u_data, packet_len, 0)) >= 0) {
+	} else {
+		printf("Receive SIZE error\n");
+	}
+
+	packet_id = (*((uint32_t*)(frame.u_data)));
+	cmd_size = (*((uint32_t*)(frame.u_data + 2 * sizeof(uint32_t))));
+
+//printing command
+	for (int i = 3 * sizeof(uint32_t); i < 3 * sizeof(uint32_t) + cmd_size; i++) {
+		printf("Byte %d : %x \n", i, frame.u_data[i]);
+	}
+	cmd_data = malloc(cmd_size);
+	if (!cmd_data) {
+		return MEMORY_ALLOCATION_ERROR;
+	}
+
+	memcpy(cmd_data, (frame.u_data + 3 * sizeof(uint32_t)), cmd_size);
+
+	result = client_executor(cmd_data);
+	printf("CMD RECEIVED : %s\n", cmd_data);
+	printf("CMD RESULT\n%s", result);
+
+	tcp_client_send(cl, cmd_data);
 	return SUCCESS;
 }

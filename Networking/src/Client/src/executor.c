@@ -32,9 +32,6 @@ char *client_executor(char *cmd_data)
 		}
 		strcat(cmd_to_ret, result);
 	}
-
-//	printf("cmd_to_ret i: %d\n sizeof cmd_to_ret : %d", i, sizeof(cmd_to_ret));
-//	printf("%s", cmd_to_ret);
 	pclose(fp);
 
 	return cmd_to_ret;

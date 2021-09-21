@@ -10,14 +10,14 @@ enum {CMD_EXECUTE, CMD_READ_FILE, CMD_WRITE_FILE};
 #define DATA_LENGTH 1024 // will be more than 50 in case files 
 
 struct packet_header {
-	uint32_t packet_id;
 	uint32_t packet_len;
+	uint32_t packet_id;
 } __attribute__((__packed__));
 
 struct packet_field {
 	uint32_t cmd_id;
 	uint32_t cmd_len;
-	char cmd_data[1024];
+	char cmd_data[0]; //cmd_data[0]
 	//send only stroka change to dynamic char *cmd_data
 } __attribute__((__packed__));
 
@@ -29,7 +29,7 @@ struct packet_frame {
 union u_frame {
 	struct packet_frame pkt;
 	char u_data[0];
-};
+}__attribute__((__packed__));
 
 #endif
 

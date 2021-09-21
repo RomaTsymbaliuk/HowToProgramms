@@ -41,6 +41,7 @@ int main(int argc, char *argv[])
 		printf(SERVER_HELP);
 		return ERR_OPTION;
 	}
+
 	switch(c) {
 	case 't':
 		server_register(TCP);
@@ -61,9 +62,11 @@ int main(int argc, char *argv[])
 		printf("\n\nNo options specified. Abort\n\n");
 		return ERR_OPTION;
 	}
+
 	shell_init();
 	if (shell_menu_initializer(menus_objs, sizeof(menus_objs)/sizeof(struct menu)) != SUCCESS) {
 		return ERR_MENU;
 	}
+
 	return shell_loop();
 }
