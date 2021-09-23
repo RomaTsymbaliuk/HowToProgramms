@@ -175,6 +175,7 @@ int shell_parse_input(struct menu *menus_objs)
 			printf("No such command <%s> !\n", cmd_name);
 			memcpy(status_bar, &status, sizeof(int));
 			printf("%s", SHELL_HELP);
+			free(cmd_name);
 			return ERR_COMMAND;
 		}
 		// Check cmd? end print help
@@ -182,6 +183,7 @@ int shell_parse_input(struct menu *menus_objs)
 			input = &shell_menu[i];
 			if (strchr(cmd_name, '?')) {
 				printf("%s", input->help);
+				free(cmd_name);
 				return ERR_COMMAND;
 			}
 			break;
@@ -201,6 +203,7 @@ int shell_parse_input(struct menu *menus_objs)
 		stack_top = stack + STACK_SIZE;
 		child_pid = clone(shell_func_wrapper, stack_top, CLONE_CHILD_CLEARTID | CLONE_CHILD_SETTID | CLONE_FILES | SIGCHLD, (void*)input);
 		if (child_pid == -1) {
+			free(stack);
 			return ERR_FORK;
 		}
 		if (input->process_flags == FG) {

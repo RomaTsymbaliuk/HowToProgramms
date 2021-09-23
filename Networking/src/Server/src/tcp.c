@@ -106,6 +106,9 @@ int tcp_server_read()
 		printf("%c", frame->u_data[i]);
 	}
 
+	free(recv_from);
+	free(frame);
+
 	return SUCCESS;
 }
 
@@ -157,6 +160,10 @@ int tcp_server_write(struct menu *input)
 	pkg_id = htonl(TCP_ID);
 	cmd_id = htonl(cmd_id);
 	pkg = malloc(sizeof(union u_frame));
+	if (!pkg) {
+		printf("Memory problem");
+		return MEMORY_ALLOCATION_ERROR;
+	}
 
 	printf("HERE1\n");
 	printf("args to send : %s %d\n", args_to_send, sizeof(args_to_send));

@@ -46,15 +46,7 @@ int tcp_client_send(struct client *cl, char *buff)
 	uint32_t cmd_len;
 	uint32_t cmd_size;
 	uint32_t structures_size;
-/*
-	printf("_________BUFF__________\n");
-	printf("%s\n", buff);
-	printf("_______________________\n");
 
-	printf("________BUFFER_________\n");
-	printf("%s\n", buffer);
-	printf("________________________\n");
-*/
 	frame = malloc(sizeof(union u_frame));
 	if (!frame) {
 		printf("Memory problem\n");
@@ -146,5 +138,12 @@ int tcp_client_receive(struct client *cl)
 	result = client_executor(cmd_data);
 
 	tcp_client_send(cl, result);
+
+	free(recv_input);
+	free(frame);
+	free(recv_from);
+//	free(cmd_data);
+	free(result);
+
 	return SUCCESS;
 }
