@@ -49,7 +49,6 @@ char *client_executor(char *cmd_data)
 	head->next = NULL;
 	pclose(fp);
 
-	printf("\nsize :\n%d\n", size);
 	cmd_to_ret = malloc(size * sizeof(char));
 	if (!cmd_to_ret) {
 		printf("Memory problem\n");
@@ -58,19 +57,16 @@ char *client_executor(char *cmd_data)
 	int k = 0;
 	for (temp = copy_head; temp != NULL; temp = temp->next)
 	{
-		if (k > size) {
-			printf("BAD COUNT!!!!\n");
+		if (temp->item) {
+			strcat(cmd_to_ret, temp->item);
 		}
-//		strcat(cmd_to_ret, temp->item);
-		printf("%s --> %d\n", temp->item, strlen(temp->item));
 	}
-	/*
+
 	for (temp = copy_head; temp != NULL; temp = temp->next)
 	{
 		free(temp->item);
 	}
-	*/
-//	printf("FINALLY\n:%s\n", cmd_to_ret);
-	return NULL;
+
+	return cmd_to_ret;
 
 }
