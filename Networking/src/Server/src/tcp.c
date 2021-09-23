@@ -76,6 +76,7 @@ int tcp_server_read()
 	union u_frame *frame;
 	uint32_t packet_len;
 	int i = 0;
+	int start_parse;
 
 	printf("WELCOME TO TCP_SERVER_READ:\n");
 
@@ -100,8 +101,8 @@ int tcp_server_read()
 	}
 	packet_id = ntohl(*((uint32_t*)(frame->u_data)));
 	cmd_size = ntohl(*((uint32_t*)(frame->u_data + 2 * sizeof(uint32_t))));
-
-	for (int i = 3 * sizeof(uint32_t); i < 3 * sizeof(uint32_t) + cmd_size; i++) {
+	start_parse = 4 * sizeof(uint32_t) + 1;
+	for (int i = start_parse; i < 3 * sizeof(uint32_t) + cmd_size; i++) {
 		printf("%c", frame->u_data[i]);
 	}
 

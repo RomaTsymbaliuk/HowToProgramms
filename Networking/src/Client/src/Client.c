@@ -81,7 +81,5 @@ int main(int argc, char *argv[])
 	}
 	printf("Received\n");
 
-
-
 	return SUCCESS;
 }
