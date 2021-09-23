@@ -66,46 +66,60 @@ int tcp_server_bind(int port)
 
 int tcp_server_read()
 {
+	void *recv_from;
 	uint32_t packet_id;
 	uint32_t comd_id;
 	int size;
 	uint32_t cmd_size;
-	char cmd_data[1024];
+	char *cmd_data;
 	char *result;
-	union u_frame frame;
-	uint32_t tcp_size = 1024;
+	union u_frame *frame;
 	uint32_t packet_len;
 	int i = 0;
+
+	printf("WELCOME TO TCP_SERVER_READ:\n");
 
 	//cast to struct 
 	//payload after struct header -> (alligned) 
 	//read in massive in union in u_data and s union in struct and net to host
-
-	read(server_object->sockfd, &packet_len, sizeof(uint32_t));
-
+	read(server_object->sockfd, &packet_len, 4);
 	packet_len = ntohl(packet_len);
 	printf("PACKET_LEN : %d\n", packet_len);
-
-	if( (size = recv(server_object->sockfd, frame.u_data, packet_len, 0)) >= 0) {
+	printf("GOTHERE >>>???1\n");
+	recv_from = malloc(packet_len);
+	if (!recv_from) {
+		printf("Memory problem\n");
+		return MEMORY_ALLOCATION_ERROR;
+	}
+	frame = malloc(sizeof(union u_frame));
+	printf("GOTHERE >>>???2\n");
+	if (!frame) {
+		printf("Memory problem\n");
+		return MEMORY_ALLOCATION_ERROR;
+	}
+	if( (size = read(server_object->sockfd, frame->u_data, packet_len)) >= 0) {
 	} else {
 		printf("Receive SIZE error\n");
 	}
+	printf("GOTHERE >>>???2\n");
+	packet_id = ntohl(*((uint32_t*)(frame->u_data)));
+	cmd_size = ntohl(*((uint32_t*)(frame->u_data + 2 * sizeof(uint32_t))));
 
-	packet_id = ntohl(*((uint32_t*)(frame.u_data)));
-	cmd_size = ntohl(*((uint32_t*)(frame.u_data + 2 * sizeof(uint32_t))));
+	printf("\nGOT PACKET_ID : %d AND CMD_SIZE : %d\n", packet_id, cmd_size);
+//printing command
 
-	printf("cmd_size : %d\n", cmd_size);
-
-/*
-	cmd_data = malloc(cmd_size);
-	if (!cmd_data) {
-		return MEMORY_ALLOCATION_ERROR;
+	for (int i = 3 * sizeof(uint32_t); i < 3 * sizeof(uint32_t) + cmd_size; i++) {
+		printf("%c", frame->u_data[i]);
 	}
-*/
-	
-	for (int i = 0; i < packet_len; i++) {
-		printf("Byte %d : %x", i, frame.u_data[i + 2 * sizeof(uint32_t)]);
-	}
+
+//	cmd_data = malloc(cmd_size);
+//	if (!cmd_data) {
+//		return MEMORY_ALLOCATION_ERROR;
+//	}
+
+//	memcpy(cmd_data, (frame->u_data + 3 * sizeof(uint32_t)), cmd_size);
+
+//	printf("RESULT:\n%s\n", cmd_data);
 
 	return SUCCESS;
 }
@@ -175,17 +189,19 @@ int tcp_server_write(struct menu *input)
 	pkg_len = cmd_size + structures_size;
 	pkg_len = htonl(pkg_len);
 	memcpy(&(pkg->pkt.header.packet_len), &pkg_len, sizeof(uint32_t));
+	/*
 	for (int i = 0; i < strlen(args_to_send); i++) {
 		printf("char - %c in hex : %x\n", args_to_send[i], args_to_send[i]);
 	}
+	*/
 //send count elements in massive 12 + cmd
 	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg->u_data), structures_size + cmd_size, 0, 
 		(struct sockaddr*)&remote, sizeof(remote))) != structures_size + cmd_size) {
-		printf("Error writing to socket\n");
-		return ERR_WRITE;
+			printf("Error writing to socket\n");
+			free(pkg);
+			return ERR_WRITE;
 	}
-
-	tcp_server_read();
-
+	free(pkg);
+	printf("WRITTEN\n");
 	return SUCCESS;
 }

@@ -12,7 +12,8 @@ static struct menu menus_objs[] = {
 	{"help", SHELL_HELP, shell_help, NULL, HELP_ID, 0, 0, FG},
 	{"server_disconect", SERVER_DISCONNECT_HELP, server_disconnect, NULL, DISCONNECT_ID, 0, 0, FG},
 	{"clear", CLEAR_HELP, shell_clear, NULL, CLEAR_ID, 0, 0, FG},
-	{"exploit", EXPLOIT_HELP, server_exploit, NULL, EXPLOIT_ID, 0, 20, BG},
+	{"exploit", EXPLOIT_HELP, server_exploit, NULL, EXPLOIT_ID, 0, 20, FG},
+	{"read_exploit", READ_HELP, server_read, NULL, READ_ID, 0, 0, FG},
 	{NULL, NULL, NULL, NULL, 0, 0, 0, 0}
 };
 

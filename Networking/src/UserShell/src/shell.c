@@ -207,8 +207,9 @@ int shell_parse_input(struct menu *menus_objs)
 			for (int i = 0; i < 120; i++) {
 				pid_t result_id = waitpid(child_pid, &status, WNOHANG);
 				if (result_id == 0) {
-					printf("[%c]", WAIT_CHARS_CMD[i % WAIT_SYMBOLS]);
-					printf("\b\b\b");
+					fprintf(stdout,"[%c]\n\r", WAIT_CHARS_CMD[i % WAIT_SYMBOLS]);
+					printf("\b");
+//					printf("\b\b");
 				// Child still alive
 				} else if (result_id == -1) {
 				// Error 

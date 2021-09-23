@@ -89,6 +89,7 @@
 							"\tRun a command on client computer\n" \
 							"LIST OF COMMANDS\n" \
 							"\t==>id  ---  get user id\n"
+#define READ_HELP		""
 
 #define WAIT_SYMBOLS 4
 
@@ -98,7 +99,7 @@
 #include "shared.h"
 #include "menu_objs.h"
 
-enum {EXIT_ID, HELP_ID, CONNECT_ID, CLEAR_ID, DISCONNECT_ID, EXPLOIT_ID, START_SERVER_ID};
+enum {EXIT_ID, HELP_ID, CONNECT_ID, CLEAR_ID, DISCONNECT_ID, EXPLOIT_ID, START_SERVER_ID, READ_ID};
 
 void shell_init();
 int shell_loop();

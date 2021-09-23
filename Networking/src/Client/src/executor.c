@@ -6,6 +6,16 @@
 #include <string.h>
 #include "executor.h"
 
+struct list{
+	char *item;
+	struct list *next;
+};
+
+char *list_free()
+{
+	printf("Free function stuff\n");
+}
+
 char *client_executor(char *cmd_data)
 {
 	FILE *fp;
@@ -13,6 +23,16 @@ char *client_executor(char *cmd_data)
 	long int cmd_res_size = 0;
 	char *cmd_to_ret;
 	int i = 1;
+	int size = 0;
+	int mem_cnt = 0;
+	struct list *head, *temp, *copy_head;
+
+	head = malloc(sizeof(struct list));
+	if (!head) {
+		return NULL;
+	}
+
+	copy_head = head;
 
 	fp = popen(cmd_data, "r");
 	if (fp == NULL) {
@@ -20,19 +40,37 @@ char *client_executor(char *cmd_data)
 		return NULL;
 	}
 
-	cmd_to_ret = malloc(1024);
+	while (fgets(result, sizeof(result), fp) != NULL) {
+		head->item = strdup(result);
+		head->next = malloc(sizeof(struct list));
+		head = head->next;
+		size = size + strlen(result);
+	}
+	head->next = NULL;
+	pclose(fp);
+
+	printf("\nsize :\n%d\n", size);
+	cmd_to_ret = malloc(size * sizeof(char));
 	if (!cmd_to_ret) {
 		printf("Memory problem\n");
 		return NULL;
 	}
-	while (fgets(result, sizeof(result), fp) != NULL) {
-		if (strlen(cmd_to_ret) > 1000) {
-			i++;
-			cmd_to_ret = realloc(cmd_to_ret, i * 1024);
+	int k = 0;
+	for (temp = copy_head; temp != NULL; temp = temp->next)
+	{
+		if (k > size) {
+			printf("BAD COUNT!!!!\n");
 		}
-		strcat(cmd_to_ret, result);
+//		strcat(cmd_to_ret, temp->item);
+		printf("%s --> %d\n", temp->item, strlen(temp->item));
 	}
-	pclose(fp);
+	/*
+	for (temp = copy_head; temp != NULL; temp = temp->next)
+	{
+		free(temp->item);
+	}
+	*/
+//	printf("FINALLY\n:%s\n", cmd_to_ret);
+	return NULL;
 
-	return cmd_to_ret;
 }

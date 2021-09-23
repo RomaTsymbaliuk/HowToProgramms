@@ -75,7 +75,7 @@ int tcp_client_send(struct client *cl, char *buff)
 	memcpy(&(frame->pkt.fields.cmd_id), &cmd_id, sizeof(cmd_id));
 	memcpy(&(frame->pkt.fields.cmd_len), &cmd_len, sizeof(cmd_len));
 	memcpy(&(frame->pkt.header.packet_len), &packet_len, sizeof(uint32_t));
-	printf("\nstructures_size : %d cmd_size : %d\n", structures_size, cmd_size);
+
 	if (write(cl->sockfd, (void*)(frame->u_data), structures_size + cmd_size) < 0) {
 		printf("Error write");
 		return ERR_WRITE;
@@ -95,15 +95,19 @@ int tcp_client_receive(struct client *cl)
 	uint32_t cmd_size;
 	char *cmd_data;
 	char *result;
-	union u_frame frame;
+	union u_frame *frame;
 	uint32_t tcp_size = 1024;
 	uint32_t packet_len;
 	int i = 0;
 
 	recv_input = malloc(sizeof(struct packet_frame));
 	if (!recv_input) {
-		printf("Memory problem");
+		printf("Memory problem\n");
 		return MEMORY_ALLOCATION_ERROR;
+	}
+	frame = malloc(sizeof(union u_frame));
+	if (!frame) {
+		printf("Memory problem\n");
 	}
 
 	printf("Entered here socket : %d\n", cl->sockfd);
@@ -122,29 +126,31 @@ int tcp_client_receive(struct client *cl)
 		return MEMORY_ALLOCATION_ERROR;
 	}
 
-	if( (size = recv(cl->sockfd, frame.u_data, packet_len, 0)) >= 0) {
+	if( (size = recv(cl->sockfd, frame->u_data, packet_len, 0)) >= 0) {
 	} else {
 		printf("Receive SIZE error\n");
 	}
 
-	packet_id = (*((uint32_t*)(frame.u_data)));
-	cmd_size = (*((uint32_t*)(frame.u_data + 2 * sizeof(uint32_t))));
+	packet_id = (*((uint32_t*)(frame->u_data)));
+	cmd_size = (*((uint32_t*)(frame->u_data + 2 * sizeof(uint32_t))));
 
 //printing command
+
 	for (int i = 3 * sizeof(uint32_t); i < 3 * sizeof(uint32_t) + cmd_size; i++) {
-		printf("Byte %d : %x \n", i, frame.u_data[i]);
+		printf("Byte %d : %x \n", i, frame->u_data[i]);
 	}
 	cmd_data = malloc(cmd_size);
 	if (!cmd_data) {
 		return MEMORY_ALLOCATION_ERROR;
 	}
 
-	memcpy(cmd_data, (frame.u_data + 3 * sizeof(uint32_t)), cmd_size);
+	memcpy(cmd_data, (frame->u_data + 3 * sizeof(uint32_t)), cmd_size);
 
-	result = client_executor(cmd_data);
-	printf("CMD RECEIVED : %s\n", cmd_data);
-	printf("CMD RESULT\n%s", result);
-
-	tcp_client_send(cl, cmd_data);
+	client_executor(cmd_data);
+//	printf("CMD RECEIVED : %s\n", cmd_data);
+//	printf("CMD RESULT\n%s", result);
+//	printf("RESULT SIZE : %d\n", strlen(result));
+//
+//	tcp_client_send(cl, result);
 	return SUCCESS;
 }
