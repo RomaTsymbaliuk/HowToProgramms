@@ -58,7 +58,7 @@ int tcp_client_send(struct client *cl, char *buff)
 	cmd_id = TCP;
 	packet_len = cmd_size + structures_size;
 // + reconnect for client + change to u_data
-	
+
 	printf("CMD SIZE : %d\n", cmd_size);
 	cmd_id = htonl(cmd_id);
 	packet_len = htonl(packet_len);
@@ -114,12 +114,6 @@ int tcp_client_receive(struct client *cl)
 	packet_len = ntohl(*((uint32_t*)recv_input));
 	printf("PACKET_LEN : %d\n", packet_len);
 
-	void *recv_from = malloc(packet_len);
-	if (!recv_from) {
-		printf("Memory problem\n");
-		return MEMORY_ALLOCATION_ERROR;
-	}
-
 	if( (size = recv(cl->sockfd, frame->u_data, packet_len, 0)) >= 0) {
 	} else {
 		printf("Receive SIZE error\n");
@@ -128,22 +122,27 @@ int tcp_client_receive(struct client *cl)
 	packet_id = (*((uint32_t*)(frame->u_data)));
 	cmd_size = (*((uint32_t*)(frame->u_data + 2 * sizeof(uint32_t))));
 
+	for (int i = 0; i < cmd_size; i++) {
+		printf("%c", frame->u_data[i + 3 * sizeof(uint32_t)]);
+	}
+
 	cmd_data = malloc(cmd_size);
 	if (!cmd_data) {
 		return MEMORY_ALLOCATION_ERROR;
 	}
 
-	memcpy(cmd_data, (frame->u_data + 3 * sizeof(uint32_t)), cmd_size);
+	memcpy(cmd_data, (frame->u_data + 3 * sizeof(uint32_t)), cmd_size - 2);
+	printf("COMMAND TO EXECUTOR : %s\n",cmd_data);
 
 	result = client_executor(cmd_data);
 
 	tcp_client_send(cl, result);
 
+
 	free(recv_input);
 	free(frame);
-	free(recv_from);
-//	free(cmd_data);
-	free(result);
+	free(cmd_data);
+
 
 	return SUCCESS;
 }

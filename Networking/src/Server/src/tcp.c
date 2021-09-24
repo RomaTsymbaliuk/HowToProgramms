@@ -78,8 +78,6 @@ int tcp_server_read()
 	int i = 0;
 	int start_parse;
 
-	printf("WELCOME TO TCP_SERVER_READ:\n");
-
 	//cast to struct 
 	//payload after struct header -> (alligned) 
 	//read in massive in union in u_data and s union in struct and net to host
@@ -165,17 +163,12 @@ int tcp_server_write(struct menu *input)
 		return MEMORY_ALLOCATION_ERROR;
 	}
 
-	printf("HERE1\n");
-	printf("args to send : %s %d\n", args_to_send, sizeof(args_to_send));
-	printf("HERE2 %s \n;", args_to_send);
-
 	cmd_size = strlen(args_to_send);
 	structures_size = sizeof(struct packet_frame);
 	memcpy(&(pkg->pkt.header.packet_id), &pkg_id, sizeof(uint32_t));
 	memcpy(&(pkg->pkt.fields.cmd_len), &cmd_size, sizeof(uint32_t));
 	memcpy(pkg->pkt.fields.cmd_data, args_to_send, sizeof(args_to_send));
 
-	printf("cmd_size : %d structures_size : %d\n", cmd_size, structures_size);
 	pkg_len = cmd_size + structures_size;
 	pkg_len = htonl(pkg_len);
 	memcpy(&(pkg->pkt.header.packet_len), &pkg_len, sizeof(uint32_t));
@@ -187,6 +180,6 @@ int tcp_server_write(struct menu *input)
 			return ERR_WRITE;
 	}
 	free(pkg);
-	printf("WRITTEN\n");
+
 	return SUCCESS;
 }

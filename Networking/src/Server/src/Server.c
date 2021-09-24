@@ -59,7 +59,6 @@ int server_exploit(struct menu *input)
 	if (server_object->server_write(input) != SUCCESS) {
 		return ERR_EXPLOIT;
 	}
-	printf("WRITTEN SUCCESS!!\n");
 
 	return SUCCESS;
 }
@@ -98,7 +97,6 @@ int server_disconnect(struct menu *input)
 int server_register(int type)
 {
 	server_object = create_shared_memory(sizeof(server_object));
-	printf("CHOOSEN : %d AND TCP is : %d and UDP is %d", type, TCP, UDP);
 	if (type == TCP) {
 		memcpy(server_object, &tcp_obj, sizeof(tcp_obj));
 	}

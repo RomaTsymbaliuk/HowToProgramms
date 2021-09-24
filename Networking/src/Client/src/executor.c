@@ -62,12 +62,14 @@ char *client_executor(char *cmd_data)
 		}
 	}
 
+
 	while (copy_head != NULL) {
 		temp = copy_head;
 		copy_head = copy_head->next;
-		temp->next = NULL;
-		free(temp->item);
-		free(temp);
+		if (temp->item)
+			free(temp->item);
+		if (temp)
+			free(temp);
 	}
 
 	return cmd_to_ret;
