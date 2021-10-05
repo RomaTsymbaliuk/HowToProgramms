@@ -49,7 +49,8 @@ char *client_executor(char *cmd_data)
 	head->next = NULL;
 	pclose(fp);
 
-	cmd_to_ret = malloc(size * sizeof(char));
+	printf("size of response : %d\n", size);
+	cmd_to_ret = malloc(size);
 	if (!cmd_to_ret) {
 		printf("Memory problem\n");
 		return NULL;
@@ -58,10 +59,14 @@ char *client_executor(char *cmd_data)
 	for (temp = copy_head; temp != NULL; temp = temp->next)
 	{
 		if (temp->item) {
-			strcat(cmd_to_ret, temp->item);
+			//strcat(cmd_to_ret, temp->item);
+			for (int j = 0; j < strlen(temp->item); j++) {
+				cmd_to_ret[k] = (temp->item)[j];
+				k++;
+			}
 		}
 	}
-
+	printf("CMD TO RET LENGTH : %d\n", strlen(cmd_to_ret));
 
 	while (copy_head != NULL) {
 		temp = copy_head;

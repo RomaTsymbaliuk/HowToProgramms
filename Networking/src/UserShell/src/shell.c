@@ -211,7 +211,6 @@ int shell_parse_input(struct menu *menus_objs)
 				pid_t result_id = waitpid(child_pid, &status, WNOHANG);
 				if (result_id == 0) {
 					fprintf(stdout,"[%c]\n\r", WAIT_CHARS_CMD[i % WAIT_SYMBOLS]);
-					printf("\b");
 //					printf("\b\b");
 				// Child still alive
 				} else if (result_id == -1) {
@@ -228,6 +227,7 @@ int shell_parse_input(struct menu *menus_objs)
 				}
 				//sleep while waiting
 				usleep(500 * 1000);
+				printf("\b\b\b");
 			}
 			printf("\n");
 		} else if (input->process_flags == BG) {

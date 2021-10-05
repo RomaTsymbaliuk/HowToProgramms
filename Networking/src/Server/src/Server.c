@@ -59,13 +59,7 @@ int server_exploit(struct menu *input)
 	if (server_object->server_write(input) != SUCCESS) {
 		return ERR_EXPLOIT;
 	}
-
-	return SUCCESS;
-}
-
-int server_read()
-{
-	if (server_object->server_read() != SUCCESS) {
+	if (server_object->server_read(input) != SUCCESS) {
 		return ERR_READ;
 	}
 

@@ -31,7 +31,6 @@ int server_exploit(struct menu *input);
 int server_connect(struct menu *input);
 int server_disconnect(struct menu *input);
 int server_register(int type);
-int server_read();
 
 struct server *server_object;
 

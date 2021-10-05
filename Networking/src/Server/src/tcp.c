@@ -83,11 +83,8 @@ int tcp_server_read()
 	//read in massive in union in u_data and s union in struct and net to host
 	read(server_object->sockfd, &packet_len, 4);
 	packet_len = ntohl(packet_len);
-	recv_from = malloc(packet_len);
-	if (!recv_from) {
-		printf("Memory problem\n");
-		return MEMORY_ALLOCATION_ERROR;
-	}
+	printf("PACKET_LEN : %d\n", packet_len);
+
 	frame = malloc(sizeof(union u_frame));
 	if (!frame) {
 		printf("Memory problem\n");
@@ -97,15 +94,15 @@ int tcp_server_read()
 	} else {
 		printf("Receive SIZE error\n");
 	}
-	packet_id = ntohl(*((uint32_t*)(frame->u_data)));
 	cmd_size = ntohl(*((uint32_t*)(frame->u_data + 2 * sizeof(uint32_t))));
-	start_parse = 4 * sizeof(uint32_t) + 1;
+	start_parse = 3 * sizeof(uint32_t);
+	printf("start_parse : %d\n", start_parse);
 	for (int i = start_parse; i < 3 * sizeof(uint32_t) + cmd_size; i++) {
 		printf("%c", frame->u_data[i]);
 	}
 
-	free(recv_from);
 	free(frame);
+
 
 	return SUCCESS;
 }
@@ -133,53 +130,62 @@ int tcp_server_accept()
 int tcp_server_write(struct menu *input)
 {
 	int nbytes;
-	union u_frame *pkg;
+	union u_frame pkg;
 	uint32_t pkg_id;
 	uint32_t pkg_len;
 	uint32_t pkg_process_flags;
 	uint32_t cmd_id;
 	uint32_t cmd_size;
-	char pkg_args[100] = { 0 };
 	char **args;
-	char args_to_send[1024];
+	char *dyn_args;
 	int i;
 	int structures_size;
+	int args_num;
+	int arg_len = 0;
+	int k = 0;
+	int cmd_to_send = 0;
 
 	nbytes = 0;
 
 	args = (char**)input->args;
 
+	dyn_args = (char*)malloc(sizeof(char) * arg_len);
+
 	for (i = 0; args[i] != NULL; i++) {
-		printf("%s\n", args[i]);
-		strcat(args_to_send, args[i]);
-		strcat(args_to_send, " ");
+		for (int j = 0; j < strlen(args[i]); j++) {
+			dyn_args[k] = args[i][j];
+			k++;
+		}
+		dyn_args[k] = ' ';
+		k++;
 	}
 
-	pkg_id = htonl(TCP_ID);
-	cmd_id = htonl(cmd_id);
-	pkg = malloc(sizeof(union u_frame));
-	if (!pkg) {
-		printf("Memory problem");
-		return MEMORY_ALLOCATION_ERROR;
+	printf("IN ARG ARRAY : %d\n", k);
+	arg_len = k;
+	printf("\nARGS PASSED : %s\n", dyn_args);
+
+	cmd_size = arg_len * sizeof(char);
+	printf("TO SEND %d cmd size \n ", cmd_size);
+	pkg.packet_frame.packet_len = htonl(cmd_size);
+	pkg.packet_frame.packet_id = htonl(0);
+	pkg.packet_frame.cmd_len = htonl(cmd_size);
+
+	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg.u_data), 4, 0,
+			(struct sockaddr*)&remote, sizeof(remote))) != 4) {
+				printf("Error writing to socket\n");
+				return ERR_WRITE;
 	}
 
-	cmd_size = strlen(args_to_send);
-	structures_size = sizeof(struct packet_frame);
-	memcpy(&(pkg->pkt.header.packet_id), &pkg_id, sizeof(uint32_t));
-	memcpy(&(pkg->pkt.fields.cmd_len), &cmd_size, sizeof(uint32_t));
-	memcpy(pkg->pkt.fields.cmd_data, args_to_send, sizeof(args_to_send));
+	pkg.packet_frame.packet_len = htonl(0);
+	pkg.packet_frame.packet_id = htonl(0);
+	pkg.packet_frame.cmd_len = htonl(0);
+	memcpy(pkg.packet_frame.cmd_data, dyn_args, cmd_size);
 
-	pkg_len = cmd_size + structures_size;
-	pkg_len = htonl(pkg_len);
-	memcpy(&(pkg->pkt.header.packet_len), &pkg_len, sizeof(uint32_t));
-
-	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg->u_data), structures_size + cmd_size, 0, 
-		(struct sockaddr*)&remote, sizeof(remote))) != structures_size + cmd_size) {
-			printf("Error writing to socket\n");
-			free(pkg);
-			return ERR_WRITE;
+	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg.u_data), (cmd_size + 15), 0,
+			(struct sockaddr*)&remote, sizeof(remote))) != (cmd_size + 15) ) {
+				printf("Error writing to socket\n");
+				return ERR_WRITE;
 	}
-	free(pkg);
 
 	return SUCCESS;
 }
