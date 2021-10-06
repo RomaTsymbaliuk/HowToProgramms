@@ -69,17 +69,20 @@ int main(int argc, char *argv[])
 		printf(HELP);
 		return ERR_OPTION;
 	}
+
 	if (cli->client_connect(cli, port) != SUCCESS) {
-		printf("Connect failed \n");
+		printf("Connect failed. Try again\n");
+		sleep(2);
 		return ERR_CONNECT;
 	}
-	printf("Connected\n");
 
 	if (cli->client_receive(cli) != SUCCESS) {
 		printf("Read error\n");
 		return ERR_READ;
 	}
-	printf("Received\n");
+
+
+	close(cli->sockfd);
 
 	return SUCCESS;
 }

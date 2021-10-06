@@ -91,6 +91,11 @@
 							"\t==>id  ---  get user id\n"
 #define READ_HELP		""
 
+#define SEND_HELP 			"NAME\n\n" \
+							"\tsend_file [COMMAND]\n" \
+							"DESCRIPTION\n\n" \
+							"\tSend binary file on the client computer and get result\n"
+
 #define WAIT_SYMBOLS 4
 
 #include <stddef.h>
@@ -99,7 +104,7 @@
 #include "shared.h"
 #include "menu_objs.h"
 
-enum {EXIT_ID, HELP_ID, CONNECT_ID, CLEAR_ID, DISCONNECT_ID, EXPLOIT_ID, START_SERVER_ID, READ_ID};
+enum {EXIT_ID, HELP_ID, CONNECT_ID, CLEAR_ID, DISCONNECT_ID, EXPLOIT_ID, START_SERVER_ID, READ_ID, SEND_ID};
 
 void shell_init();
 int shell_loop();

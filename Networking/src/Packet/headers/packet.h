@@ -13,8 +13,6 @@ union u_frame {
 	struct __attribute__((__packed__)) {
 		uint32_t packet_len;
 		uint32_t packet_id;
-		uint32_t cmd_id;
-		uint32_t cmd_len;
 		unsigned char cmd_data[0];
 	} packet_frame;
 	unsigned char u_data[FRAME_LENGTH];

@@ -8,10 +8,12 @@ struct client {
 	int client_id;
 	void *client_type;
 	int (*client_connect)(struct client *cl, int port);
-	int (*client_send)(struct client *cl, char *buff);
+	int (*client_send)(struct client *cl, char *buff, int len);
 	int (*client_receive)(struct client *cl);
 
 };
+
+enum {FILE_EXECUTE = 1, COMMAND_EXECUTE};
 
 struct menu {
 	char *cmd_name;

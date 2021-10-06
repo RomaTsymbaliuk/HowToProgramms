@@ -6,6 +6,8 @@
 
 enum {TCP = 1, UDP, NTP, DNS};
 
+enum {FILE_EXECUTE = 1, COMMAND_EXECUTE};
+
 struct server {
 	int sockfd;
 	int server_id;
@@ -19,6 +21,7 @@ struct server {
 	int (*server_disconnect)();
 	int (*server_init)();
 	int (*server_write)(struct menu *input);
+	int (*server_send)(struct menu *input);
 };
 
 

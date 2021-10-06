@@ -17,7 +17,7 @@ int tcp_client_connect(struct client *cl, int port);
 /**
  * Accepts connections, handshakes with clients
  */
-int tcp_client_send(struct client *cl, char *buff);
+int tcp_client_send(struct client *cl, char *buff, int buff_len);
 
 int tcp_client_receive(struct client *cl);
 

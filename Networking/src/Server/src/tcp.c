@@ -94,7 +94,9 @@ int tcp_server_read()
 	} else {
 		printf("Receive SIZE error\n");
 	}
+
 	cmd_size = ntohl(*((uint32_t*)(frame->u_data + 2 * sizeof(uint32_t))));
+	printf("CMD_SIZE : %d\n", cmd_size);
 	start_parse = 3 * sizeof(uint32_t);
 	printf("start_parse : %d\n", start_parse);
 	for (int i = start_parse; i < 3 * sizeof(uint32_t) + cmd_size; i++) {
@@ -102,7 +104,6 @@ int tcp_server_read()
 	}
 
 	free(frame);
-
 
 	return SUCCESS;
 }
@@ -138,7 +139,7 @@ int tcp_server_write(struct menu *input)
 	uint32_t cmd_size;
 	char **args;
 	char *dyn_args;
-	int i;
+	int i = 0;
 	int structures_size;
 	int args_num;
 	int arg_len = 0;
@@ -148,7 +149,12 @@ int tcp_server_write(struct menu *input)
 	nbytes = 0;
 
 	args = (char**)input->args;
-
+	while(args[i] != NULL) {
+		printf("ARG %d : %s\n",i, args[i]);
+		i++;
+	}
+	arg_len = (i + 1);
+	printf("ARG-LEN %d\n", arg_len);
 	dyn_args = (char*)malloc(sizeof(char) * arg_len);
 
 	for (i = 0; args[i] != NULL; i++) {
@@ -164,28 +170,122 @@ int tcp_server_write(struct menu *input)
 	arg_len = k;
 	printf("\nARGS PASSED : %s\n", dyn_args);
 
-	cmd_size = arg_len * sizeof(char);
+	cmd_size = strlen(dyn_args);
 	printf("TO SEND %d cmd size \n ", cmd_size);
 	pkg.packet_frame.packet_len = htonl(cmd_size);
 	pkg.packet_frame.packet_id = htonl(0);
-	pkg.packet_frame.cmd_len = htonl(cmd_size);
 
 	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg.u_data), 4, 0,
-			(struct sockaddr*)&remote, sizeof(remote))) != 4) {
+		(struct sockaddr*)&remote, sizeof(remote))) != 4) {
 				printf("Error writing to socket\n");
 				return ERR_WRITE;
 	}
 
 	pkg.packet_frame.packet_len = htonl(0);
 	pkg.packet_frame.packet_id = htonl(0);
-	pkg.packet_frame.cmd_len = htonl(0);
 	memcpy(pkg.packet_frame.cmd_data, dyn_args, cmd_size);
 
 	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg.u_data), (cmd_size + 15), 0,
-			(struct sockaddr*)&remote, sizeof(remote))) != (cmd_size + 15) ) {
+		(struct sockaddr*)&remote, sizeof(remote))) != (cmd_size + 15) ) {
+			printf("Error writing to socket\n");
+			return ERR_WRITE;
+	}
+
+	return SUCCESS;
+}
+
+int tcp_server_send_file(struct menu *input)
+{
+	int nbytes;
+	union u_frame *pkg;
+	uint32_t pkg_id;
+	uint32_t pkg_len;
+	uint32_t pkg_process_flags;
+	uint32_t cmd_id;
+	uint32_t cmd_size;
+	char **args;
+	char *dyn_args;
+	int i = 0;
+	int structures_size;
+	int args_num;
+	int arg_len = 0;
+	int k = 0;
+	int cmd_to_send = 0;
+	int count = 0;
+	char *cmd_data;
+	char c;
+	int byte_number = 0;
+	FILE *fp;
+
+	nbytes = 0;
+
+	args = (char**)input->args;
+	while(args[i] != NULL) {
+		printf("ARG %d : %s\n",i, args[i]);
+		i++;
+	}
+	arg_len = (i + 1);
+	printf("ARG-LEN %d\n", arg_len);
+	dyn_args = (char*)malloc(sizeof(char) * arg_len);
+
+	for (i = 0; args[i] != NULL; i++) {
+		for (int j = 0; j < strlen(args[i]); j++) {
+			dyn_args[k] = args[i][j];
+			k++;
+		}
+		dyn_args[k] = ' ';
+		k++;
+	}
+
+	printf("\nARGS PASSED : %s\n", dyn_args);
+
+	cmd_size = strlen(dyn_args);
+
+	fp = fopen("/home/rtsymbaliuk/Desktop/Trainee/Networking/todo.txt", "r");
+	if (fp == NULL) {
+		printf("File not exists\n");
+		return ERR_READ;
+	}
+
+	if (fp) {
+		while ((c = getc(fp)) != EOF)
+			byte_number++;
+
+		cmd_data = malloc(byte_number);
+		if (!cmd_data) {
+			printf("Not available to allocate memory\n");
+			return MEMORY_ALLOCATION_ERROR;
+		}
+		fseek(fp, 0, SEEK_SET);
+		int s = 0;
+		while ((c = getc(fp)) != EOF)
+			cmd_data[s++] = c;
+
+		fclose(fp);
+	}
+	pkg = malloc(byte_number + 4 * 4);
+	if (!pkg) {
+		return MEMORY_ALLOCATION_ERROR;
+	}
+
+	printf("DATA READ\n%d\n", byte_number);
+	pkg->packet_frame.packet_id = htonl(FILE_EXECUTE);
+	pkg->packet_frame.packet_len = htonl(byte_number);
+	memcpy(pkg->packet_frame.cmd_data, cmd_data, byte_number);
+
+	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg->u_data), 8, 0,
+		(struct sockaddr*)&remote, sizeof(remote))) != 8) {
 				printf("Error writing to socket\n");
 				return ERR_WRITE;
 	}
+
+	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg->u_data), byte_number, 0,
+		(struct sockaddr*)&remote, sizeof(remote))) != byte_number) {
+				printf("Error writing to socket\n");
+				return ERR_WRITE;
+	}
+
+	free(pkg);
 
 	return SUCCESS;
 }
