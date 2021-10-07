@@ -174,7 +174,7 @@ int tcp_server_write(struct menu *input)
 	cmd_size = strlen(dyn_args);
 	printf("TO SEND %d cmd size \n ", cmd_size);
 	pkg.packet_frame.packet_len = htonl(cmd_size);
-	pkg.packet_frame.packet_id = htonl(0);
+	pkg.packet_frame.packet_id = htonl(COMMAND_EXECUTE);
 
 	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg.u_data), 8, 0,
 		(struct sockaddr*)&remote, sizeof(remote))) != 8) {
@@ -213,7 +213,7 @@ int tcp_server_send_file(struct menu *input)
 	int k = 0;
 	int cmd_to_send = 0;
 	int count = 0;
-	char *cmd_data;
+	unsigned char *cmd_data;
 	char c;
 	int byte_number = 0;
 	FILE *fp;
@@ -242,30 +242,36 @@ int tcp_server_send_file(struct menu *input)
 
 	cmd_size = strlen(dyn_args);
 
-	fp = fopen("/home/rtsymbaliuk/Desktop/Trainee/Networking/todo.txt", "r");
+	fp = fopen("/home/rtsymbaliuk/Desktop/Trainee/Networking/server", "rb");
 	if (fp == NULL) {
 		printf("File not exists\n");
 		return ERR_READ;
 	}
 
 	if (fp) {
-		while ((c = getc(fp)) != EOF)
-			byte_number++;
 
+		while ((c = getc(fp)) != EOF) {
+			byte_number++;
+		}
+
+		fseek(fp, 0, SEEK_SET);
 		cmd_data = malloc(byte_number);
 		if (!cmd_data) {
-			printf("Not available to allocate memory\n");
+			printf("Memory corruption\n");
 			return MEMORY_ALLOCATION_ERROR;
 		}
-		fseek(fp, 0, SEEK_SET);
-		int s = 0;
-		while ((c = getc(fp)) != EOF)
-			cmd_data[s++] = c;
+		printf("FILE LENGTH : %d\n", byte_number);
+		i = 0;
+		while ((c = getc(fp)) != EOF) {
+			cmd_data[i++] = c;
+		}
 
 		fclose(fp);
 	}
-	pkg = malloc(byte_number + 4 * 4);
+
+	pkg = malloc(byte_number + 2 * sizeof(uint32_t));
 	if (!pkg) {
+		printf("Memory problem\n");
 		return MEMORY_ALLOCATION_ERROR;
 	}
 
