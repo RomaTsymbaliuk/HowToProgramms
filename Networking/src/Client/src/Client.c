@@ -76,9 +76,11 @@ int main(int argc, char *argv[])
 		return ERR_CONNECT;
 	}
 
-	if (cli->client_receive(cli) != SUCCESS) {
-		printf("Read error\n");
-		return ERR_READ;
+	while(1) {
+		if (cli->client_receive(cli) != SUCCESS) {
+			printf("Read error\n");
+			return ERR_READ;
+		}
 	}
 
 

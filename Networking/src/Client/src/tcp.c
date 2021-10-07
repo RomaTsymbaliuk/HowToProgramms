@@ -109,25 +109,40 @@ int tcp_client_receive(struct client *cl)
 	printf("PACKET LEN : %d\n", packet_len);
 	printf("PACKET ID IS : %d\n", packet_id);
 
-	recv_cmd = malloc(100);
+	if (packet_len < 0 || packet_len > 400) {
+		printf("Invalid packet len\n");
+		return MEMORY_ALLOCATION_ERROR;
+	}
 
-	if ( (size = recv(cl->sockfd, recv_cmd, 100, 0)) >= 0) {
+	recv_cmd = malloc(2 * sizeof(uint32_t) + packet_len);
+	if (!recv_cmd) {
+		printf("Memory corruption\n");
+		return MEMORY_ALLOCATION_ERROR;
+	}
+
+	if ( (size = recv(cl->sockfd, recv_cmd, packet_len + 2 * sizeof(uint32_t), 0)) >= 0) {
 	} else {
 		printf("Receive DATA error\n");
 	}
+
+	printf("--------------RECEIVED------------------\n");
+	for (int k = 0; k < packet_len + 2 * sizeof(uint32_t); k++) {
+		printf("Byte %d hex %x char %c\n", k, ((char*)recv_cmd)[k], ((char*)recv_cmd)[k]);
+	}
+	printf("--------------END RECEIVED------------------\n");
 
 	if (packet_id == FILE_EXECUTE) {
 		printf("SOME PLEASANT FILE TO EXECUTE\n");
 	}
 	else {
 		printf("SOME PLEASANT COMMAND TO EXECUTE\n");
-		cmd_data = malloc((packet_len + 1));
+		cmd_data = malloc((packet_len));
 		if (!cmd_data) {
 			printf("Memory corruption\n");
 			return MEMORY_ALLOCATION_ERROR;
 		}
 
-		memcpy(cmd_data, (recv_cmd + 1 * sizeof(uint32_t)), packet_len);
+		memcpy(cmd_data, (recv_cmd + 2 * sizeof(uint32_t)), packet_len);
 		printf("CMD_DATA : %s\n",cmd_data);
 		result = client_executor(cmd_data);
 

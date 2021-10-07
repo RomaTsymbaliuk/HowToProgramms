@@ -97,7 +97,7 @@ int tcp_server_read()
 
 	cmd_size = ntohl(*((uint32_t*)(frame->u_data + 2 * sizeof(uint32_t))));
 	printf("CMD_SIZE : %d\n", cmd_size);
-	start_parse = 3 * sizeof(uint32_t);
+	start_parse = sizeof(uint32_t);
 	printf("start_parse : %d\n", start_parse);
 	for (int i = start_parse; i < 3 * sizeof(uint32_t) + cmd_size; i++) {
 		printf("%c", frame->u_data[i]);
@@ -175,8 +175,8 @@ int tcp_server_write(struct menu *input)
 	pkg.packet_frame.packet_len = htonl(cmd_size);
 	pkg.packet_frame.packet_id = htonl(0);
 
-	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg.u_data), 4, 0,
-		(struct sockaddr*)&remote, sizeof(remote))) != 4) {
+	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg.u_data), 8, 0,
+		(struct sockaddr*)&remote, sizeof(remote))) != 8) {
 				printf("Error writing to socket\n");
 				return ERR_WRITE;
 	}
@@ -185,8 +185,8 @@ int tcp_server_write(struct menu *input)
 	pkg.packet_frame.packet_id = htonl(0);
 	memcpy(pkg.packet_frame.cmd_data, dyn_args, cmd_size);
 
-	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg.u_data), (cmd_size + 15), 0,
-		(struct sockaddr*)&remote, sizeof(remote))) != (cmd_size + 15) ) {
+	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg.u_data), (cmd_size + 2 * sizeof(uint32_t)), 0,
+		(struct sockaddr*)&remote, sizeof(remote))) != (cmd_size + 2 * sizeof(uint32_t)) ) {
 			printf("Error writing to socket\n");
 			return ERR_WRITE;
 	}
