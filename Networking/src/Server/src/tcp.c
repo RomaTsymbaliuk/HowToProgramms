@@ -84,6 +84,9 @@ int tcp_server_read()
 	read(server_object->sockfd, &packet_len, 4);
 	packet_len = ntohl(packet_len);
 	printf("PACKET_LEN : %d\n", packet_len);
+	read(server_object->sockfd, &packet_id, 4);
+	packet_id = ntohl(packet_id);
+	printf("PACKET ID : %d\n", packet_id);
 
 	frame = malloc(sizeof(union u_frame));
 	if (!frame) {
@@ -95,11 +98,9 @@ int tcp_server_read()
 		printf("Receive SIZE error\n");
 	}
 
-	cmd_size = ntohl(*((uint32_t*)(frame->u_data + 2 * sizeof(uint32_t))));
-	printf("CMD_SIZE : %d\n", cmd_size);
-	start_parse = sizeof(uint32_t);
+	start_parse = 0;
 	printf("start_parse : %d\n", start_parse);
-	for (int i = start_parse; i < 3 * sizeof(uint32_t) + cmd_size; i++) {
+	for (int i = start_parse; i < packet_len; i++) {
 		printf("%c", frame->u_data[i]);
 	}
 

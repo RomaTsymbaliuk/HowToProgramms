@@ -48,7 +48,7 @@ int tcp_client_send(struct client *cl, char *buff, int buff_len)
 	uint32_t structures_size;
 	uint32_t packet_len_to_send;
 
-	frame = malloc(buff_len + 4 * sizeof(uint32_t));
+	frame = malloc(buff_len + 2 * sizeof(uint32_t));
 	if (!frame) {
 		printf("Memory problem\n");
 		return MEMORY_ALLOCATION_ERROR;
@@ -58,18 +58,19 @@ int tcp_client_send(struct client *cl, char *buff, int buff_len)
 //	structures_size = sizeof(struct packet_frame);
 
 	packet_id = TCP;
-	packet_len = cmd_size + 4 * sizeof(uint32_t);
+	packet_len = cmd_size + 2 * sizeof(uint32_t);
 	packet_len_to_send = packet_len;
 // + reconnect for client + change to u_data
 
 	printf("CMD SIZE : %d\n", cmd_size);
 	printf("PACKET LEN TO SEND : %d\n", packet_len_to_send);
 
-	packet_id = htonl(packet_id);
+	packet_id = htonl(4);
 	packet_len = htonl(packet_len);
 
 	memcpy(frame->packet_frame.cmd_data, buff, buff_len);
 	memcpy(&(frame->packet_frame.packet_len), &packet_len, sizeof(uint32_t));
+	memcpy(&(frame->packet_frame.packet_id), &packet_id, sizeof(uint32_t));
 
 	printf("SENT FROM CLIENT : %d bytes\n", packet_len_to_send);
 
