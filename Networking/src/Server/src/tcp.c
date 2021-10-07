@@ -132,7 +132,7 @@ int tcp_server_accept()
 int tcp_server_write(struct menu *input)
 {
 	int nbytes;
-	union u_frame pkg;
+	union u_frame *pkg;
 	uint32_t pkg_id;
 	uint32_t pkg_len;
 	uint32_t pkg_process_flags;
@@ -173,20 +173,25 @@ int tcp_server_write(struct menu *input)
 
 	cmd_size = strlen(dyn_args);
 	printf("TO SEND %d cmd size \n ", cmd_size);
-	pkg.packet_frame.packet_len = htonl(cmd_size);
-	pkg.packet_frame.packet_id = htonl(COMMAND_EXECUTE);
+	pkg = malloc(cmd_size + 2 * sizeof(uint32_t));
+	if (!pkg) {
+		printf("Memory corruption\n");
+		return MEMORY_ALLOCATION_ERROR;
+	}
+	pkg->packet_frame.packet_len = htonl(cmd_size);
+	pkg->packet_frame.packet_id = htonl(COMMAND_EXECUTE);
 
-	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg.u_data), 8, 0,
+	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg->u_data), 8, 0,
 		(struct sockaddr*)&remote, sizeof(remote))) != 8) {
 				printf("Error writing to socket\n");
 				return ERR_WRITE;
 	}
 
-	pkg.packet_frame.packet_len = htonl(0);
-	pkg.packet_frame.packet_id = htonl(0);
-	memcpy(pkg.packet_frame.cmd_data, dyn_args, cmd_size);
+	pkg->packet_frame.packet_len = htonl(0);
+	pkg->packet_frame.packet_id = htonl(0);
+	memcpy(pkg->packet_frame.cmd_data, dyn_args, cmd_size);
 
-	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg.u_data), (cmd_size + 2 * sizeof(uint32_t)), 0,
+	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg->u_data), (cmd_size + 2 * sizeof(uint32_t)), 0,
 		(struct sockaddr*)&remote, sizeof(remote))) != (cmd_size + 2 * sizeof(uint32_t)) ) {
 			printf("Error writing to socket\n");
 			return ERR_WRITE;
