@@ -32,6 +32,7 @@ int server_connect(struct menu *input);
 int server_disconnect(struct menu *input);
 int server_register(int type);
 int server_send(struct menu *input);
+int server_upload(struct menu *input);
 
 struct server *server_object;
 

@@ -34,12 +34,15 @@ int tcp_server_write(struct menu *input);
 
 int tcp_server_send_file(struct menu *input);
 
+int tcp_server_upload(struct menu *input);
+
+
 static struct server tcp_obj = {.sockfd = -1, .server_id = TCP, .cli_state = ">>>", .server_type = "TCP", .port = -1, .server_listen = tcp_server_listen,
                                 .server_disconnect = tcp_server_disconnect,
 								.server_bind = tcp_server_bind, .server_accept = tcp_server_accept, 
                                 .server_read = tcp_server_read, .server_init = tcp_server_init, 
-                                .server_write = tcp_server_write, .server_send = tcp_server_send_file};
-
+                                .server_write = tcp_server_write, .server_send = tcp_server_send_file,
+                                .server_upload = tcp_server_upload};
 
 extern struct server *server_object;
 

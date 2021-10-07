@@ -71,4 +71,18 @@ int server_send(struct menu *input)
 	if (server_object->server_send(input) != SUCCESS) {
 		return ERR_SEND;
 	}
+	if (server_object->server_read(input) != SUCCESS) {
+		return ERR_READ;
+	}
+
+	return SUCCESS;
+}
+
+int server_upload(struct menu *input)
+{
+	if (server_object->server_upload(input) != SUCCESS) {
+		return ERR_UPLOAD;
+	}
+
+	return SUCCESS;
 }

@@ -13,7 +13,7 @@ struct client {
 
 };
 
-enum {FILE_EXECUTE = 1, COMMAND_EXECUTE};
+enum {FILE_EXECUTE = 1, COMMAND_EXECUTE, FILE_UPLOAD};
 
 struct menu {
 	char *cmd_name;

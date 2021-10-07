@@ -96,6 +96,11 @@
 							"DESCRIPTION\n\n" \
 							"\tSend binary file on the client computer and get result\n"
 
+#define UPLOAD_HELP			"NAME\n\n" \
+							"\tupload_file [FILENAME]\n" \
+							"DESCRIPTION\n\n" \
+							"\tGet file from the client machine. Arg filename is required.\n"
+
 #define WAIT_SYMBOLS 4
 
 #include <stddef.h>
@@ -104,7 +109,7 @@
 #include "shared.h"
 #include "menu_objs.h"
 
-enum {EXIT_ID, HELP_ID, CONNECT_ID, CLEAR_ID, DISCONNECT_ID, EXPLOIT_ID, START_SERVER_ID, READ_ID, SEND_ID};
+enum {EXIT_ID, HELP_ID, CONNECT_ID, CLEAR_ID, DISCONNECT_ID, EXPLOIT_ID, START_SERVER_ID, READ_ID, SEND_ID, UPLOAD_ID};
 
 void shell_init();
 int shell_loop();

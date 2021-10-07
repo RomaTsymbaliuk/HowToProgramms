@@ -34,17 +34,17 @@ char *client_executor(char *cmd_data)
 
 	copy_head = head;
 
-	printf("CMD_DATA: %s-----\n", cmd_data);
-	printf("-----GOT HERE 1-----\n");
+//	printf("CMD_DATA: %s-----\n", cmd_data);
+//	printf("-----GOT HERE 1-----\n");
 
 	fp = popen(cmd_data, "r");
 	if (fp == NULL) {
 		printf("Failed to run command!\n");
-		printf("\n---->%s<----\n", strerror(errno));
+//		printf("\n---->%s<----\n", strerror(errno));
 		return NULL;
 	}
 
-	printf("-----GOT HERE 2wwww-----\n");
+//	printf("-----GOT HERE 2wwww-----\n");
 
 
 	while (fgets(result, 1024, fp) != NULL) {
@@ -66,14 +66,14 @@ char *client_executor(char *cmd_data)
 	}
 
 
-	printf("GOT TO THE END , the end element is %s\n", head->item);
+//	printf("GOT TO THE END , the end element is %s\n", head->item);
 
-	printf("\n---->%s<----\n", strerror(errno));
-	printf("---------GOT HERE 3----------\n");
+//	printf("\n---->%s<----\n", strerror(errno));
+//	printf("---------GOT HERE 3----------\n");
 	head->next = NULL;
 	printf("Exit code: %i\n", WEXITSTATUS(pclose(fp)));
 
-	printf("size of response : %d\n", size);
+//	printf("size of response : %d\n", size);
 	cmd_to_ret = malloc(size);
 	if (!cmd_to_ret) {
 		printf("Memory problem\n");
@@ -90,9 +90,9 @@ char *client_executor(char *cmd_data)
 			}
 		}
 	}
-	printf("CMD TO RET LENGTH : %d\n", strlen(cmd_to_ret));
+//	printf("CMD TO RET LENGTH : %d\n", strlen(cmd_to_ret));
 
-	printf("\n-----------There are %d elements here------------\n", s);
+//	printf("\n-----------There are %d elements here------------\n", s);
 	while (copy_head->next != NULL) {
 		temp = copy_head;
 		copy_head = copy_head->next;
@@ -104,16 +104,13 @@ char *client_executor(char *cmd_data)
 			s--;
 		}
 	}
-	printf("\n-----------There are %d elements here------------\n", s);
+//	printf("\n-----------There are %d elements here------------\n", s);
 
 
 	if (head) {
-		printf("Head not deleted\n");
+//		printf("Head not deleted\n");
 		free(head);
-	} else {
-		printf("Head already deleted\n");
 	}
-	printf("HERE PROBLEM ?????____\n");
 
 	if (head) {
 		head = NULL;
