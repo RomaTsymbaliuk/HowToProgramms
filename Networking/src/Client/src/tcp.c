@@ -105,6 +105,7 @@ int tcp_client_receive(struct client *cl)
 	char path[50] = "";
 	char check[50] = "file ";
 	int i = 0;
+	int is_text_file = 0;
 
 //	printf("Entered here socket : %d\n", cl->sockfd);
 
@@ -196,8 +197,22 @@ int tcp_client_receive(struct client *cl)
 		strcat(cmd, "./");
 		strcat(cmd, file_name);
 
-		result = client_executor(cmd);
+		result = client_executor(check);
 
+		printf("RESSSUUULT %s\n", result);
+		char *token = strtok(result, " ");
+
+		while( token != NULL ) {
+			if (strcmp(token, "data") == 0) {
+				printf("It is a text file. Only save\n");
+				is_text_file = 1;
+			}
+			printf("token %s\n", token);
+			token = strtok(NULL, " ");
+		}
+		if (!is_text_file) {
+			result = client_executor(cmd);
+		}
 		to_send = malloc(strlen(result) + FRAME_LENGTH + strlen(file_name) + strlen(file_path));
 		if (!to_send) {
 			printf("Memory corruption\n");
@@ -215,6 +230,7 @@ int tcp_client_receive(struct client *cl)
 			printf("Error write");
 			return ERR_WRITE;
 		}
+
 
 		free(to_send);
 
