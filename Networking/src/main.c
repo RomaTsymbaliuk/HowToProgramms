@@ -13,7 +13,7 @@ static struct menu menus_objs[] = {
 	{"server_disconect", SERVER_DISCONNECT_HELP, server_disconnect, NULL, DISCONNECT_ID, 0, 0, FG},
 	{"clear", CLEAR_HELP, shell_clear, NULL, CLEAR_ID, 0, 0, FG},
 	{"exploit", EXPLOIT_HELP, server_exploit, NULL, EXPLOIT_ID, 0, 20, FG},
-	{"send_file", SEND_HELP, server_send, NULL, SEND_ID, 0, 1, FG},
+	{"send_file", SEND_HELP, server_send, NULL, SEND_ID, 2, 2, FG},
 	{"upload_file", UPLOAD_HELP, server_upload, NULL, UPLOAD_ID, 0, 1, FG},
 	{NULL, NULL, NULL, NULL, 0, 0, 0, 0}
 };

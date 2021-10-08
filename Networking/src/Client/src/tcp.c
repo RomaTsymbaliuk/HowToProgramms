@@ -93,12 +93,16 @@ int tcp_client_receive(struct client *cl)
 	int size;
 	char *cmd_data;
 	char *cmd_filename;
+	char *file_path;
+	char *file_name;
 	char *result;
 	void *recv_cmd;
 	union u_frame *pkg;
 	union u_frame *to_send;
 	uint32_t packet_len;
 	uint32_t cmd_size;
+	char cmd[50] = {0};
+	char path[50] = "";
 	int i = 0;
 
 //	printf("Entered here socket : %d\n", cl->sockfd);
@@ -127,7 +131,7 @@ int tcp_client_receive(struct client *cl)
 		printf("Memory corruption\n");
 		return MEMORY_ALLOCATION_ERROR;
 	}
-	if (packet_len < 0 || packet_len > 100000) {
+	if (packet_len < 0 || packet_len > 1000000) {
 		printf("Invalid packet len %d\n", packet_len);
 		return MEMORY_ALLOCATION_ERROR;
 	}
@@ -152,19 +156,69 @@ int tcp_client_receive(struct client *cl)
 			printf("Memory corruption\n");
 			return MEMORY_ALLOCATION_ERROR;
 		}
-
-		memcpy(cmd_data, pkg->packet_frame.cmd_data, packet_len);
-
-		fp = fopen("TO_EXEC", "wb");
-//		printf("\nTO WRITE : %d bytes \n", packet_len);
-		if (fp) {
-//			printf("file_exec opened\n");
-			fwrite(cmd_data, packet_len, 1, fp);
-			fclose(fp);
+		file_name = malloc(file_name_size);
+		if (!file_name) {
+			printf("Memory corruption\n");
+			return MEMORY_ALLOCATION_ERROR;
 		}
-		result = client_executor("chmod a+x TO_EXEC && ./TO_EXEC");
-//		printf("RESULT : %s\n", result);
-		tcp_client_send(cl, result, strlen(result));
+		file_path = malloc(file_name_path);
+		if (!file_path) {
+			printf("Memory corruption\n");
+			return MEMORY_ALLOCATION_ERROR;
+		}
+
+		memcpy(file_name, pkg->packet_frame.cmd_data, file_name_size);
+		printf("FILENAME %s \n", file_name);
+		memcpy(file_path, (pkg->packet_frame.cmd_data + file_name_size), file_name_path);
+		printf("PATH %s\n", file_path);
+		memcpy(cmd_data, (pkg->packet_frame.cmd_data + file_name_size + file_name_path), packet_len);
+
+		strcat(path, file_path);
+		strcat(path, "/");
+		strcat(path, file_name);
+
+		printf("PAAAAATHHHH : %s\n", path);
+		fp = fopen(path, "wb");
+		if (!fp) {
+			perror("fopen");
+			return ERR_READ;
+		}
+		printf("PATH2xxxxxx ===== %s", path);
+		printf("\nTO WRITE : %d bytes \n", packet_len);
+
+		fwrite(cmd_data , packet_len, 1, fp);
+
+		fclose(fp);
+
+		strcat(cmd, "chmod a+x ");
+		strcat(cmd, path);
+		strcat(cmd, " && cd ");
+		strcat(cmd, file_path);
+		strcat(cmd, " && ");
+		strcat(cmd, "./");
+		strcat(cmd, file_name);
+
+		result = client_executor(cmd);
+
+		to_send = malloc(strlen(result) + FRAME_LENGTH + strlen(file_name) + strlen(file_path));
+		if (!to_send) {
+			printf("Memory corruption\n");
+			return MEMORY_ALLOCATION_ERROR;
+		}
+		to_send->packet_frame.packet_id = htonl(0);
+		to_send->packet_frame.packet_len = htonl(strlen(result));
+		to_send->packet_frame.file_name_size = htonl(strlen(file_name));
+		to_send->packet_frame.file_name_path_size = htonl(strlen(file_path));
+		memcpy(to_send->packet_frame.cmd_data, file_name, strlen(file_name));
+		memcpy(to_send->packet_frame.cmd_data + strlen(file_name), file_path, strlen(file_path));
+		memcpy(to_send->packet_frame.cmd_data + strlen(file_name) + strlen(file_path), result, strlen(result));
+
+		if (write(cl->sockfd, (void*)(to_send->u_data), (strlen(file_name) + strlen(file_path) + strlen(result) + FRAME_LENGTH)) < 0) {
+			printf("Error write");
+			return ERR_WRITE;
+		}
+
+		free(to_send);
 
 	} else if (packet_id == COMMAND_EXECUTE){
 //		printf("SOME PLEASANT COMMAND TO EXECUTE\n");

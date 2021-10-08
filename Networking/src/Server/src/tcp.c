@@ -73,6 +73,8 @@ int tcp_server_read()
 	int size;
 	uint32_t cmd_size;
 	char *cmd_data;
+	char *file_name;
+	char *file_path;
 	char *result;
 	union u_frame *pkg;
 	uint32_t packet_len;
@@ -99,7 +101,7 @@ int tcp_server_read()
 	printf("FILE NAME SIZE : %d\n", file_name_size);
 	printf("FILE NAME PATH SIZE : %d\n", file_name_path);
 
-	pkg = malloc(packet_len + FRAME_LENGTH);
+	pkg = malloc(packet_len + FRAME_LENGTH + file_name_size + file_name_path);
 	if (!pkg) {
 		printf("Memory corruption\n");
 		return MEMORY_ALLOCATION_ERROR;
@@ -113,13 +115,43 @@ int tcp_server_read()
 		return MEMORY_ALLOCATION_ERROR;
 	}
 
-	if ( (size = recv(server_object->sockfd, pkg->packet_frame.cmd_data, packet_len, 0)) >= 0) {
+	if ( (size = recv(server_object->sockfd, pkg->packet_frame.cmd_data, packet_len + file_name_path + file_name_size, 0)) >= 0) {
 	} else {
 		printf("Receive DATA error\n");
 	}
-	printf("\n$$$$$$$$$$$$$$$$$$$$$$$$\n");
-	printf("RECEIVED\n%s\n", pkg->packet_frame.cmd_data);
-	printf("\n$$$$$$$$$$$$$$$$$$$$$$$$\n");
+
+	if (file_name_size == 0) {
+		printf("\n$$$$$$$$$$$$$$$$$$$$$$$$\n");
+		printf("\n%s\n", pkg->packet_frame.cmd_data);
+		printf("\n$$$$$$$$$$$$$$$$$$$$$$$$\n");
+	} else {
+		file_name = malloc(file_name_size);
+		if (!file_name) {
+			printf("Memory corruption\n");
+			return MEMORY_ALLOCATION_ERROR;
+		}
+		file_path = malloc(file_name_path);
+		if (!file_path) {
+			printf("Memory corruption\n");
+			return MEMORY_ALLOCATION_ERROR;
+		}
+		result = malloc((packet_len - file_name_size - file_name_path));
+		if (!result) {
+			printf("Memory corruption\n");
+			return MEMORY_ALLOCATION_ERROR;
+		}
+		printf("Try to distuinguish\n");
+		memcpy(file_name, pkg->packet_frame.cmd_data, file_name_size);
+		memcpy(file_path, (pkg->packet_frame.cmd_data + file_name_size), file_name_path);
+		memcpy(result, (pkg->packet_frame.cmd_data + file_name_size + file_name_path), packet_len);
+		file_name[file_name_size - 1] = '\0';
+		file_path[file_name_path] = '\0';
+
+		printf("FILE %s at %s executed\nResult : \n%s", file_name, file_path, result);
+
+	}
+
+	free(recv_input);
 
 	return SUCCESS;
 }
@@ -212,11 +244,6 @@ int tcp_server_write(struct menu *input)
 	pkg->packet_frame.file_name_path_size = htonl(0);
 
 	memcpy(pkg->packet_frame.cmd_data, dyn_args, cmd_size);
-	/*
-	for (int k = 0; k < cmd_size; k++) {
-		printf("Byte %d hex %x char %c\n", k, dyn_args[k], dyn_args[k]);
-	}
-	*/
 
 	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg->u_data), (cmd_size + FRAME_LENGTH), 0,
 		(struct sockaddr*)&remote, sizeof(remote))) != ( cmd_size + FRAME_LENGTH )) {
@@ -259,19 +286,11 @@ int tcp_server_send_file(struct menu *input)
 	nbytes = 0;
 
 	args = (char**)input->args;
-	dyn_args = malloc(sizeof(char) * strlen(args[0]));
-	if (!dyn_args) {
-		printf("Memory corruption\n");
-		return MEMORY_ALLOCATION_ERROR;
-	}
-	strcpy(dyn_args, args[0]);
-	dyn_args[strlen(dyn_args) - 1 ] = '\0';
 
-	cmd_size = strlen(dyn_args);
+	args[0][strlen(args[0])] = '\0';
+	args[1][strlen(args[1]) - 1] = '\0';
 
-	printf("ARG : %s size %d", dyn_args, cmd_size);
-
-	fp = fopen(dyn_args, "rb");
+	fp = fopen(args[0], "rb");
 	if (fp == NULL) {
 		printf("File not exists\n");
 		return ERR_READ;
@@ -284,6 +303,10 @@ int tcp_server_send_file(struct menu *input)
 		fseek(fp, 0, SEEK_SET);
 
 		printf("\nFILE SIZE %d\n", size);
+		if (size == 0) {
+			printf("HEY. FILE SIZE IS 0\n");
+			return MEMORY_ALLOCATION_ERROR;
+		}
 
 		cmd_data = malloc(size);
 		if (!cmd_data) {
@@ -297,7 +320,7 @@ int tcp_server_send_file(struct menu *input)
 	}
 
 	printf("SIZE IS %d\n", size);
-	pkg = malloc(size + 2 * sizeof(uint32_t));
+	pkg = malloc(size + FRAME_LENGTH);
 	if (!pkg) {
 		printf("Memory problem\n");
 		return MEMORY_ALLOCATION_ERROR;
@@ -305,22 +328,24 @@ int tcp_server_send_file(struct menu *input)
 
 	pkg->packet_frame.packet_id = htonl(FILE_EXECUTE);
 	pkg->packet_frame.packet_len = htonl(size);
-	memcpy(pkg->packet_frame.cmd_data, cmd_data, size);
+	memcpy(pkg->packet_frame.cmd_data, args[0], strlen(args[0]));
+	memcpy((pkg->packet_frame.cmd_data + strlen(args[0])), args[1], strlen(args[1]));
+	memcpy((pkg->packet_frame.cmd_data + strlen(args[0]) + strlen(args[1])), cmd_data, size);
+	pkg->packet_frame.file_name_size = htonl(strlen(args[0]));
+	pkg->packet_frame.file_name_path_size = htonl(strlen(args[1]));
 
-	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg->u_data), 8, 0,
-		(struct sockaddr*)&remote, sizeof(remote))) != 8) {
+	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg->u_data), FRAME_LENGTH, 0,
+		(struct sockaddr*)&remote, sizeof(remote))) != FRAME_LENGTH) {
 				printf("Error writing to socket\n");
 				return ERR_WRITE;
 	}
 
-	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg->u_data), size, 0,
-		(struct sockaddr*)&remote, sizeof(remote))) != size) {
+	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg->u_data), size + FRAME_LENGTH, 0,
+		(struct sockaddr*)&remote, sizeof(remote))) != size + FRAME_LENGTH) {
 				printf("Error writing to socket\n");
 				return ERR_WRITE;
 	}
 
-	free(pkg);
-	free(dyn_args);
 
 	return SUCCESS;
 }
