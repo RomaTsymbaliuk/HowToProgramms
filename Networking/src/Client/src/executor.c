@@ -71,7 +71,11 @@ char *client_executor(char *cmd_data)
 //	printf("\n---->%s<----\n", strerror(errno));
 //	printf("---------GOT HERE 3----------\n");
 	head->next = NULL;
-	printf("Exit code: %i\n", WEXITSTATUS(pclose(fp)));
+
+	if (WEXITSTATUS(pclose(fp)) != 0) {
+		printf("File cannot be executed, just saved ");
+		return NULL;
+	}
 
 //	printf("size of response : %d\n", size);
 	cmd_to_ret = malloc(size);
