@@ -66,45 +66,60 @@ int tcp_server_bind(int port)
 
 int tcp_server_read()
 {
-	void *recv_from;
+	void *recv_input;
 	uint32_t packet_id;
-	uint32_t comd_id;
+	uint32_t file_name_size;
+	uint32_t file_name_path;
 	int size;
 	uint32_t cmd_size;
 	char *cmd_data;
 	char *result;
-	union u_frame *frame;
+	union u_frame *pkg;
 	uint32_t packet_len;
 	int i = 0;
 	int start_parse;
 
-	//cast to struct 
-	//payload after struct header -> (alligned) 
-	//read in massive in union in u_data and s union in struct and net to host
-	read(server_object->sockfd, &packet_len, 4);
-	packet_len = ntohl(packet_len);
-	printf("PACKET_LEN : %d\n", packet_len);
-	read(server_object->sockfd, &packet_id, 4);
-	packet_id = ntohl(packet_id);
-	printf("PACKET ID : %d\n", packet_id);
-
-	frame = malloc(packet_len);
-	if (!frame) {
-		printf("Memory problem\n");
+	recv_input = malloc(FRAME_LENGTH);
+	if (!recv_input) {
+		printf("Memory corruption\n");
 		return MEMORY_ALLOCATION_ERROR;
 	}
-	if( (size = read(server_object->sockfd, frame->u_data, packet_len)) >= 0) {
+
+	if( (size = recv(server_object->sockfd, recv_input, FRAME_LENGTH, 0)) >= 0) {
 	} else {
 		printf("Receive SIZE error\n");
 	}
+	packet_len = ntohl(*((uint32_t*)recv_input));
+	packet_id = ntohl(*((uint32_t*)(recv_input + 1 * sizeof(uint32_t))));
+	file_name_size = ntohl(*((uint32_t*)(recv_input + 2 * sizeof(uint32_t))));
+	file_name_path = ntohl(*((uint32_t*)(recv_input + 3 * sizeof(uint32_t))));
 
-	start_parse = 0;
-	printf("start_parse : %d\n", start_parse);
-	for (int i = start_parse; i < packet_len; i++) {
-		printf("%c", frame->u_data[i]);
+	printf("PACKET LEN : %d\n", packet_len);
+	printf("PACKET ID IS : %d\n", packet_id);
+	printf("FILE NAME SIZE : %d\n", file_name_size);
+	printf("FILE NAME PATH SIZE : %d\n", file_name_path);
+
+	pkg = malloc(packet_len + FRAME_LENGTH);
+	if (!pkg) {
+		printf("Memory corruption\n");
+		return MEMORY_ALLOCATION_ERROR;
+	}
+	pkg->packet_frame.packet_len = packet_len;
+	pkg->packet_frame.packet_id = packet_id;
+	pkg->packet_frame.file_name_size = file_name_size;
+	pkg->packet_frame.file_name_path_size = file_name_path;
+	if (packet_len < 0 || packet_len > 100000) {
+		printf("Invalid packet len %d\n", packet_len);
+		return MEMORY_ALLOCATION_ERROR;
 	}
 
-	free(frame);
+	if ( (size = recv(server_object->sockfd, pkg->packet_frame.cmd_data, packet_len, 0)) >= 0) {
+	} else {
+		printf("Receive DATA error\n");
+	}
+	printf("\n$$$$$$$$$$$$$$$$$$$$$$$$\n");
+	printf("RECEIVED\n%s\n", pkg->packet_frame.cmd_data);
+	printf("\n$$$$$$$$$$$$$$$$$$$$$$$$\n");
 
 	return SUCCESS;
 }
@@ -182,26 +197,29 @@ int tcp_server_write(struct menu *input)
 	}
 	pkg->packet_frame.packet_len = htonl(cmd_size);
 	pkg->packet_frame.packet_id = htonl(COMMAND_EXECUTE);
+	pkg->packet_frame.file_name_size = htonl(0);
+	pkg->packet_frame.file_name_path_size = htonl(0);
 
-	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg->u_data), 8, 0,
-		(struct sockaddr*)&remote, sizeof(remote))) != 8) {
+	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg->u_data), FRAME_LENGTH, 0,
+		(struct sockaddr*)&remote, sizeof(remote))) != FRAME_LENGTH) {
 				printf("Error writing to socket\n");
 				return ERR_WRITE;
 	}
 
 	pkg->packet_frame.packet_len = htonl(0);
 	pkg->packet_frame.packet_id = htonl(0);
-//	memcpy(pkg->packet_frame.cmd_data, dyn_args, cmd_size);
+	pkg->packet_frame.file_name_size = htonl(0);
+	pkg->packet_frame.file_name_path_size = htonl(0);
+
 	memcpy(pkg->packet_frame.cmd_data, dyn_args, cmd_size);
 	/*
 	for (int k = 0; k < cmd_size; k++) {
 		printf("Byte %d hex %x char %c\n", k, dyn_args[k], dyn_args[k]);
 	}
 	*/
-//	printf("AFTER MEMCPY \n:%s\n", pkg->packet_frame.cmd_data);
 
-	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg->u_data), (cmd_size + 2 * sizeof(uint32_t)), 0,
-		(struct sockaddr*)&remote, sizeof(remote))) != (cmd_size + 2 * sizeof(uint32_t)) ) {
+	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg->u_data), (cmd_size + FRAME_LENGTH), 0,
+		(struct sockaddr*)&remote, sizeof(remote))) != ( cmd_size + FRAME_LENGTH )) {
 			printf("Error writing to socket\n");
 			free(dyn_args);
 			free(pkg);

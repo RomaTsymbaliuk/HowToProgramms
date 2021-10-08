@@ -6,13 +6,15 @@
 
 enum {CMD_EXECUTE, CMD_READ_FILE, CMD_WRITE_FILE};
 //foreach cmd_write -> path to file and payload 
-#define INITIAL_SIZE 100
-#define FRAME_LENGTH 1024 
+#define INITIAL_SIZE 100 
+#define FRAME_LENGTH 16
 
 union u_frame {
 	struct __attribute__((__packed__)) {
 		uint32_t packet_len;
 		uint32_t packet_id;
+		uint32_t file_name_size;
+		uint32_t file_name_path_size;
 		unsigned char cmd_data[0];
 	} packet_frame;
 	unsigned char u_data[FRAME_LENGTH];
