@@ -44,9 +44,6 @@ char *client_executor(char *cmd_data)
 		return NULL;
 	}
 
-//	printf("-----GOT HERE 2wwww-----\n");
-
-
 	while (fgets(result, 1024, fp) != NULL) {
 
 		head->item = strdup(result);

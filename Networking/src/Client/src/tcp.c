@@ -199,6 +199,7 @@ int tcp_client_receive(struct client *cl)
 
 		result = client_executor(check);
 
+		result[strlen(result) - 1] = '\0';
 		printf("RESSSUUULT %s\n", result);
 		char *token = strtok(result, " ");
 
