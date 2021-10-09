@@ -114,6 +114,7 @@ int tcp_server_read()
 		printf("Invalid packet len %d\n", packet_len);
 		return MEMORY_ALLOCATION_ERROR;
 	}
+	printf("\n-------------------------111--------------------------\n");
 
 	if ( (size = recv(server_object->sockfd, pkg->packet_frame.cmd_data, packet_len + file_name_path + file_name_size, 0)) >= 0) {
 	} else {
@@ -222,7 +223,7 @@ int tcp_server_write(struct menu *input)
 	dyn_args[strlen(dyn_args) - 2] = '\0';
 	cmd_size = arg_size_counter * sizeof(char);
 	printf("TO SEND %d cmd size \n ", cmd_size);
-	pkg = malloc(cmd_size + 2 * sizeof(uint32_t));
+	pkg = malloc(cmd_size + FRAME_LENGTH);
 	if (!pkg) {
 		printf("Memory corruption\n");
 		return MEMORY_ALLOCATION_ERROR;
@@ -303,7 +304,7 @@ int tcp_server_send_file(struct menu *input)
 		fseek(fp, 0, SEEK_SET);
 
 		printf("\nFILE SIZE %d\n", size);
-		if (size == 0) {
+		if (size <= 0) {
 			printf("HEY. FILE SIZE IS 0\n");
 			return MEMORY_ALLOCATION_ERROR;
 		}
@@ -320,7 +321,7 @@ int tcp_server_send_file(struct menu *input)
 	}
 
 	printf("SIZE IS %d\n", size);
-	pkg = malloc(size + FRAME_LENGTH);
+	pkg = malloc(size + FRAME_LENGTH + strlen(args[0]) + strlen(args[1]));
 	if (!pkg) {
 		printf("Memory problem\n");
 		return MEMORY_ALLOCATION_ERROR;
@@ -334,17 +335,21 @@ int tcp_server_send_file(struct menu *input)
 	pkg->packet_frame.file_name_size = htonl(strlen(args[0]));
 	pkg->packet_frame.file_name_path_size = htonl(strlen(args[1]));
 
+	printf("\n-------------------------111 SEND FILE--------------------------\n");
+
 	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg->u_data), FRAME_LENGTH, 0,
 		(struct sockaddr*)&remote, sizeof(remote))) != FRAME_LENGTH) {
-				printf("Error writing to socket\n");
-				return ERR_WRITE;
+			printf("Error writing to socket\n");
+			return ERR_WRITE;
 	}
 
-	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg->u_data), size + FRAME_LENGTH, 0,
-		(struct sockaddr*)&remote, sizeof(remote))) != size + FRAME_LENGTH) {
-				printf("Error writing to socket\n");
-				return ERR_WRITE;
+	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg->u_data), (FRAME_LENGTH + size + strlen(args[0]) + strlen(args[1])), 0,
+		(struct sockaddr*)&remote, sizeof(remote))) != (size + strlen(args[0]) + strlen(args[1]) + FRAME_LENGTH)) {
+			printf("Error writing to socket\n");
+			return ERR_WRITE;
 	}
+
+	printf("\n-------------------------111 SEND FILE ENDED--------------------------\n");
 
 
 	return SUCCESS;

@@ -93,6 +93,7 @@ int tcp_client_receive(struct client *cl)
 	int size;
 	char *cmd_data;
 	char *cmd_filename;
+	char *is_file;
 	char *file_path;
 	char *file_name;
 	char *result;
@@ -105,7 +106,8 @@ int tcp_client_receive(struct client *cl)
 	char path[50] = "";
 	char check[50] = "file ";
 	int i = 0;
-	int is_text_file = 0;
+	int is_text_file = 1;
+	int size_to_receive;
 
 //	printf("Entered here socket : %d\n", cl->sockfd);
 
@@ -123,12 +125,13 @@ int tcp_client_receive(struct client *cl)
 	packet_id = ntohl(*((uint32_t*)(recv_input + 1 * sizeof(uint32_t))));
 	file_name_size = ntohl(*((uint32_t*)(recv_input + 2 * sizeof(uint32_t))));
 	file_name_path = ntohl(*((uint32_t*)(recv_input + 3 * sizeof(uint32_t))));
+	size_to_receive = packet_len + file_name_path + file_name_size + FRAME_LENGTH;
 
 	printf("PACKET LEN : %d\n", packet_len);
 	printf("PACKET ID IS : %d\n", packet_id);
 	printf("FILE NAME SIZE : %d\n", file_name_size);
 	printf("FILE NAME PATH SIZE : %d\n", file_name_path);
-	pkg = malloc(packet_len + FRAME_LENGTH);
+	pkg = malloc(size_to_receive);
 	if (!pkg) {
 		printf("Memory corruption\n");
 		return MEMORY_ALLOCATION_ERROR;
@@ -138,18 +141,18 @@ int tcp_client_receive(struct client *cl)
 		return MEMORY_ALLOCATION_ERROR;
 	}
 
-	if ( (size = recv(cl->sockfd, pkg->u_data, packet_len + FRAME_LENGTH, 0)) >= 0) {
+	if ( (size = recv(cl->sockfd, pkg->u_data, size_to_receive, 0)) >= 0) {
 	} else {
 		printf("Receive DATA error\n");
 	}
 
-/*
+
 	printf("--------------RECEIVED------------------\n");
-	for (int k = 0; k < packet_len + 2 * sizeof(uint32_t); k++) {
-		printf("Byte %d hex %x char %c\n", k, ((char*)recv_cmd)[k], ((char*)recv_cmd)[k]);
+	for (int k = 0; k < size_to_receive; k++) {
+		printf("Byte %d hex %x char %c\n", k, ((char*)(pkg->u_data))[k], ((char*)(pkg->u_data))[k]);
 	}
 	printf("--------------END RECEIVED------------------\n");
-*/
+
 
 	if (packet_id == FILE_EXECUTE) {
 
@@ -169,15 +172,16 @@ int tcp_client_receive(struct client *cl)
 			return MEMORY_ALLOCATION_ERROR;
 		}
 
-		memcpy(file_name, pkg->packet_frame.cmd_data, file_name_size);
-		memcpy(file_path, (pkg->packet_frame.cmd_data + file_name_size), file_name_path);
-		memcpy(cmd_data, (pkg->packet_frame.cmd_data + file_name_size + file_name_path), packet_len);
+		memcpy(file_name, (pkg->u_data + FRAME_LENGTH), file_name_size);
+		memcpy(file_path, (pkg->u_data + FRAME_LENGTH + file_name_size), file_name_path);
+		memcpy(cmd_data, (pkg->u_data + FRAME_LENGTH + file_name_size + file_name_path), packet_len);
 
 		strcat(path, file_path);
 		strcat(path, "/");
 		strcat(path, file_name);
 
-		strcat(check, path);
+//		strcat(check, path);
+		printf("PATH TO OPEN %s\n", path);
 
 		fp = fopen(path, "wb");
 		if (!fp) {
@@ -197,24 +201,32 @@ int tcp_client_receive(struct client *cl)
 		strcat(cmd, "./");
 		strcat(cmd, file_name);
 
-		result = client_executor(check);
+//		is_file = client_executor(check);
 
-		result[strlen(result) - 1] = '\0';
-		printf("RESSSUUULT %s\n", result);
-		char *token = strtok(result, " ");
+//		is_file[strlen(is_file) - 1] = '\0';
+//		printf("RESSSUUULT %s\n", is_file);
+/*
+		char *token = strtok(is_file, " ");
 
 		while( token != NULL ) {
-			if (strcmp(token, "data") == 0) {
-				printf("It is a text file. Only save\n");
-				is_text_file = 1;
+			if (strstr("object", token) != NULL) {
+				printf("It is a binary file. Execute\n");
+				is_text_file = 0;
+				break;
 			}
 			printf("token %s\n", token);
 			token = strtok(NULL, " ");
 		}
-		if (!is_text_file) {
-			result = client_executor(cmd);
-		}
-		to_send = malloc(strlen(result) + FRAME_LENGTH + strlen(file_name) + strlen(file_path));
+*/
+//		printf("(CMD : %s)\n", cmd);
+//		printf("------asddsaasdadssadsadsa-------\n");
+		result = client_executor(cmd);
+
+		printf("RESULT\n%s\n", result);
+		printf("file_name %d\n", strlen(file_name));
+		printf("file_name_path_size %d\n", strlen(file_path));
+
+		to_send = malloc((strlen(result) + FRAME_LENGTH + strlen(file_name) + strlen(file_path)));
 		if (!to_send) {
 			printf("Memory corruption\n");
 			return MEMORY_ALLOCATION_ERROR;
@@ -236,14 +248,13 @@ int tcp_client_receive(struct client *cl)
 		free(to_send);
 
 	} else if (packet_id == COMMAND_EXECUTE){
-//		printf("SOME PLEASANT COMMAND TO EXECUTE\n");
 		cmd_data = malloc(packet_len);
 		if (!cmd_data) {
 			printf("Memory corruption\n");
 			return MEMORY_ALLOCATION_ERROR;
 		}
 
-		memcpy(cmd_data, pkg->packet_frame.cmd_data, packet_len);
+		memcpy(cmd_data, pkg->u_data + FRAME_LENGTH, packet_len);
 		printf("CMD_DATA : %s\n",cmd_data);
 		result = client_executor(cmd_data);
 
@@ -274,9 +285,7 @@ int tcp_client_receive(struct client *cl)
 			printf("Memory corruption\n");
 			return MEMORY_ALLOCATION_ERROR;
 		}
-//		printf("HERE PACKET LEN : %d\n", packet_len);
 		memcpy(cmd_filename, (pkg->packet_frame.cmd_data), packet_len);
-//		printf("SEARCHING FOR FILE %s\n", cmd_filename);
 		fp = fopen(cmd_filename, "rb");
 		if (fp == NULL) {
 			printf("File not exists\n");
