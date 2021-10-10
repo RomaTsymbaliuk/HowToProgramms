@@ -29,19 +29,15 @@ char *client_executor(char *cmd_data)
 	head = malloc(sizeof(struct list));
 	if (!head) {
 		printf("Memory problem\n");
-		return NULL;
+		return "Error";
 	}
 
 	copy_head = head;
 
-//	printf("CMD_DATA: %s-----\n", cmd_data);
-//	printf("-----GOT HERE 1-----\n");
-
 	fp = popen(cmd_data, "r");
 	if (fp == NULL) {
 		printf("Failed to run command!\n");
-//		printf("\n---->%s<----\n", strerror(errno));
-		return NULL;
+		return "Error";
 	}
 
 	while (fgets(result, 1024, fp) != NULL) {
@@ -49,12 +45,12 @@ char *client_executor(char *cmd_data)
 		head->item = strdup(result);
 		if (!(head->item)) {
 			printf("Malloc problem\n");
-			return NULL;
+			return "Error";
 		}
 		head->next = malloc(sizeof(struct list));
 		if (!(head->next)) {
 			printf("Malloc problem\n");
-			return NULL;
+			return "Error";
 		}
 		head = head->next;
 		s++;
@@ -62,23 +58,17 @@ char *client_executor(char *cmd_data)
 
 	}
 
-
-//	printf("GOT TO THE END , the end element is %s\n", head->item);
-
-//	printf("\n---->%s<----\n", strerror(errno));
-//	printf("---------GOT HERE 3----------\n");
 	head->next = NULL;
 
 	if (WEXITSTATUS(pclose(fp)) != 0) {
 		printf("File cannot be executed, just saved ");
-		return NULL;
+		return "Error";
 	}
 
-//	printf("size of response : %d\n", size);
 	cmd_to_ret = malloc(size);
 	if (!cmd_to_ret) {
 		printf("Memory problem\n");
-		return NULL;
+		return "Error";
 	}
 
 	k = 0;

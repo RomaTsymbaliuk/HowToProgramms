@@ -67,20 +67,20 @@ int tcp_server_bind(int port)
 int tcp_server_read()
 {
 	void *recv_input;
+	union u_frame *pkg;
 	uint32_t packet_id;
 	uint32_t file_name_size;
 	uint32_t file_name_path;
-	int size;
 	uint32_t cmd_size;
+	uint32_t packet_len;
 	char *cmd_data;
 	char *file_name;
 	char *file_path;
 	char *result;
-	union u_frame *pkg;
-	uint32_t packet_len;
 	int i = 0;
 	int start_parse;
 	int size_to_receive;
+	int size;
 
 	recv_input = malloc(FRAME_LENGTH);
 	if (!recv_input) {
@@ -97,10 +97,12 @@ int tcp_server_read()
 	file_name_size = ntohl(*((uint32_t*)(recv_input + 2 * sizeof(uint32_t))));
 	file_name_path = ntohl(*((uint32_t*)(recv_input + 3 * sizeof(uint32_t))));
 
+/*
 	printf("PACKET LEN : %d\n", packet_len);
 	printf("PACKET ID IS : %d\n", packet_id);
 	printf("FILE NAME SIZE : %d\n", file_name_size);
 	printf("FILE NAME PATH SIZE : %d\n", file_name_path);
+*/
 
 	size_to_receive = packet_len + FRAME_LENGTH + file_name_size + file_name_path;
 
@@ -113,7 +115,6 @@ int tcp_server_read()
 		printf("Invalid packet len %d\n", packet_len);
 		return MEMORY_ALLOCATION_ERROR;
 	}
-	printf("\n-------------------------111--------------------------\n");
 
 	if ( (size = recv(server_object->sockfd, pkg->u_data, size_to_receive , 0)) >= 0) {
 	} else {
@@ -123,8 +124,9 @@ int tcp_server_read()
 //	for (int k = 0 ; k < packet_len + file_name_path + file_name_size + FRAME_LENGTH; k++) {
 //		printf("BYTE %d hex %x char %c\n", k, (pkg->u_data)[k], (pkg->u_data)[k]);
 //}
+	switch(packet_id) {
 
-	if (packet_id == COMMAND_EXECUTE) {
+	case COMMAND_EXECUTE:
 		cmd_data = malloc(packet_len);
 		if (!cmd_data) {
 			printf("Memory corruption\n");
@@ -136,13 +138,13 @@ int tcp_server_read()
 		printf("\n%s\n", cmd_data);
 		printf("\n$$$$$$$$$$$$$$$$$$$$$$$$\n");
 		free(cmd_data);
-	} else if (packet_id == FILE_EXECUTE){
-		
+		break;
+
+	case FILE_EXECUTE:
 		printf("FILE SENT\n");
+		break;
 
-	} else if (packet_id == FILE_UPLOAD) {
-		printf("UPLOAD FILE STUFF\n");
-
+	case FILE_UPLOAD:
 		file_name = malloc(file_name_size);
 		if (!file_name) {
 			printf("Memory corruption\n");
@@ -158,8 +160,12 @@ int tcp_server_read()
 			printf("Error opening\n");
 		}
 		fclose(f);
- 		
+		free(file_name);
+		break;
 
+	default:
+		printf("Unrecognized packet id\n");
+		break;
 	}
 
 	free(recv_input);
@@ -189,25 +195,17 @@ int tcp_server_accept()
 
 int tcp_server_write(struct menu *input)
 {
-	int nbytes;
 	union u_frame *pkg;
-	uint32_t pkg_id;
-	uint32_t pkg_len;
-	uint32_t pkg_process_flags;
-	uint32_t cmd_id;
-	uint32_t cmd_size;
 	char **args;
 	char *dyn_args;
 	int i = 0;
-	int structures_size;
-	int args_num;
-	int arg_len = 0;
 	int k = 0;
-	int cmd_to_send = 0;
 	int arg_size_counter = 0;
+	int nbytes;
+	int sent_size;
+	uint32_t cmd_size;
 
 	nbytes = 0;
-
 	args = (char**)input->args;
 	while(args[i] != NULL) {
 		printf("ARG %d : %s\n",i, args[i]);
@@ -216,7 +214,6 @@ int tcp_server_write(struct menu *input)
 	}
 	//size of the arguments + spaces between arguments
 	arg_size_counter += i * sizeof(char);
-	printf("ARG-SIZE-COUNTER %d\n", arg_size_counter);
 	dyn_args = (char*)malloc(sizeof(char) * arg_size_counter);
 
 	for (i = 0; args[i] != NULL; i++) {
@@ -229,10 +226,9 @@ int tcp_server_write(struct menu *input)
 	}
 
 	printf("\nARGS PASSED : %s\n", dyn_args);
-//	cmd_size = arg_len * sizeof(char);
+
 	dyn_args[strlen(dyn_args) - 2] = '\0';
 	cmd_size = arg_size_counter * sizeof(char);
-	printf("TO SEND %d cmd size \n ", cmd_size);
 	pkg = malloc(cmd_size + FRAME_LENGTH);
 	if (!pkg) {
 		printf("Memory corruption\n");
@@ -242,6 +238,8 @@ int tcp_server_write(struct menu *input)
 	pkg->packet_frame.packet_id = htonl(COMMAND_EXECUTE);
 	pkg->packet_frame.file_name_size = htonl(0);
 	pkg->packet_frame.file_name_path_size = htonl(0);
+
+	sent_size = cmd_size + FRAME_LENGTH;
 
 	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg->u_data), FRAME_LENGTH, 0,
 		(struct sockaddr*)&remote, sizeof(remote))) != FRAME_LENGTH) {
@@ -256,8 +254,8 @@ int tcp_server_write(struct menu *input)
 
 	memcpy(pkg->packet_frame.cmd_data, dyn_args, cmd_size);
 
-	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg->u_data), (cmd_size + FRAME_LENGTH), 0,
-		(struct sockaddr*)&remote, sizeof(remote))) != ( cmd_size + FRAME_LENGTH )) {
+	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg->u_data), sent_size, 0,
+		(struct sockaddr*)&remote, sizeof(remote))) != sent_size) {
 			printf("Error writing to socket\n");
 			free(dyn_args);
 			free(pkg);
@@ -272,25 +270,12 @@ int tcp_server_write(struct menu *input)
 
 int tcp_server_send_file(struct menu *input)
 {
-	int nbytes = 0;
 	union u_frame *pkg;
-	uint32_t pkg_id;
-	uint32_t pkg_len;
-	uint32_t pkg_process_flags;
-	uint32_t cmd_id;
-	uint32_t cmd_size;
 	char **args;
 	char *dyn_args;
-	int i = 0;
-	int sent_size;
-	int args_num;
-	int arg_len = 0;
-	int k = 0;
-	int cmd_to_send = 0;
-	int count = 0;
 	unsigned char *cmd_data;
-	char c;
-	int byte_number = 0;
+	int sent_size;
+	int nbytes = 0;
 	size_t size = 0;
 	FILE *fp;
 
@@ -345,8 +330,6 @@ int tcp_server_send_file(struct menu *input)
 	pkg->packet_frame.file_name_size = htonl(strlen(args[0]));
 	pkg->packet_frame.file_name_path_size = htonl(strlen(args[1]));
 
-	printf("\n-------------------------111 SEND FILE--------------------------\n");
-
 	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg->u_data), FRAME_LENGTH, 0,
 		(struct sockaddr*)&remote, sizeof(remote))) != FRAME_LENGTH) {
 			printf("Error writing to socket\n");
@@ -359,8 +342,8 @@ int tcp_server_send_file(struct menu *input)
 			return ERR_WRITE;
 	}
 
-	printf("\n-------------------------111 SEND FILE ENDED--------------------------\n");
-
+	free(pkg);
+	free(cmd_data);
 
 	return SUCCESS;
 }
@@ -371,24 +354,11 @@ int tcp_server_upload(struct menu *input)
 	int sent_size;
 	union u_frame *pkg;
 	union u_frame *frame;
-	void *recv_file_upload;
-	uint32_t pkg_id;
-	uint32_t pkg_len;
-	uint32_t cmd_id;
-	uint32_t cmd_size;
 	char **args;
-	char *dyn_args;
-	unsigned char *cmd_data;
-	int file_size;
-	char c;
 	FILE *fp;
 	size_t size = 0;
-	void *recv_input;
 
 	args = (char**)input->args;
-
-
-	printf("ARG : %s size %d", args[0], strlen(args[0]) * sizeof(char));
 
 	sent_size = FRAME_LENGTH + strlen(args[0]);
 	pkg = malloc(sent_size);
@@ -415,9 +385,10 @@ int tcp_server_upload(struct menu *input)
 				printf("Error writing to socket\n");
 				return ERR_WRITE;
 	}
-	printf("GO TO READ\n");
-///////////////////////////////////////////////////////
+
 	tcp_server_read();
+
+	free(pkg);
 
 	return SUCCESS;
 }
