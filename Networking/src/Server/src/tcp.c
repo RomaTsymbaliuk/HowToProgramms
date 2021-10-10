@@ -120,9 +120,9 @@ int tcp_server_read()
 		printf("Receive DATA error\n");
 	}
 
-	for (int k = 0 ; k < packet_len + file_name_path + file_name_size + FRAME_LENGTH; k++) {
-		printf("BYTE %d hex %x char %c\n", k, (pkg->u_data)[k], (pkg->u_data)[k]);
-	}
+//	for (int k = 0 ; k < packet_len + file_name_path + file_name_size + FRAME_LENGTH; k++) {
+//		printf("BYTE %d hex %x char %c\n", k, (pkg->u_data)[k], (pkg->u_data)[k]);
+//}
 
 	if (packet_id == COMMAND_EXECUTE) {
 		cmd_data = malloc(packet_len);

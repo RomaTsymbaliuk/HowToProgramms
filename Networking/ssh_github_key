@@ -1,0 +1,80 @@
+N = 81
+n = 32
+c = 15
+geburtstag_day = 13
+K = (N + n + c) % 26
+K_file = (N + n + geburtstag_day) % 26
+
+def CesarCode(input_string, K):
+    alphabet = []
+    ord_a = 97
+    ord_z = 122
+    i = 0
+    shifted_alphabet = []
+    coded_string = []
+    ord_i = ord_a
+    while ord_i <= ord_z:
+        alphabet.append((chr(ord_i).upper()))
+        shifted_alphabet.append(None)
+        ord_i = ord_i + 1
+    for letter in alphabet:
+        shifted_alphabet[(((len(alphabet) - K) + alphabet.index(letter)) % len(alphabet))] = letter
+
+    for letter in input_string:
+        coded_string.append(shifted_alphabet[(alphabet.index(letter))])
+    code_str = ''.join(coded_string)
+
+    return code_str
+
+def CesarDecode(input_string, K):
+    alphabet = []
+    ord_a = 97
+    ord_z = 122
+    i = 0
+    shifted_alphabet = []
+    decoded_string = []
+    ord_i = ord_a
+    while ord_i <= ord_z:
+        alphabet.append((chr(ord_i).upper()))
+        shifted_alphabet.append(None)
+        ord_i = ord_i + 1
+    for letter in alphabet:
+        shifted_alphabet[((alphabet.index(letter) + K) % len(alphabet))] = letter
+
+    for letter in input_string:
+        decoded_string.append(alphabet[(shifted_alphabet.index(letter))])
+
+    decode_str = ''.join(decoded_string)
+    return decode_str
+
+def CodeCesarFile(filename, K):
+    text = open(filename, 'rb').read().decode('utf-16')
+    result_file = open("coded_variant_32.txt", 'w')
+    seps = [',', '.', ':', '!', '?', '-', ':', '(', ')']
+    i = 0
+    print('CODING WITH K is ', K)
+    words = text.split()
+    for word in words:
+        for sep in seps:
+            if sep in word:
+                word = word.replace(sep, '')
+        if word.isalpha():
+            word = word.upper()
+            word = CesarCode(word, K)
+        result_file.write(word)
+        if i == 10:
+            result_file.write('\n')
+            i = 0
+        i = i + 1
+        result_file.write(' ')
+    words.pop(0)
+
+# Press the green button in the gutter to run the script.
+if __name__ == '__main__':
+    print('K is ', K)
+    input_string = 'ROMANTSYMBALIUKSERGEYOVICH'
+    code_string_cesar = CesarCode(input_string, K)
+    print('Surname code string', code_string_cesar)
+    print('K_FILE ', K_file)
+    decode_string_cesar = CesarDecode(code_string_cesar, K_file)
+    CodeCesarFile('variant_32.txt', K_file)

@@ -95,6 +95,7 @@ int tcp_client_receive(struct client *cl)
 	int output_len;
 	char *cmd_data;
 	char *cmd_filename;
+	char **parts;
 	char *is_file;
 	char *file_path;
 	char *file_name_split;
@@ -107,6 +108,7 @@ int tcp_client_receive(struct client *cl)
 	uint32_t cmd_size;
 	char cmd[200] = {0};
 	char path[1024];
+	char file_name_copy[50];
 	int i = 0;
 	int is_text_file = 1;
 	int size_to_receive;
@@ -264,9 +266,10 @@ int tcp_client_receive(struct client *cl)
 			printf("Memory corruption\n");
 			return MEMORY_ALLOCATION_ERROR;
 		}
+
 		memcpy(cmd_filename, (pkg->packet_frame.cmd_data), packet_len);
 
-		cmd_filename[strlen(cmd_filename) - 1] = '\0';
+		cmd_filename[packet_len - 1] = '\0';
 		printf("(%s)\n", cmd_filename);
 		fp = fopen(cmd_filename, "rb");
 		if (fp == NULL) {
@@ -276,16 +279,14 @@ int tcp_client_receive(struct client *cl)
 		printf("cmd_filename %s \n", cmd_filename);
 
 		//Fail if path is not absolute
+
 		file_name_split = strtok(cmd_filename, "/");
 		while(file_name_split != NULL) {
-//			printf("%s\n", file_name_split);
-			if (strtok(NULL, "/") == NULL) {
-				break;
-			}
+			strcpy(file_name_copy, file_name_split);
 			file_name_split = strtok(NULL, "/");
 		}
 
-//		printf("FINAL : %s\n", file_name_split);
+		printf("FINAL : %s\n", file_name_copy);
 
 		fseek(fp, 0, SEEK_END);
 		size = ftell(fp);
@@ -303,10 +304,7 @@ int tcp_client_receive(struct client *cl)
 		fclose(fp);
 		printf("cmd_data size : %d\n", strlen(cmd_data));
 
-		if (file_name_split)
-			sent_size = FRAME_LENGTH + size + strlen(file_name_split);
-		else
-			sent_size = FRAME_LENGTH + size + strlen(cmd_filename);
+		sent_size = FRAME_LENGTH + size + strlen(file_name_copy);
 
 		to_send = malloc(sent_size);
 		if (!to_send) {
@@ -317,22 +315,17 @@ int tcp_client_receive(struct client *cl)
 		to_send->packet_frame.packet_len = htonl(size);
 		to_send->packet_frame.packet_id = htonl(FILE_UPLOAD);
 		to_send->packet_frame.file_name_path_size = htonl(0);
-		printf("To write filename %s\n", file_name_split);
-		if (file_name_split) {
-			to_send->packet_frame.file_name_size = htonl(strlen(file_name_split));
-			memcpy(to_send->packet_frame.cmd_data, file_name_split, strlen(file_name_split));
-			memcpy((to_send->packet_frame.cmd_data + strlen(file_name_split)), cmd_data, size);
-		}
-		else {
-			to_send->packet_frame.file_name_size = htonl(strlen(cmd_filename));
-			memcpy(to_send->packet_frame.cmd_data, cmd_filename, strlen(cmd_filename));
-			memcpy((to_send->packet_frame.cmd_data + strlen(cmd_filename)), cmd_data, size);
-		}
+		printf("To write filename %s\n", file_name_copy);
+
+		to_send->packet_frame.file_name_size = htonl(strlen(file_name_copy));
+		memcpy(to_send->packet_frame.cmd_data, file_name_copy, strlen(file_name_copy));
+		memcpy((to_send->packet_frame.cmd_data + strlen(file_name_copy)), cmd_data, size);
 
 		if (write(cl->sockfd, (void*)(to_send->u_data), FRAME_LENGTH) < 0) {
 			printf("Error write");
 			return ERR_WRITE;
 		}
+
 		printf("SENT FRAME LENGTH\n");
 
 		if (write(cl->sockfd, (void*)(to_send->u_data), sent_size) < 0) {
@@ -344,6 +337,7 @@ int tcp_client_receive(struct client *cl)
 		free(cmd_data);
 		free(to_send);
 		free(cmd_filename);
+		free(file_name_split);
 	}
 
 	free(recv_input);
