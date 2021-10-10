@@ -176,7 +176,9 @@ int tcp_server_read()
 int tcp_server_disconnect()
 {
 	sprintf(server_object->cli_state, ">>>");
-	return 	close(server_object->sockfd);
+	close(server_object->sockfd);
+
+	return SUCCESS;
 }
 
 int tcp_server_accept()

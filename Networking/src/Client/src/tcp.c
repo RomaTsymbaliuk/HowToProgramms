@@ -136,7 +136,6 @@ int tcp_client_receive(struct client *cl)
 		printf("Receive DATA error\n");
 	}
 
-
 //	printf("--------------RECEIVED------------------\n");
 //	for (int k = 0; k < size_to_receive; k++) {
 //		printf("Byte %d hex %x char %c\n", k, ((char*)(pkg->u_data))[k], ((char*)(pkg->u_data))[k]);

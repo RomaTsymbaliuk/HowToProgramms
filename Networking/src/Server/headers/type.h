@@ -8,11 +8,14 @@ enum {TCP = 1, UDP, NTP, DNS};
 
 enum {FILE_EXECUTE = 1, COMMAND_EXECUTE,FILE_UPLOAD};
 
+enum {eth, wifi, lo};
+
 struct server {
 	int sockfd;
 	int server_id;
 	char cli_state[20];
 	void *server_type;
+	char *interface;
 	int port;
 	int (*server_listen)();
 	int (*server_bind)(int port);

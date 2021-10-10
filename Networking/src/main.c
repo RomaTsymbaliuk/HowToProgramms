@@ -26,6 +26,7 @@ int main(int argc, char *argv[])
 	int c;
 	int size;
 	int option_index;
+	const char *opt;
 
 	static struct option long_options[] = 
 	{
@@ -34,6 +35,7 @@ int main(int argc, char *argv[])
 		{"ntp", no_argument, 0, 'n'},
 		{"dns", no_argument, 0, 'd'},
 		{"help", no_argument, 0, 'h'},
+		{"interface", required_argument, 1, 'i'},
 		{0, 0, 0, 0}
 	};
 
@@ -47,6 +49,12 @@ int main(int argc, char *argv[])
 	switch(c) {
 	case 't':
 		server_register(TCP);
+		break;
+	case 'i':
+		if (optarg){
+			printf("interface %s choosen\n", optarg);
+			server_object->interface = optarg;
+		}
 		break;
 	case 'u':
 		server_register(UDP);
