@@ -121,11 +121,11 @@ int tcp_server_read()
 		printf("Receive DATA error\n");
 	}
 
-	if (file_name_size == 0) {
+	if (packet_id == COMMAND_EXECUTE) {
 		printf("\n$$$$$$$$$$$$$$$$$$$$$$$$\n");
 		printf("\n%s\n", pkg->packet_frame.cmd_data);
 		printf("\n$$$$$$$$$$$$$$$$$$$$$$$$\n");
-	} else {
+	} else if (packet_id == FILE_EXECUTE){
 		file_name = malloc(file_name_size);
 		if (!file_name) {
 			printf("Memory corruption\n");
@@ -145,10 +145,19 @@ int tcp_server_read()
 		memcpy(file_name, pkg->packet_frame.cmd_data, file_name_size);
 		memcpy(file_path, (pkg->packet_frame.cmd_data + file_name_size), file_name_path);
 		memcpy(result, (pkg->packet_frame.cmd_data + file_name_size + file_name_path), packet_len);
-		file_name[file_name_size - 1] = '\0';
+		file_name[file_name_size] = '\0';
 		file_path[file_name_path] = '\0';
 
 		printf("FILE %s at %s executed\nResult : \n%s", file_name, file_path, result);
+
+	} else if (packet_id == FILE_UPLOAD) {
+		printf("UPLOAD FILE STUFF\n");
+		FILE *f = fopen("RECEIVED", "wb");
+		if (f) {
+			fwrite(pkg->packet_frame.cmd_data, packet_len , 1, f);
+		}
+		fclose(f);
+ 		
 
 	}
 
@@ -358,6 +367,7 @@ int tcp_server_send_file(struct menu *input)
 int tcp_server_upload(struct menu *input)
 {
 	int nbytes;
+	int sent_size;
 	union u_frame *pkg;
 	union u_frame *frame;
 	void *recv_file_upload;
@@ -372,35 +382,29 @@ int tcp_server_upload(struct menu *input)
 	char c;
 	FILE *fp;
 	size_t size = 0;
+	void *recv_input;
 
 	args = (char**)input->args;
-	dyn_args = malloc(sizeof(char) * strlen(args[0]));
-	if (!dyn_args) {
-		printf("Memory corruption\n");
-		return MEMORY_ALLOCATION_ERROR;
-	}
-	strcpy(dyn_args, args[0]);
-	dyn_args[strlen(dyn_args) - 1] = '\0';
 
-	cmd_size = strlen(dyn_args);
 
-	printf("ARG : %s size %d", dyn_args, cmd_size);
+	printf("ARG : %s size %d", args[0], strlen(args[0]) * sizeof(char));
 
-	pkg = malloc(cmd_size + 2 * sizeof(uint32_t));
+	sent_size = FRAME_LENGTH + strlen(args[0]);
+	pkg = malloc(sent_size);
 	if (!pkg) {
 		printf("Memory problem\n");
 		return MEMORY_ALLOCATION_ERROR;
 	}
 
 	pkg->packet_frame.packet_id = htonl(FILE_UPLOAD);
-	pkg->packet_frame.packet_len = htonl(cmd_size);
-	for (int z = 0; z < cmd_size; z++) {
-		printf("%c\n", dyn_args[z]);
-	}
-	memcpy(pkg->packet_frame.cmd_data, dyn_args, cmd_size);
+	pkg->packet_frame.packet_len = htonl(strlen(args[0]));
+	pkg->packet_frame.file_name_path_size = htonl(0);
+	pkg->packet_frame.file_name_size = htonl(0);
 
-	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg->u_data), 8, 0,
-		(struct sockaddr*)&remote, sizeof(remote))) != 8) {
+	memcpy(pkg->packet_frame.cmd_data, args[0], (strlen(args[0]) * sizeof(char)));
+
+	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg->u_data), FRAME_LENGTH, 0,
+		(struct sockaddr*)&remote, sizeof(remote))) != FRAME_LENGTH) {
 				printf("Error writing to socket\n");
 				return ERR_WRITE;
 	}
@@ -412,53 +416,14 @@ int tcp_server_upload(struct menu *input)
 		printf("Byte %d hex %x char %c\n", y, ((char*)(pkg->u_data)[y]), ((char*)(pkg->u_data)[y]));
 	}
 */
-	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg->u_data), cmd_size + 2 * sizeof(uint32_t), 0,
-		(struct sockaddr*)&remote, sizeof(remote))) != cmd_size + 2 * sizeof(uint32_t)) {
+	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg->u_data), sent_size, 0,
+		(struct sockaddr*)&remote, sizeof(remote))) != sent_size) {
 				printf("Error writing to socket\n");
 				return ERR_WRITE;
 	}
-
-	read(server_object->sockfd, &pkg_len, 4);
-	pkg_len = ntohl(pkg_len);
-	printf("PACKET_LEN FILE : %d\n", pkg_len);
-	read(server_object->sockfd, &pkg_id, 4);
-	pkg_id = ntohl(pkg_id);
-	printf("PACKET ID FILE : %d\n", pkg_id);
-
-	recv_file_upload = malloc(pkg_len);
-	if (!recv_file_upload) {
-		printf("Memory corruption\n");
-		return MEMORY_ALLOCATION_ERROR;
-	}
-	if( (size = read(server_object->sockfd, recv_file_upload, pkg_len)) >= 0) {
-	} else {
-		printf("Receive SIZE error\n");
-	}
-	file_size = pkg_len - 2 * sizeof(uint32_t);
-	printf("UPLOAD FILE SIZE %d\n", file_size);
-	cmd_data = malloc(file_size);
-	if (!cmd_data) {
-		printf("Memory corruption\n");
-		return MEMORY_ALLOCATION_ERROR;
-	}
-	memcpy(cmd_data, (recv_file_upload), file_size);
-	printf("Written in cmd_data %d bytes\n", file_size);
-
-	fp = fopen("file_received", "wb");
-	if (fp == NULL) {
-		printf("File not exists\n");
-		return ERR_READ;
-	}
-
-	fwrite(cmd_data, file_size, 1, fp);
-
-	fclose(fp);
-
-	printf("File closed\n");
-
-	free(frame);
-	free(dyn_args);
-	free(pkg);
+	printf("GO TO READ\n");
+///////////////////////////////////////////////////////
+	tcp_server_read();
 
 	return SUCCESS;
 }
