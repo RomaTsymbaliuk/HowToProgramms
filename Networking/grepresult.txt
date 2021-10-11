@@ -1,0 +1,13 @@
+qca/feeds/packages/cambium-pkg/net-snmp/patches/910-fix-warnings-for-werror.patch:2731:--- a/apps/snmpset.c
+qca/feeds/packages/cambium-pkg/net-snmp/patches/910-fix-warnings-for-werror.patch:2732:+++ b/apps/snmpset.c
+qca/feeds/packages/cambium-pkg/net-snmp/patches/910-fix-warnings-for-werror.patch:2741:     fprintf(stderr, "USAGE: snmpset ");
+qca/feeds/luci/modules/luci-mod-admin-full/luasrc/controller/admin/index.lua:2187:    --line = "snmpset -v 2c -c " .. community .. " localhost " .. key .. " i 1 2>/tmp/snmp_errors/" .. key
+qca/feeds/luci/modules/luci-mod-admin-full/luasrc/controller/admin/index.lua:2411:function snmpset(key, v, isdebug)
+qca/feeds/luci/modules/luci-mod-admin-full/luasrc/controller/admin/index.lua:2419:    result, line = shellexec("snmpset -v 2c -c %Q localhost %Q = %Q 2>%Q", community, key, v, errPath)
+staging_dir/target-arm_cortex-a7_musl-1.1.16_eabi/usr/include/net-snmp/net-snmp-config.h:1596:/* How long to wait before restarting the agent after a snmpset to
+staging_dir/target-arm_cortex-a7_musl-1.1.16_eabi/usr/include/net-snmp/net-snmp-config.h:1598:   necessary to finish the snmpset reply before restarting. */
+staging_dir/target-arm_cortex-a7_musl-1.1.16_eabi/root-ipq/etc/clish/net.xml:187:       exec snmpset -v ${version} $authargs ${agent} ${oid} ${type} "${value}"
+staging_dir/target-arm_cortex-a7_musl-1.1.16_eabi/root-ipq/usr/lib/lua/luci/controller/admin/index.lua:2187:    --line = "snmpset -v 2c -c " .. community .. " localhost " .. key .. " i 1 2>/tmp/snmp_errors/" .. key
+staging_dir/target-arm_cortex-a7_musl-1.1.16_eabi/root-ipq/usr/lib/lua/luci/controller/admin/index.lua:2411:function snmpset(key, v, isdebug)
+staging_dir/target-arm_cortex-a7_musl-1.1.16_eabi/root-ipq/usr/lib/lua/luci/controller/admin/index.lua:2419:    result, line = shellexec("snmpset -v 2c -c %Q localhost %Q = %Q 2>%Q", community, key, v, errPath)
+

@@ -273,11 +273,15 @@ int tcp_server_write(struct menu *input)
 int tcp_server_send_file(struct menu *input)
 {
 	union u_frame *pkg;
+	union u_frame **packages;
 	char **args;
 	char *dyn_args;
 	unsigned char *cmd_data;
 	int sent_size;
 	int nbytes = 0;
+	int num_packages = 0;
+	int offset = 0;
+	int one_package_size = 0;
 	size_t size = 0;
 	FILE *fp;
 
@@ -306,29 +310,15 @@ int tcp_server_send_file(struct menu *input)
 		return MEMORY_ALLOCATION_ERROR;
 	}
 
-	cmd_data = malloc(size);
-	if (!cmd_data) {
-		printf("Memory corruption\n");
-		return MEMORY_ALLOCATION_ERROR;
-	}
+	sent_size = size;
 
-	fread(cmd_data, size, 1, fp);
-
-	fclose(fp);
-
-	sent_size = size + FRAME_LENGTH + strlen(args[0]) + strlen(args[1]);
-
-	pkg = malloc(sent_size);
+	pkg = malloc(FRAME_LENGTH);
 	if (!pkg) {
 		printf("Memory problem\n");
 		return MEMORY_ALLOCATION_ERROR;
 	}
-
 	pkg->packet_frame.packet_id = htonl(FILE_EXECUTE);
 	pkg->packet_frame.packet_len = htonl(size);
-	memcpy(pkg->packet_frame.cmd_data, args[0], strlen(args[0]));
-	memcpy((pkg->packet_frame.cmd_data + strlen(args[0])), args[1], strlen(args[1]));
-	memcpy((pkg->packet_frame.cmd_data + strlen(args[0]) + strlen(args[1])), cmd_data, size);
 	pkg->packet_frame.file_name_size = htonl(strlen(args[0]));
 	pkg->packet_frame.file_name_path_size = htonl(strlen(args[1]));
 
@@ -338,13 +328,58 @@ int tcp_server_send_file(struct menu *input)
 			return ERR_WRITE;
 	}
 
-	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg->u_data), sent_size, 0,
-		(struct sockaddr*)&remote, sizeof(remote))) != sent_size) {
-			printf("Error writing to socket\n");
-			return ERR_WRITE;
+
+	num_packages = size / TCP_LIMIT + 1;
+
+	cmd_data = malloc((size / num_packages));
+	if (!cmd_data) {
+		printf("Memory corruption\n");
+		return MEMORY_ALLOCATION_ERROR;
 	}
 
+	printf("To send %d packages\n", num_packages);
+
+	one_package_size = FRAME_LENGTH + strlen(args[0]) + strlen(args[1]) + size / num_packages;
+
+	printf("One package size %d\n", one_package_size);
+
+	packages = malloc(sizeof(union u_frame*) * (num_packages + 1));
+	if (!packages) {
+		printf("Memory corruption\n");
+		return MEMORY_ALLOCATION_ERROR;
+	}
+	for (int k = 0; k <= num_packages; k++) {
+		packages[k] = malloc(one_package_size);
+		if (!packages[k]) {
+			printf("Memory corruption\n");
+		}
+		fread(cmd_data, (size / num_packages), 1, fp);
+		packages[k]->packet_frame.packet_id = htonl(FILE_EXECUTE);
+		packages[k]->packet_frame.packet_len = htonl(size);
+		if (k == 0) {
+			packages[k]->packet_frame.file_name_size = htonl(strlen(args[0]));
+			packages[k]->packet_frame.file_name_path_size = htonl(strlen(args[1]));
+			memcpy(packages[k]->packet_frame.cmd_data, args[0], strlen(args[0]));
+			memcpy((packages[k]->packet_frame.cmd_data + strlen(args[0])), args[1], strlen(args[1]));
+			memcpy((packages[k]->packet_frame.cmd_data + strlen(args[0]) + strlen(args[1])), cmd_data, (size / num_packages));
+		} else {
+			memcpy((packages[k]->packet_frame.cmd_data), cmd_data, (size / num_packages));
+			one_package_size = FRAME_LENGTH + (size / num_packages);
+		}
+
+		if ((nbytes = sendto(server_object->sockfd, (void*)(packages[k]->u_data), one_package_size, 0,
+			(struct sockaddr*)&remote, sizeof(remote))) != one_package_size) {
+				printf("Error writing to socket\n");
+				return ERR_WRITE;
+		}
+
+		free(packages[k]);
+	}
+
+	fclose(fp);
+
 	free(pkg);
+	free(packages);
 	free(cmd_data);
 
 	return SUCCESS;

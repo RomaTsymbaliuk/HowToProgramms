@@ -77,8 +77,6 @@ int tcp_client_receive(struct client *cl)
 {
 	FILE *fp;
 	FILE *ch;
-	int nbytes;
-	int size;
 	void *recv_input;
 	uint32_t packet_id;
 	uint32_t file_name_size;
@@ -93,10 +91,17 @@ int tcp_client_receive(struct client *cl)
 	char file_name_copy[50];
 	char path[1024];
 	union u_frame *pkg;
+	union u_frame **packages;
 	union u_frame *to_send;
 	int i = 0;
+	int j = 0;
 	int size_to_receive;
 	int sent_size;
+	int offset = 0;
+	int num_packages = 1;
+	int one_package_size = 0;
+	int nbytes;
+	int size;
 
 //	printf("Entered here socket : %d\n", cl->sockfd);
 
@@ -121,35 +126,62 @@ int tcp_client_receive(struct client *cl)
 	printf("PACKET ID IS : %d\n", packet_id);
 	printf("FILE NAME SIZE : %d\n", file_name_size);
 	printf("FILE NAME PATH SIZE : %d\n", file_name_path);
+
+	if (packet_len < 0) {
+		printf("Invalid packet len %d\n", packet_len);
+		return MEMORY_ALLOCATION_ERROR;
+	}
+
+	num_packages = (packet_len / TCP_LIMIT) + 1;
+	one_package_size = FRAME_LENGTH + file_name_size + file_name_path + packet_len / num_packages;
+	printf("First package size is %d other is %d\n", one_package_size, (one_package_size - file_name_size - file_name_path));
+	size_to_receive = packet_len;
+
+	printf("There will be %d packages to receive\n", num_packages);
+
+	packages = malloc(sizeof(union u_frame*) * (num_packages + 1));
+	if (!packages) {
+		printf("Memory corruption\n");
+		return MEMORY_ALLOCATION_ERROR;
+	}
+	for (j = 0; j <= num_packages; j++) {
+		packages[j] = malloc(one_package_size);
+		if (!packages[j]) {
+			printf("Memory corruption\n");
+		}
+		if (j != 0) {
+			one_package_size = FRAME_LENGTH + (packet_len / num_packages);
+		}
+		if ( (size = recv(cl->sockfd, (packages[j])->u_data, one_package_size, 0)) >= 0) {
+//			printf("RECEIVED package %d\n", j);
+		} else {
+//			printf("Receive DATA error\n");
+		}
+	}
+	printf("j is %d\n", j);
+/*
 	pkg = malloc(size_to_receive);
 	if (!pkg) {
 		printf("Memory corruption\n");
 		return MEMORY_ALLOCATION_ERROR;
 	}
-	if (packet_len < 0 || packet_len > 1000000) {
-		printf("Invalid packet len %d\n", packet_len);
-		return MEMORY_ALLOCATION_ERROR;
-	}
+*/
 
-	if ( (size = recv(cl->sockfd, pkg->u_data, size_to_receive, 0)) >= 0) {
-	} else {
-		printf("Receive DATA error\n");
+/*
+	printf("--------------RECEIVED------------------\n");
+	for (int k = 0; k < num_packages; k++) {
+		printf("Package %d\n", k);
+		for (int j = 0; j < one_package_size; j++) {
+			printf("Byte %d hex %x char %c\n", j, (char*)((packages[k])->u_data)[j], (char*)((packages[k])->u_data)[j]);
+		}
 	}
-
-//	printf("--------------RECEIVED------------------\n");
-//	for (int k = 0; k < size_to_receive; k++) {
-//		printf("Byte %d hex %x char %c\n", k, ((char*)(pkg->u_data))[k], ((char*)(pkg->u_data))[k]);
-//	}
-//	printf("--------------END RECEIVED------------------\n");
+	printf("--------------END RECEIVED------------------\n");
+*/
 
 	switch(packet_id) {
 
 	case FILE_EXECUTE:
-		cmd_data = malloc(packet_len);
-		if (!cmd_data) {
-			printf("Memory corruption\n");
-			return MEMORY_ALLOCATION_ERROR;
-		}
+
 		file_name = malloc(file_name_size);
 		if (!file_name) {
 			printf("Memory corruption\n");
@@ -161,9 +193,9 @@ int tcp_client_receive(struct client *cl)
 			return MEMORY_ALLOCATION_ERROR;
 		}
 
-		memcpy(file_name, (pkg->u_data + FRAME_LENGTH), file_name_size);
-		memcpy(file_path, (pkg->u_data + FRAME_LENGTH + file_name_size), file_name_path);
-		memcpy(cmd_data, (pkg->u_data + FRAME_LENGTH + file_name_size + file_name_path), packet_len);
+
+		memcpy(file_name, (packages[0]->u_data + FRAME_LENGTH), file_name_size);
+		memcpy(file_path, (packages[0]->u_data + FRAME_LENGTH + file_name_size), file_name_path);
 
 		file_name[file_name_size] = '\0';
 		file_path[file_name_path] = '\0';
@@ -176,7 +208,7 @@ int tcp_client_receive(struct client *cl)
 		printf("file_name ---->>%s<<---\n", file_name);
 		printf("file_path ---->>%s<<---\n", file_path);
 
-		fp = fopen(path, "wb");
+		fp = fopen(path, "wb+");
 		if (!fp) {
 			perror("fopen");
 			sent_size = FRAME_LENGTH;
@@ -203,7 +235,20 @@ int tcp_client_receive(struct client *cl)
 			break;
 		}
 
-		fwrite(cmd_data, packet_len, 1, fp);
+		cmd_data = malloc((packet_len / num_packages));
+		if (!cmd_data) {
+			printf("Memory corruption\n");
+			return MEMORY_ALLOCATION_ERROR;
+		}
+
+		for (int i = 0; i <= num_packages; i++) {
+			if (i == 0) {
+				memcpy(cmd_data, (packages[i]->u_data + FRAME_LENGTH + file_name_size + file_name_path), (packet_len / num_packages));
+			} else {
+				memcpy(cmd_data, (packages[i]->u_data + FRAME_LENGTH), (packet_len / num_packages));
+			}
+			fwrite(cmd_data, (packet_len / num_packages), 1, fp);
+		}
 
 		fclose(fp);
 
@@ -229,6 +274,7 @@ int tcp_client_receive(struct client *cl)
 		free(to_send);
 		free(file_name);
 		free(file_path);
+		free(cmd_data);
 
 		break;
 
