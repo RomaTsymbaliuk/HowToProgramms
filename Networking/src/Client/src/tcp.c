@@ -171,17 +171,22 @@ int tcp_client_receive(struct client *cl)
 	}
 	one_package_size = (packet_size_copy + TCP_LIMIT + FRAME_LENGTH);
 	last_pkg_size = TCP_LIMIT + packet_size_copy;
+	printf("LAST PKG SIZE %d\n", last_pkg_size);
 
-	last_pkg = malloc(last_pkg_size);
-	if (!last_pkg) {
-		printf("Memory corruption\n");
-		return MEMORY_ALLOCATION_ERROR;
+	if (last_pkg_size % TCP_LIMIT) {
+		one_package_size = last_pkg_size + FRAME_LENGTH;
+		last_pkg = malloc(last_pkg_size);
+		if (!last_pkg) {
+			printf("Memory corruption\n");
+			return MEMORY_ALLOCATION_ERROR;
+		}
+		printf("RECEIVED LAST PKG SIZE : %d\n", one_package_size);
+		if ( (size = recv(cl->sockfd, (last_pkg)->u_data, one_package_size, 0)) >= 0) {
+		} else {
+				printf("Receive DATA error\n");
+		}
 	}
-	printf("RECEIVED LAST PKG SIZE : %d\n", one_package_size);
-	if ( (size = recv(cl->sockfd, (last_pkg)->u_data, one_package_size, 0)) >= 0) {
-	} else {
-//			printf("Receive DATA error\n");
-	}
+
 
 
 	printf("j is %d\n", j);
@@ -241,8 +246,10 @@ int tcp_client_receive(struct client *cl)
 		}
 		printf("\nasdadsasdaweq2131231232-3---213-123-12-3------333333\n");
 
-		memcpy(cmd_data, (last_pkg->u_data + FRAME_LENGTH), last_pkg_size);
-		fwrite(cmd_data, last_pkg_size, 1, fp);
+		if (last_pkg_size % TCP_LIMIT) {
+			memcpy(cmd_data, (last_pkg->u_data + FRAME_LENGTH), last_pkg_size);
+			fwrite(cmd_data, last_pkg_size, 1, fp);
+		}
 
 		sent_size = FRAME_LENGTH + strlen(file_name) + strlen(file_path);
 
