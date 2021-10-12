@@ -388,6 +388,7 @@ int tcp_server_send_file(struct menu *input)
 		k++;
 	}
 
+
 	printf("SENT SIZE %d\n", sent_size + TCP_LIMIT);
 	last_pkg = malloc((sent_size + TCP_LIMIT));
 	if (!last_pkg) {
@@ -408,6 +409,7 @@ int tcp_server_send_file(struct menu *input)
 			printf("Error writing to socket\n");
 			return ERR_WRITE;
 	}
+
 	printf("K in result is %d\n", k - 1);
 
 	fclose(fp);
