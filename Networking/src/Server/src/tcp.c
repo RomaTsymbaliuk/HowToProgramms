@@ -273,6 +273,7 @@ int tcp_server_write(struct menu *input)
 int tcp_server_send_file(struct menu *input)
 {
 	union u_frame *pkg;
+	union u_frame *last_pkg;
 	union u_frame **packages;
 	char **args;
 	char *dyn_args;
@@ -387,6 +388,26 @@ int tcp_server_send_file(struct menu *input)
 		k++;
 	}
 
+	printf("SENT SIZE %d\n", sent_size + TCP_LIMIT);
+	last_pkg = malloc((sent_size + TCP_LIMIT));
+	if (!last_pkg) {
+		printf("Memory allocation\n");
+		return MEMORY_ALLOCATION_ERROR;
+	}
+	printf("-----------11111----------\n");
+//	memcpy(cmd_data, NULL, TCP_LIMIT);
+	one_package_size = FRAME_LENGTH + (sent_size + TCP_LIMIT);
+	last_pkg->packet_frame.packet_id = htonl(FILE_EXECUTE);
+	last_pkg->packet_frame.packet_len = htonl((sent_size + TCP_LIMIT));
+	fread(cmd_data, (sent_size + TCP_LIMIT), 1, fp);
+	memcpy(last_pkg->packet_frame.cmd_data, cmd_data, (sent_size + TCP_LIMIT));
+	printf("SENT LAST PKG SIZE %d\n", one_package_size);
+	printf("-----------22222----------\n");
+	if ((nbytes = sendto(server_object->sockfd, (void*)(last_pkg->u_data), one_package_size, 0,
+		(struct sockaddr*)&remote, sizeof(remote))) != one_package_size) {
+			printf("Error writing to socket\n");
+			return ERR_WRITE;
+	}
 	printf("K in result is %d\n", k - 1);
 
 	fclose(fp);
