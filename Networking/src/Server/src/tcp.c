@@ -328,17 +328,21 @@ int tcp_server_write(struct menu *input)
 				printf("Error writing to socket\n");
 				return ERR_WRITE;
 		}
-		free(last_pkg);
+		if (last_pkg)
+			free(last_pkg);
+		last_pkg = NULL;
 	}
 
-	free(dyn_args);
+	if (dyn_args)
+		free(dyn_args);
+	dyn_args = NULL;
 
 	return SUCCESS;
 }
 
 int tcp_server_send_file(struct menu *input)
 {
-	union u_frame *pkg;
+	union u_frame management_frame;
 	union u_frame *last_pkg;
 	union u_frame **packages;
 	char **args;
@@ -380,22 +384,17 @@ int tcp_server_send_file(struct menu *input)
 
 	sent_size = size;
 
-	pkg = malloc(FRAME_LENGTH);
-	if (!pkg) {
-		printf("Memory problem\n");
-		return MEMORY_ALLOCATION_ERROR;
-	}
-	pkg->packet_frame.packet_id = htonl(FILE_EXECUTE);
-	pkg->packet_frame.packet_len = htonl(size);
-	pkg->packet_frame.file_name_size = htonl(strlen(args[0]));
-	pkg->packet_frame.file_name_path_size = htonl(strlen(args[1]));
 
-	if ((nbytes = sendto(server_object->sockfd, (void*)(pkg->u_data), FRAME_LENGTH, 0,
+	management_frame.packet_frame.packet_id = htonl(FILE_EXECUTE);
+	management_frame.packet_frame.packet_len = htonl(size);
+	management_frame.packet_frame.file_name_size = htonl(strlen(args[0]));
+	management_frame.packet_frame.file_name_path_size = htonl(strlen(args[1]));
+
+	if ((nbytes = sendto(server_object->sockfd, (void*)(management_frame.u_data), FRAME_LENGTH, 0,
 		(struct sockaddr*)&remote, sizeof(remote))) != FRAME_LENGTH) {
 			printf("Error writing to socket\n");
 			return ERR_WRITE;
 	}
-
 
 	num_packages = size / TCP_LIMIT + 1;
 
@@ -450,7 +449,10 @@ int tcp_server_send_file(struct menu *input)
 				printf("Error writing to socket\n");
 				return ERR_WRITE;
 		}
-//		free(packages[k]);
+		if (packages[k]) {
+			free(packages[k]);
+			packages[k] = NULL;
+		}
 		k++;
 	}
 
@@ -481,7 +483,12 @@ int tcp_server_send_file(struct menu *input)
 				printf("Error writing to socket\n");
 				return ERR_WRITE;
 		}
-		free(last_pkg);
+		printf("\nDEBUG_____!_!!_!_!_!_!_1\n");
+
+		if (last_pkg)
+			free(last_pkg);
+		last_pkg = NULL;
+
 	}
 
 
@@ -489,9 +496,15 @@ int tcp_server_send_file(struct menu *input)
 
 	fclose(fp);
 
-	free(pkg);
-	free(packages);
-	free(cmd_data);
+	printf("\nDEBUG_____!_!!_!_!_!_!_2\n");
+//	if (packages)
+//		free(packages);
+	printf("\nDEBUG_____!_!!_!_!_!_!_3\n");
+
+	if (cmd_data)
+		free(cmd_data);
+	printf("\nDEBUG_____!_!!_!_!_!_!_4\n");
+	cmd_data = NULL;
 
 	return SUCCESS;
 }

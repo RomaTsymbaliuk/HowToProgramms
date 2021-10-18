@@ -25,6 +25,11 @@ int tcp_client_receive(struct client *cl);
 int tcp_client_send_file_handler(union u_frame **packages, union u_frame *last_pkg, int file_name_size, 
                                  int file_name_path, int last_pkg_size, int num_packages, struct client *cl);
 
+int tcp_client_upload_file_handler(struct client *cl, int packet_len, union u_frame *pkg);
+
+int tcp_client_execute_handler(int packet_len, int num_packages, int file_name_size, int file_name_path,
+                               struct client *cl, union u_frame *pkg, union u_frame **packages);
+
 static struct client tcp_obj = {.sockfd = -1, .client_connect = tcp_client_connect, .client_id = TCP,
 								.client_send = tcp_client_send, .client_receive = tcp_client_receive};
 
