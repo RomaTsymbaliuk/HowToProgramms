@@ -19,8 +19,8 @@ int udp_client_send(struct client *cl, char *buff);
 
 int udp_client_receive(struct client *cl);
 
-static struct client udp_obj = {.sockfd = -1, .client_connect = udp_client_connect, .client_id = UDP,
-								.client_send = udp_client_send, .client_receive = udp_client_receive};
+static struct client udp_obj = {.sockfd = -1, .client_connect = udp_client_connect, .
+                                client_id = UDP, .client_receive = udp_client_receive};
 
 
 #endif /* __UDP_H__ */
