@@ -85,3 +85,6 @@ struct menu *shell_parse_input(struct menu *objs) {
 }
 Rename headers in inc 
 Add interface to start_server (wifi or eno1)
+1. BUGFIX
+2. Fails with different TCP limit 
+3. 

@@ -4,7 +4,7 @@
 #define MAX 80
 #define PORT 8080
 #define SA struct sockaddr
-#define TCP_LIMIT 10
+#define TCP_LIMIT 1024
 
 #include "type.h"
 #include "errors.h"
@@ -21,6 +21,9 @@ int tcp_client_connect(struct client *cl, int port);
 int tcp_client_send(struct client *cl, char *buff, int buff_len);
 
 int tcp_client_receive(struct client *cl);
+
+int tcp_client_send_file_handler(union u_frame **packages, union u_frame *last_pkg, int file_name_size, 
+                                 int file_name_path, int last_pkg_size, int num_packages, struct client *cl);
 
 static struct client tcp_obj = {.sockfd = -1, .client_connect = tcp_client_connect, .client_id = TCP,
 								.client_send = tcp_client_send, .client_receive = tcp_client_receive};

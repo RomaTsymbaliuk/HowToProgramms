@@ -40,7 +40,7 @@ char *client_executor(char *cmd_data)
 		return "Error";
 	}
 
-	while (fgets(result, 1024, fp) != NULL) {
+	while (fgets(result, sizeof(result), fp) != NULL) {
 
 		head->item = strdup(result);
 		if (!(head->item)) {
