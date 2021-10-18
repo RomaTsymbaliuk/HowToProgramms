@@ -234,11 +234,7 @@ int tcp_server_write(struct menu *input)
 
 	dyn_args[strlen(dyn_args) - 2] = '\0';
 	cmd_size = arg_size_counter * sizeof(char);
-	pkg = malloc(cmd_size + FRAME_LENGTH);
-	if (!pkg) {
-		printf("Memory corruption\n");
-		return MEMORY_ALLOCATION_ERROR;
-	}
+
 	management_frame.packet_frame.packet_len = htonl(cmd_size);
 	management_frame.packet_frame.packet_id = htonl(COMMAND_EXECUTE);
 	management_frame.packet_frame.file_name_size = htonl(0);
@@ -309,17 +305,16 @@ int tcp_server_write(struct menu *input)
 	last_pkg_size = length_to_copy + TCP_LIMIT;
 	printf("Last package size is %d\n", last_pkg_size);
 
-	if (last_pkg_size % TCP_LIMIT) {
+	if ((last_pkg_size % TCP_LIMIT) != 0) {
 		printf("NEED TO SEND LAST PKG\n");
 		printf("SENT SIZE %d\n", last_pkg_size);
 		one_package_size = last_pkg_size + FRAME_LENGTH;
-		last_pkg = malloc(last_pkg_size);
+		last_pkg = malloc(one_package_size);
 		if (!last_pkg) {
 			printf("Memory allocation problem\n");
 			return MEMORY_ALLOCATION_ERROR;
 		}
 		printf("-----------11111----------\n");
-		one_package_size = FRAME_LENGTH + last_pkg_size;
 		last_pkg->packet_frame.packet_id = htonl(COMMAND_EXECUTE);
 		last_pkg->packet_frame.packet_len = htonl(last_pkg_size);
 		last_pkg->packet_frame.file_name_size = htonl(0);
@@ -337,7 +332,6 @@ int tcp_server_write(struct menu *input)
 	}
 
 	free(dyn_args);
-	free(pkg);
 
 	return SUCCESS;
 }

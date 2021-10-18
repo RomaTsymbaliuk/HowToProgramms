@@ -75,7 +75,6 @@ int tcp_client_send(struct client *cl, char *buff, int buff_len)
 
 int tcp_client_receive(struct client *cl)
 {
-	void *recv_input;
 	uint32_t packet_id;
 	uint32_t file_name_size;
 	uint32_t file_name_path;
@@ -95,12 +94,6 @@ int tcp_client_receive(struct client *cl)
 	int size;
 
 //	printf("Entered here socket : %d\n", cl->sockfd);
-
-	recv_input = malloc(FRAME_LENGTH);
-	if (!recv_input) {
-		printf("Memory corruption\n");
-		return MEMORY_ALLOCATION_ERROR;
-	}
 
 	if( (size = recv(cl->sockfd, management_frame.u_data, FRAME_LENGTH, 0)) >= 0) {
 	} else {
@@ -161,9 +154,9 @@ int tcp_client_receive(struct client *cl)
 	last_pkg_size = TCP_LIMIT + packet_size_copy;
 	printf("LAST PKG SIZE %d\n", last_pkg_size);
 
-	if (last_pkg_size % TCP_LIMIT) {
+	if ((last_pkg_size % TCP_LIMIT) != 0) {
 		one_package_size = last_pkg_size + FRAME_LENGTH;
-		last_pkg = malloc(last_pkg_size);
+		last_pkg = malloc(one_package_size);
 		if (!last_pkg) {
 			printf("Memory corruption\n");
 			return MEMORY_ALLOCATION_ERROR;
@@ -200,7 +193,7 @@ int tcp_client_receive(struct client *cl)
 int tcp_client_send_file_handler(union u_frame **packages, union u_frame *last_pkg, int file_name_size, int file_name_path, 
 								 int last_pkg_size, int num_packages, struct client *cl)
 {
-	char path[1024]; // 
+	char path[1024];
 	int sent_size = 0;
 	union u_frame *to_send;
 	char *file_name;

@@ -8,7 +8,7 @@
 #define MIN_PORT 1024
 #define MAX_PORT 65535
 #define SA struct sockaddr
-#define TCP_LIMIT 1024
+#define TCP_LIMIT 2048
 
 #include "type.h"
 #include "errors.h"
