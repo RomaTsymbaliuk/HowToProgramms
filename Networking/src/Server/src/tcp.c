@@ -347,7 +347,7 @@ int tcp_server_send_file(struct menu *input)
 	union u_frame **packages;
 	char **args;
 	char *dyn_args;
-	unsigned char *cmd_data;
+	unsigned char cmd_data[TCP_LIMIT] = {0};
 	int sent_size;
 	int nbytes = 0;
 	int num_packages = 0;
@@ -384,7 +384,6 @@ int tcp_server_send_file(struct menu *input)
 
 	sent_size = size;
 
-
 	management_frame.packet_frame.packet_id = htonl(FILE_EXECUTE);
 	management_frame.packet_frame.packet_len = htonl(size);
 	management_frame.packet_frame.file_name_size = htonl(strlen(args[0]));
@@ -397,12 +396,6 @@ int tcp_server_send_file(struct menu *input)
 	}
 
 	num_packages = size / TCP_LIMIT + 1;
-
-	cmd_data = malloc(TCP_LIMIT);
-	if (!cmd_data) {
-		printf("Memory corruption\n");
-		return MEMORY_ALLOCATION_ERROR;
-	}
 
 	printf("To send %d packages\n", num_packages);
 
@@ -463,7 +456,7 @@ int tcp_server_send_file(struct menu *input)
 		printf("NEED TO SEND LAST PKG\n");
 		printf("SENT SIZE %d\n", last_pkg_size);
 		one_package_size = last_pkg_size + FRAME_LENGTH;
-		last_pkg = malloc(last_pkg_size);
+		last_pkg = malloc(one_package_size);
 		if (!last_pkg) {
 			printf("Memory allocation\n");
 			return MEMORY_ALLOCATION_ERROR;
@@ -491,20 +484,7 @@ int tcp_server_send_file(struct menu *input)
 
 	}
 
-
-	printf("K in result is %d\n", k - 1);
-
 	fclose(fp);
-
-	printf("\nDEBUG_____!_!!_!_!_!_!_2\n");
-//	if (packages)
-//		free(packages);
-	printf("\nDEBUG_____!_!!_!_!_!_!_3\n");
-
-	if (cmd_data)
-		free(cmd_data);
-	printf("\nDEBUG_____!_!!_!_!_!_!_4\n");
-	cmd_data = NULL;
 
 	return SUCCESS;
 }
