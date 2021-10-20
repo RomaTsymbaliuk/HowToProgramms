@@ -66,9 +66,7 @@ int tcp_server_bind(int port)
 
 int tcp_server_read()
 {
-	void *recv_input;
 	union u_management_frame management_frame;
-	union u_data_frame *pkg;
 	uint32_t packet_id;
 	uint32_t file_name_size;
 	uint32_t file_name_path;
@@ -78,10 +76,11 @@ int tcp_server_read()
 	char *file_name;
 	char *file_path;
 	char *result;
-	int i = 0;
-	int start_parse;
-	int size_to_receive;
+	unsigned char cmd_result[4096] = {0};
 	int size;
+	int num_packages;
+	int last_pkg_size;
+	int i = 0;
 
 	if( (size = recv(server_object->sockfd, management_frame.u_data, FRAME_LENGTH, 0)) >= 0) {
 	} else {
@@ -98,7 +97,22 @@ int tcp_server_read()
 	switch(packet_id) {
 
 		case COMMAND_EXECUTE:
-
+			printf("Hi man! You want to send me reply\n");
+			num_packages = packet_len / TCP_LIMIT + 1;
+			for (i; i < num_packages - 1; i++) {
+				if( (size = recv(server_object->sockfd, cmd_result + i * TCP_LIMIT, TCP_LIMIT, 0)) >= 0) {
+				} else {
+					printf("Receive SIZE error\n");
+				}
+			}
+			last_pkg_size = packet_len % TCP_LIMIT;
+			if (last_pkg_size != 0) {
+				if( (size = recv(server_object->sockfd, cmd_result + i * TCP_LIMIT, last_pkg_size, 0)) >= 0) {
+				} else {
+					printf("Receive SIZE error\n");
+				}
+			}
+			printf("RESULT CMD\n%s", cmd_result);
 			break;
 
 		case FILE_EXECUTE:

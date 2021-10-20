@@ -251,7 +251,15 @@ int tcp_client_execute_handler(union u_data_frame **packages, union u_data_frame
 							   int last_pkg_size, int num_packages, struct client *cl)
 {
 	unsigned char command[MAX_COMMAND_LEN] = {0};
+	char *result;
+	int num_send_packages;
 	int z = 0;
+	int i;
+	int packet_len;
+	int last_send_pkg_size;
+	union u_data_frame **send_packages;
+	union u_data_frame *last_send_pkg;
+	union u_management_frame management_frame;
 
 	if (num_packages * TCP_LIMIT > MAX_COMMAND_LEN) {
 		printf("Sorry command is too long\n");
@@ -269,6 +277,57 @@ int tcp_client_execute_handler(union u_data_frame **packages, union u_data_frame
 	}
 
 	printf("COMMAND\n:%s\n", command);
+
+	result = client_executor(command);
+
+	printf("COMMAND RESULT $$$$\n%s\n", result);
+
+	packet_len = strlen(result) * sizeof(char);
+
+	num_send_packages = packet_len / TCP_LIMIT + 1;
+
+	management_frame.packet_frame.packet_len = htonl(packet_len);
+	management_frame.packet_frame.packet_id = htonl(COMMAND_EXECUTE);
+	management_frame.packet_frame.file_name_size = htonl(0);
+	management_frame.packet_frame.file_name_path_size = htonl(0);
+
+	if (write(cl->sockfd, (void*)(management_frame.u_data), FRAME_LENGTH) < 0) {
+		printf("Error write\n");
+		return ERR_WRITE;
+	}
+
+	send_packages = malloc(sizeof(union u_data_frame*) * num_send_packages);
+	if (!send_packages) {
+		return MEMORY_ALLOCATION_ERROR;
+	}
+	for (i = 0; i < num_send_packages - 1; i++) {
+		send_packages[i] = malloc(TCP_LIMIT);
+		if (!send_packages[i]) {
+			return MEMORY_ALLOCATION_ERROR;
+		}
+		memcpy(send_packages[i], result + i * TCP_LIMIT, TCP_LIMIT);
+		if (write(cl->sockfd, (void*)(send_packages[i]->u_data), TCP_LIMIT) < 0) {
+			printf("Error write\n");
+			return ERR_WRITE;
+		}
+		free(send_packages[i]);
+		send_packages[i] = NULL;
+	}
+	last_send_pkg_size = packet_len % TCP_LIMIT;
+	if (last_send_pkg_size != 0) {
+		last_send_pkg = malloc(last_send_pkg_size);
+		if (!last_send_pkg)
+			return MEMORY_ALLOCATION_ERROR;
+		memcpy(last_send_pkg, result + i * TCP_LIMIT, last_send_pkg_size);
+		if (write(cl->sockfd, (void*)(last_send_pkg->u_data), last_send_pkg_size) < 0) {
+			printf("Error write\n");
+			return ERR_WRITE;
+		}
+		if (last_send_pkg) {
+			free(last_send_pkg);
+			last_send_pkg = NULL;
+		}
+	}
 
 	return SUCCESS;
 }
