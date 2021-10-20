@@ -41,7 +41,7 @@ int tcp_client_receive(struct client *cl)
 	uint32_t file_name_path;
 	uint32_t packet_len;
 	union u_management_frame management_frame;
-	union u_data_frame *last_pkg;
+	union u_data_frame *last_pkg = NULL;
 	union u_data_frame **packages;
 	int i = 0;
 	int j = 0;
@@ -83,15 +83,15 @@ int tcp_client_receive(struct client *cl)
 	one_package_size = file_name_size + file_name_path + TCP_LIMIT;
 
 	size_to_receive = packet_len;
-	packet_size_copy = packet_len;
 
 	printf("There will be %d packages to receive\n", num_packages);
 
-	packages = malloc(sizeof(union u_frame*) * (num_packages + 1));
+	packages = malloc(sizeof(union u_frame*) * (num_packages));
 	if (!packages) {
 		printf("Memory corruption\n");
 		return MEMORY_ALLOCATION_ERROR;
 	}
+
 
 	for (packet_size_copy; packet_size_copy > 0; packet_size_copy = packet_size_copy - TCP_LIMIT) {
 		if (j == 0) {
@@ -110,8 +110,8 @@ int tcp_client_receive(struct client *cl)
 		j++;
 	}
 
-	one_package_size = (packet_size_copy + TCP_LIMIT);
-	last_pkg_size = TCP_LIMIT + packet_size_copy;
+	last_pkg_size = packet_len % TCP_LIMIT;
+
 	printf("LAST PKG SIZE %d\n", last_pkg_size);
 
 	if ((last_pkg_size % TCP_LIMIT) != 0) {
@@ -124,7 +124,7 @@ int tcp_client_receive(struct client *cl)
 		printf("RECEIVED LAST PKG SIZE : %d\n", one_package_size);
 		if ( (size = recv(cl->sockfd, (last_pkg)->u_data, one_package_size, 0)) >= 0) {
 		} else {
-				printf("Receive DATA error\n");
+			printf("Receive DATA error\n");
 		}
 	}
 
@@ -140,6 +140,9 @@ int tcp_client_receive(struct client *cl)
 	case COMMAND_EXECUTE:
 //		tcp_client_execute_handler(packet_len, num_packages, file_name_size,
 //								   file_name_path, cl, pkg, packages);
+		tcp_client_execute_handler(packages, last_pkg,
+								   last_pkg_size, num_packages, cl);
+
 		break;
 
 	case FILE_UPLOAD:
@@ -147,6 +150,19 @@ int tcp_client_receive(struct client *cl)
 //									   num_packages, cl);
 		break;
 	}
+
+	for (int j = 0; j < num_packages; j++) {
+		if (packages[j]) {
+			free(packages[j]);
+			packages[j] = NULL;
+		}
+	}
+
+	if (last_pkg)
+		free(last_pkg);
+
+	if (packages)
+		free(packages);
 
 	return SUCCESS;
 }
@@ -157,7 +173,6 @@ int tcp_client_send_file_handler(union u_data_frame **packages, union u_data_fra
 	char path[1024];
 	int sent_size = 0;
 	union u_management_frame to_send_management;
-	union u_data_frame *to_send_data;
 	char *file_name;
 	char *file_path;
 	FILE *fp;
@@ -195,6 +210,8 @@ int tcp_client_send_file_handler(union u_data_frame **packages, union u_data_fra
 		return ERR_READ;
 	}
 
+	printf("NUM PACKAGES %d\n", num_packages);
+
 	for (int z = 0; z < num_packages - 1; z++) {
 		if (z == 0) {
 			memcpy(cmd_data, (packages[z]->u_data + file_name_size + file_name_path), TCP_LIMIT);
@@ -205,11 +222,10 @@ int tcp_client_send_file_handler(union u_data_frame **packages, union u_data_fra
 	}
 	printf("\nasdadsasdaweq2131231232-3---213-123-12-xxxxxxxx-3------333333\n");
 
-	if (last_pkg_size % TCP_LIMIT) {
+	if (last_pkg) {
 		memcpy(cmd_data, (last_pkg->u_data), last_pkg_size);
 		fwrite(cmd_data, last_pkg_size, 1, fp);
 	}
-
 
 	to_send_management.packet_frame.packet_id = htonl(FILE_EXECUTE);
 	to_send_management.packet_frame.packet_len = htonl(0);
@@ -222,64 +238,42 @@ int tcp_client_send_file_handler(union u_data_frame **packages, union u_data_fra
 	}
 
 	fclose(fp);
-	free(file_name);
-	free(file_path);
+
+	if (file_name)
+		free(file_name);
+	if (file_path)
+		free(file_path);
 
 	return SUCCESS;
 }
-/*
-int tcp_client_execute_handler(int packet_len, int num_packages, int file_name_size, int file_name_path,
-							   struct client *cl, union u_frame *pkg, union u_frame **packages)
+
+int tcp_client_execute_handler(union u_data_frame **packages, union u_data_frame *last_pkg, 
+							   int last_pkg_size, int num_packages, struct client *cl)
 {
-	char *cmd_data;
-	char *result;
-	int sent_size = 0;
-	union u_frame *to_send;
+	unsigned char command[MAX_COMMAND_LEN] = {0};
+	int z = 0;
 
-	cmd_data = malloc(packet_len);
-	if (!cmd_data) {
-		printf("Memory corruption\n");
-		return MEMORY_ALLOCATION_ERROR;
+	if (num_packages * TCP_LIMIT > MAX_COMMAND_LEN) {
+		printf("Sorry command is too long\n");
+		return ERR_COMMAND;
 	}
 
-	for (int z = 0; z < num_packages - 1; z++) {
-		memcpy(cmd_data + (z * TCP_LIMIT), (packages[z]->u_data + FRAME_LENGTH), TCP_LIMIT);
+	printf("Im here or not\n");
+
+	for (z; z < num_packages - 1; z++) {
+		memcpy(command + z * TCP_LIMIT, packages[z]->u_data, TCP_LIMIT);
 	}
 
-	result = client_executor(cmd_data);
-
-	sent_size = strlen(result) + FRAME_LENGTH;
-
-	if (sent_size > TCP_LIMIT * 100000) {
-		printf("Too much to send\n");
-		return SUCCESS;
+	if (last_pkg_size % TCP_LIMIT) {
+		memcpy(command + z * TCP_LIMIT, (last_pkg->u_data), last_pkg_size);
 	}
 
-	to_send = malloc(sent_size);
-	if (!to_send) {
-		printf("Memory corruption\n");
-		return MEMORY_ALLOCATION_ERROR;
-	}
-
-	to_send->packet_frame.packet_id = htonl(COMMAND_EXECUTE);
-	to_send->packet_frame.packet_len = htonl(strlen(result));
-	to_send->packet_frame.file_name_size = htonl(0);
-	to_send->packet_frame.file_name_path_size = htonl(0);
-
-	memcpy(to_send->packet_frame.cmd_data, result, strlen(result));
-
-	if (write(cl->sockfd, (void*)(to_send->u_data), sent_size) < 0) {
-		printf("Error write");
-		return ERR_WRITE;
-	}
-
-	free(to_send);
-	free(cmd_data);
-	free(result);
+	printf("COMMAND\n:%s\n", command);
 
 	return SUCCESS;
 }
 
+/*
 int tcp_client_upload_file_handler(union u_frame **packages, union u_frame *last_pkg, 
 								   int last_pkg_size, int num_packages, struct client *cl)
 {

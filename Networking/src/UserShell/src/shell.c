@@ -97,7 +97,9 @@ int shell_func_wrapper(void *args)
 
 	status = WAIT_CONDITION;
 	memcpy(status_bar, &status, sizeof(int));
+	printf("STATUS 0 %d \n", status);
 	status = fn(args);
+	printf("STATUS 1 %d \n", status);
 	memcpy(status_bar, &status, sizeof(int));
 
 	return SUCCESS;
