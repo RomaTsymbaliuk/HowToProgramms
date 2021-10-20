@@ -93,17 +93,17 @@ int tcp_client_receive(struct client *cl)
 	}
 
 
-	for (packet_size_copy; packet_size_copy > 0; packet_size_copy = packet_size_copy - TCP_LIMIT) {
+	for (int z = 0; z < num_packages - 1; z++) {
 		if (j == 0) {
 			one_package_size = TCP_LIMIT + file_name_size + file_name_path;
 		} else {
 			one_package_size = TCP_LIMIT;
 		}
-		packages[j] = malloc(one_package_size);
+		packages[z] = malloc(one_package_size);
 		if (!packages[j]) {
 			printf("Memory corruption\n");
 		}
-		if ( (size = recv(cl->sockfd, (packages[j])->u_data, one_package_size, 0)) >= 0) {
+		if ( (size = recv(cl->sockfd, (packages[z])->u_data, one_package_size, 0)) >= 0) {
 		} else {
 			return ERR_READ;
 		}
@@ -264,7 +264,7 @@ int tcp_client_execute_handler(union u_data_frame **packages, union u_data_frame
 		memcpy(command + z * TCP_LIMIT, packages[z]->u_data, TCP_LIMIT);
 	}
 
-	if (last_pkg_size % TCP_LIMIT) {
+	if (last_pkg) {
 		memcpy(command + z * TCP_LIMIT, (last_pkg->u_data), last_pkg_size);
 	}
 
