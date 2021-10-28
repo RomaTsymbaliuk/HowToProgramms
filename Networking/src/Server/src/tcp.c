@@ -98,21 +98,26 @@ int tcp_server_read()
 
 		case COMMAND_EXECUTE:
 			printf("Hi man! You want to send me reply\n");
-			num_packages = packet_len / TCP_LIMIT + 1;
-			for (i; i < num_packages - 1; i++) {
-				if( (size = recv(server_object->sockfd, cmd_result + i * TCP_LIMIT, TCP_LIMIT, 0)) >= 0) {
-				} else {
-					printf("Receive SIZE error\n");
+			if (packet_len != 0) {
+				num_packages = packet_len / TCP_LIMIT + 1;
+				for (i; i < num_packages - 1; i++) {
+					if( (size = recv(server_object->sockfd, cmd_result + i * TCP_LIMIT, TCP_LIMIT, 0)) >= 0) {
+					} else {
+						printf("Receive SIZE error\n");
+					}
 				}
-			}
-			last_pkg_size = packet_len % TCP_LIMIT;
-			if (last_pkg_size != 0) {
-				if( (size = recv(server_object->sockfd, cmd_result + i * TCP_LIMIT, last_pkg_size, 0)) >= 0) {
-				} else {
-					printf("Receive SIZE error\n");
+				last_pkg_size = packet_len % TCP_LIMIT;
+				if (last_pkg_size != 0) {
+					if( (size = recv(server_object->sockfd, cmd_result + i * TCP_LIMIT, last_pkg_size, 0)) >= 0) {
+					} else {
+						printf("Receive SIZE error\n");
+					}
 				}
+				printf("RESULT CMD\n%s", cmd_result);
+			} else {
+				printf("On client executor problem occured!\n");
 			}
-			printf("RESULT CMD\n%s", cmd_result);
+
 			break;
 
 		case FILE_EXECUTE:

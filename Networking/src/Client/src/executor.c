@@ -28,15 +28,17 @@ char *client_executor(char *cmd_data)
 	}
 
 	while (fgets(buff, sizeof(buff), fp) != NULL) {
-		if (k == 0) {
-			strcpy(result_cmd, buff);
-		} else {
-			strcat(result_cmd, buff);
-		}
+
 		size = size + strlen(buff) * sizeof(char);
 		if (size > MAX_RESPONSE_SIZE) {
 			printf("To big command result\n");
 			return NULL;
+		}
+
+		if (k == 0) {
+			strcpy(result_cmd, buff);
+		} else {
+			strcat(result_cmd, buff);
 		}
 		k++;
 	}
@@ -49,7 +51,7 @@ char *client_executor(char *cmd_data)
 
 	if (WEXITSTATUS(pclose(fp)) != 0) {
 		printf("\nCOMMAND ERROR!\n");
-		return "Error";
+		return NULL;
 	}
 
 	return response_cmd;
