@@ -80,6 +80,8 @@ int server_send(struct menu *input)
 
 int server_upload(struct menu *input)
 {
+	printf("Here\n");
+
 	if (server_object->server_upload(input) != SUCCESS) {
 		return ERR_UPLOAD;
 	}

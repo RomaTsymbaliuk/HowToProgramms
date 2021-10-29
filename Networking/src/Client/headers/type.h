@@ -9,7 +9,7 @@ struct client {
 	void *client_type;
 	int (*client_connect)(struct client *cl, int port);
 	int (*client_receive)(struct client *cl);
-
+	char interface[20];
 };
 
 enum {FILE_EXECUTE = 1, COMMAND_EXECUTE, FILE_UPLOAD};

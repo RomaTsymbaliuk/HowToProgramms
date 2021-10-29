@@ -35,42 +35,52 @@ int main(int argc, char *argv[])
 		{"ntp", no_argument, 0, 'n'},
 		{"dns", no_argument, 0, 'd'},
 		{"help", no_argument, 0, 'h'},
-		{"interface", required_argument, 1, 'i'},
+		{"ip", required_argument, 0, 'i'},
 		{0, 0, 0, 0}
 	};
 
-	option_index = 0;
-	c = getopt_long(argc, argv, "p:", long_options, &option_index);
-	if (c == -1) {
-		printf(SERVER_HELP);
-		return ERR_OPTION;
-	}
+	while(1) {
 
-	switch(c) {
-	case 't':
-		server_register(TCP);
-		break;
-	case 'i':
-		if (optarg){
-			printf("interface %s choosen\n", optarg);
-			server_object->interface = optarg;
+		option_index = 0;
+		c = getopt_long(argc, argv, "i:tundh", long_options, &option_index);
+		if (c == -1) {
+			break;
 		}
-		break;
-	case 'u':
-		server_register(UDP);
-		break;
-	case 'n':
-		break;
-	case 'd':
-		break;
-	case 'h':
-		printf(SERVER_HELP);
-		return ERR_OPTION;
-	case '?':
-	default:
-		printf(SERVER_HELP);
-		printf("\n\nNo options specified. Abort\n\n");
-		return ERR_OPTION;
+
+		switch(c) {
+		case 't':
+			printf("working with tcp server\n");
+			server_register(TCP);
+			break;
+		case 'i':
+			if (optarg){
+				if (server_object) {
+					printf("interface %s choosen strlen(optarg) : %d\n", optarg, strlen(optarg));
+					strncpy(server_object->interface, optarg, strlen(optarg) > 20 ? 20 : strlen(optarg));
+				} else {
+					printf("First specify server type! Then specify ip");
+					return ERR_OPTION;
+				}
+			} else {
+				printf("No IP specified! Abort\n");
+			}
+			break;
+		case 'u':
+			server_register(UDP);
+			break;
+		case 'n':
+			break;
+		case 'd':
+			break;
+		case 'h':
+			printf(SERVER_HELP);
+			return ERR_OPTION;
+		case '?':
+		default:
+			printf(SERVER_HELP);
+			printf("\n\nNo options specified. Abort\n\n");
+			return ERR_OPTION;
+		}
 	}
 
 	shell_init();

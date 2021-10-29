@@ -17,7 +17,7 @@ char *client_executor(char *cmd_data)
 	FILE *fp;
 	char result_cmd[MAX_RESPONSE_SIZE];
 	char *response_cmd;
-	char buff[30] = {0};
+	char buff[TCP_LIMIT] = {0};
 	int k = 0;
 	int size = 0;
 

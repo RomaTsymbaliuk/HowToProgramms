@@ -15,7 +15,7 @@ struct server {
 	int server_id;
 	char cli_state[20];
 	void *server_type;
-	char *interface;
+	char interface[20];
 	int port;
 	int (*server_listen)();
 	int (*server_bind)(int port);
