@@ -131,7 +131,8 @@ int tcp_server_read()
 			break;
 
 		case FILE_UPLOAD:
-
+			num_packages = packet_len / TCP_LIMIT + 1;
+			printf("FILE UPLOAD RECEIVE %d packages\n", num_packages);
 			break;
 
 		default:
@@ -431,31 +432,58 @@ int tcp_server_upload(struct menu *input)
 {
 	union u_management_frame management_frame;
 	union u_data_frame *last_pkg = NULL;
+	union u_data_frame **packages;
 	union u_data_frame data_frame;
 	char **args;
+	char *token;
+	char file_name[30];
+	char *file_name_path;
 	unsigned char cmd_data[TCP_LIMIT] = {0};
 	int nbytes = 0;
 	int num_packages = 0;
 	int one_package_size = 0;
 	int last_pkg_size = 0;
 	int sent_size = 0;
+	int file_name_size;
+	int file_name_path_size;
 	int k = 0;
+	int i = 0;
 
 	args = (char**)input->args;
 
 	printf("entered her!!!e\n");
 
 	args[0][strlen(args[0])] = '\0';
-	args[1][strlen(args[1]) - 1] = '\0';
+	file_name_path = strdup(args[0]);
+	if (!file_name_path) {
+		return MEMORY_ALLOCATION_ERROR;
+	}
+
+	printf("ARG : %s \n",args[0]);
 
 	sent_size = strlen(args[0]);
 
 	printf("HHHHEEEERRREREE\n");
 
+	token = strtok(args[0], "/");
+
+	while(token != NULL) {
+		printf("%s\n", token);
+		memset(file_name, 0, sizeof(char) * 30);
+		strncpy(file_name, token, strlen(token));
+		token = strtok(NULL, "/");
+	}
+
+	file_name_size = strlen(file_name);
+	file_name_path_size = sent_size - strlen(file_name);
+	printf("FILENAME STRLEN : %s %d\n", file_name, file_name_size);
+	file_name_path[file_name_path_size - 1] = '\0';
+	printf("FILE PATH SIZE : %s %d\n", file_name_path, file_name_path_size);
+
 	management_frame.packet_frame.packet_id = htonl(FILE_UPLOAD);
 	management_frame.packet_frame.packet_len = htonl(sent_size);
-	management_frame.packet_frame.file_name_size = htonl(strlen(args[0]));
-	management_frame.packet_frame.file_name_path_size = htonl(strlen(args[0]));
+	management_frame.packet_frame.file_name_size = htonl(file_name_size);
+	management_frame.packet_frame.file_name_path_size = htonl(file_name_path_size);
 
 	if ((nbytes = sendto(server_object->sockfd, (void*)(management_frame.u_data), FRAME_LENGTH, 0,
 		(struct sockaddr*)&remote, sizeof(remote))) != FRAME_LENGTH) {
@@ -463,14 +491,84 @@ int tcp_server_upload(struct menu *input)
 			return ERR_WRITE;
 	}
 
-	memcpy(data_frame.packet_frame.cmd_data, args[0], strlen(args[0]));
+	num_packages = sent_size / TCP_LIMIT + 1;
 
-	if ((nbytes = sendto(server_object->sockfd, (void*)(data_frame.u_data), sent_size, 0,
-		(struct sockaddr*)&remote, sizeof(remote))) != sent_size) {
-			printf("Error writing to socket\n");
-			return ERR_WRITE;
+	printf("To send %d packages\n", num_packages);
+
+	one_package_size = TCP_LIMIT;
+
+	packages = malloc(sizeof(union u_frame*) * (num_packages));
+	if (!packages) {
+		printf("Memory corruption\n");
+		return MEMORY_ALLOCATION_ERROR;
 	}
 
+	printf("SIZE %d \n", sent_size);
+
+	for (k = 0; k < num_packages - 1; k++) {
+		packages[k] = malloc(one_package_size);
+		if (!packages[k]) {
+			printf("Memory corruption\n");
+			return MEMORY_ALLOCATION_ERROR;
+		}
+		printf("k->%d\n",k);
+		if (k * TCP_LIMIT < file_name_path_size)
+			memcpy((packages[k]->packet_frame.cmd_data), file_name_path + k * TCP_LIMIT, TCP_LIMIT);
+		else {
+			memcpy((packages[k]->packet_frame.cmd_data), file_name + i * TCP_LIMIT, TCP_LIMIT);
+			i++;
+		}
+
+		if ((nbytes = sendto(server_object->sockfd, (void*)(packages[k]->u_data), one_package_size, 0,
+			(struct sockaddr*)&remote, sizeof(remote))) != one_package_size) {
+				printf("Error writing to socket\n");
+				return ERR_WRITE;
+		}
+		if (packages[k]) {
+			free(packages[k]);
+			packages[k] = NULL;
+		}
+	}
+
+	last_pkg_size = sent_size % TCP_LIMIT;
+	printf("Last package size is %d\n", last_pkg_size);
+
+	if (last_pkg_size) {
+		printf("NEED TO SEND LAST PKG\n");
+		printf("SENT SIZE %d\n", last_pkg_size);
+		one_package_size = last_pkg_size;
+		last_pkg = malloc(one_package_size);
+		if (!last_pkg) {
+			printf("Memory allocation\n");
+			return MEMORY_ALLOCATION_ERROR;
+		}
+		printf("-----------11111----------\n");
+		one_package_size = last_pkg_size;
+		memcpy(last_pkg->packet_frame.cmd_data, cmd_data, last_pkg_size);
+		printf("SENT LAST PKG SIZE %d\n", one_package_size);
+		printf("-----------22222----------\n");
+		if ((nbytes = sendto(server_object->sockfd, (void*)(last_pkg->u_data), one_package_size, 0,
+			(struct sockaddr*)&remote, sizeof(remote))) != one_package_size) {
+				printf("Error writing to socket\n");
+				return ERR_WRITE;
+		}
+
+		if (last_pkg)
+			free(last_pkg);
+		last_pkg = NULL;
+
+	}
+
+	if (packages) {
+		free(packages);
+		packages = NULL;
+	}
+	if (file_name_path) {
+		free(file_name_path);
+		file_name_path = NULL;
+	}
+
+	tcp_server_read();
 
 	return SUCCESS;
 }
