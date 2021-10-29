@@ -473,7 +473,7 @@ int tcp_client_upload_file_handler(union u_data_frame **packages, int file_name_
 			memcpy((to_send_packages[k]->packet_frame.cmd_data), cmd_data, TCP_LIMIT);
 			one_package_size = TCP_LIMIT;
 		}
-		if (write(cl->sockfd, (void*)(to_send_packages[k]->u_data), TCP_LIMIT) != TCP_LIMIT) {
+		if (write(cl->sockfd, (void*)(to_send_packages[k]->u_data), one_package_size) != one_package_size) {
 				printf("Error writing to socket\n");
 				return ERR_WRITE;
 		}

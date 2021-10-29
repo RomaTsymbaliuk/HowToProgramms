@@ -85,6 +85,7 @@ int tcp_server_read()
 	int num_packages;
 	int last_pkg_size;
 	int i = 0;
+	FILE *fp;
 
 	if( (size = recv(server_object->sockfd, management_frame.u_data, FRAME_LENGTH, 0)) >= 0) {
 	} else {
@@ -94,7 +95,8 @@ int tcp_server_read()
 	packet_id = ntohl(management_frame.packet_frame.packet_id);
 	file_name_size = ntohl(management_frame.packet_frame.file_name_size);
 	file_name_path = ntohl(management_frame.packet_frame.file_name_path_size);
-
+	printf("Received file_name_size %d\n", file_name_size);
+	printf("Received file_name_path %d\n", file_name_path);
 //	for (int k = 0 ; k < packet_len + file_name_path + file_name_size + FRAME_LENGTH; k++) {
 //		printf("BYTE %d hex %x char %c\n", k, (pkg->u_data)[k], (pkg->u_data)[k]);
 //}
@@ -131,8 +133,35 @@ int tcp_server_read()
 			break;
 
 		case FILE_UPLOAD:
+			file_name = malloc(file_name_size);
+			if (!file_name) {
+				return MEMORY_ALLOCATION_ERROR;
+			}
 			num_packages = packet_len / TCP_LIMIT + 1;
 			printf("FILE UPLOAD RECEIVE %d packages\n", num_packages);
+			for (i; i < num_packages - 1; i++) {
+				if( (size = recv(server_object->sockfd, cmd_result, TCP_LIMIT, 0)) >= 0) {
+					if (i == 0) {
+						memcpy(file_name, cmd_result, file_name_size);
+						printf("FILE NAME : %s\n", file_name);
+						fp = fopen(file_name, "wb");
+					} else {
+						fwrite(cmd_result, 1, TCP_LIMIT, fp);
+					}
+					printf("Receive i->%d\n",i);
+				} else {
+					printf("Receive SIZE error\n");
+				}
+			}
+			last_pkg_size = packet_len % TCP_LIMIT;
+			if (last_pkg_size) {
+				if( (size = recv(server_object->sockfd, cmd_result, last_pkg_size, 0)) >= 0) {
+					fwrite(cmd_result, 1, last_pkg_size, fp);
+				} else {
+					printf("Receive SIZE error\n");
+				}
+			}
+			fclose(fp);
 			break;
 
 		default:
