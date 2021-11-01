@@ -143,7 +143,7 @@ int tcp_client_receive(struct client *cl)
 
 	case FILE_UPLOAD:
 		printf("FILE TO UPLOAD\n");
-		tcp_client_upload_file_handler(packages, file_name_size, 
+		tcp_client_upload_file_handler(packages, last_pkg, last_pkg_size, file_name_size,
 									  file_name_path, num_packages, cl);
 
 		break;
@@ -357,8 +357,9 @@ int tcp_client_execute_handler(union u_data_frame **packages, union u_data_frame
 	return SUCCESS;
 }
 
-int tcp_client_upload_file_handler(union u_data_frame **packages, int file_name_size, 
-								   int file_name_path, int num_packages, struct client *cl)
+int tcp_client_upload_file_handler(union u_data_frame **packages, union u_data_frame *last_pkg, int last_pkg_receive_size,
+								  int file_name_size, int file_name_path, 
+								  int num_packages, struct client *cl)
 {
 	char *path;
 	int sent_size = 0;
@@ -402,6 +403,11 @@ int tcp_client_upload_file_handler(union u_data_frame **packages, int file_name_
 			memcpy(file_name + i * TCP_LIMIT, packages[x]->u_data, TCP_LIMIT);
 			i++;
 		}
+	}
+	if (last_pkg) {
+		printf("Got last pkg\n");
+		memcpy(file_name, last_pkg->u_data, file_name_size);
+		memcpy(file_path, last_pkg->u_data + file_name_size, file_name_path);
 	}
 
 	file_name[file_name_size - 1] = '\0';
@@ -495,18 +501,16 @@ int tcp_client_upload_file_handler(union u_data_frame **packages, int file_name_
 			printf("Memory allocation\n");
 			return MEMORY_ALLOCATION_ERROR;
 		}
-		printf("-----------11111----------\n");
-		one_package_size = last_pkg_send_size;
 		fread(cmd_data, last_pkg_send_size, 1, fp);
 		memcpy(to_send_last_pkg->packet_frame.cmd_data, cmd_data, last_pkg_send_size);
 		printf("SENT LAST PKG SIZE %d\n", one_package_size);
 		printf("-----------22222----------\n");
-		if (write(cl->sockfd, (void*)(to_send_management.u_data), FRAME_LENGTH) != FRAME_LENGTH) {
+		if (write(cl->sockfd, (void*)(to_send_last_pkg->u_data), last_pkg_send_size) != last_pkg_send_size) {
 				printf("Error writing to socket\n");
 				return ERR_WRITE;
 		}
-	if (to_send_last_pkg)
-		free(to_send_last_pkg);
+		if (to_send_last_pkg)
+			free(to_send_last_pkg);
 		to_send_last_pkg = NULL;
 	}
 

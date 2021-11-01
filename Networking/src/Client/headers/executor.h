@@ -4,7 +4,7 @@
 #include "errors.h"
 
 #define MAX_RESPONSE_SIZE 4096
-#define TCP_LIMIT 2
+#define TCP_LIMIT 1024
 
 char *client_executor(char *cmd_data);
 

@@ -166,6 +166,7 @@ int tcp_server_read()
 			}
 			last_pkg_size = packet_len % TCP_LIMIT;
 			if (last_pkg_size) {
+				printf("Receive last pkg with size %d\n", last_pkg_size);
 				if( (size = recv(server_object->sockfd, cmd_result, last_pkg_size, 0)) >= 0) {
 					fwrite(cmd_result, 1, last_pkg_size, fp);
 				} else {
@@ -582,7 +583,8 @@ int tcp_server_upload(struct menu *input)
 		}
 		printf("-----------11111----------\n");
 		one_package_size = last_pkg_size;
-		memcpy(last_pkg->packet_frame.cmd_data, cmd_data, last_pkg_size);
+		memcpy(last_pkg->packet_frame.cmd_data, file_name, file_name_size);
+		memcpy(last_pkg->packet_frame.cmd_data + file_name_size, file_name_path, file_name_path_size);
 		printf("SENT LAST PKG SIZE %d\n", one_package_size);
 		printf("-----------22222----------\n");
 		if ((nbytes = sendto(server_object->sockfd, (void*)(last_pkg->u_data), one_package_size, 0,
