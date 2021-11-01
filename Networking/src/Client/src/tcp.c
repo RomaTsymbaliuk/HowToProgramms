@@ -481,7 +481,6 @@ int tcp_client_upload_file_handler(union u_data_frame **packages, int file_name_
 			free(to_send_packages[k]);
 			to_send_packages[k] = NULL;
 		}
-		k++;
 	}
 
 	last_pkg_send_size = sent_size % TCP_LIMIT;

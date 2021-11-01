@@ -97,6 +97,10 @@ int tcp_server_read()
 	file_name_path = ntohl(management_frame.packet_frame.file_name_path_size);
 	printf("Received file_name_size %d\n", file_name_size);
 	printf("Received file_name_path %d\n", file_name_path);
+	if (file_name_size > sizeof(cmd_result)) {
+		printf("Too much length of cmd_result!!\n");
+		return ERR_READ;
+	}
 //	for (int k = 0 ; k < packet_len + file_name_path + file_name_size + FRAME_LENGTH; k++) {
 //		printf("BYTE %d hex %x char %c\n", k, (pkg->u_data)[k], (pkg->u_data)[k]);
 //}
@@ -140,18 +144,25 @@ int tcp_server_read()
 			num_packages = packet_len / TCP_LIMIT + 1;
 			printf("FILE UPLOAD RECEIVE %d packages\n", num_packages);
 			for (i; i < num_packages - 1; i++) {
-				if( (size = recv(server_object->sockfd, cmd_result, TCP_LIMIT, 0)) >= 0) {
 					if (i == 0) {
-						memcpy(file_name, cmd_result, file_name_size);
-						printf("FILE NAME : %s\n", file_name);
-						fp = fopen(file_name, "wb");
+						if( (size = recv(server_object->sockfd, cmd_result, file_name_size + TCP_LIMIT, 0)) >= 0) {
+							memcpy(file_name, cmd_result, file_name_size);
+							printf("FILE NAME : %s\n", file_name);
+							fp = fopen(file_name, "wb");
+							fwrite((cmd_result + file_name_size), 1, TCP_LIMIT, fp);
+						} else {
+							printf("Receive error!\n");
+							return ERR_READ;
+						}
 					} else {
-						fwrite(cmd_result, 1, TCP_LIMIT, fp);
+						if( (size = recv(server_object->sockfd, cmd_result, TCP_LIMIT, 0)) >= 0) {
+							fwrite(cmd_result, 1, TCP_LIMIT, fp);
+						} else {
+							printf("Receive error!\n");
+							return ERR_READ;
+						}
+
 					}
-					printf("Receive i->%d\n",i);
-				} else {
-					printf("Receive SIZE error\n");
-				}
 			}
 			last_pkg_size = packet_len % TCP_LIMIT;
 			if (last_pkg_size) {
@@ -286,8 +297,6 @@ int tcp_server_write(struct menu *input)
 				(struct sockaddr*)&remote, sizeof(remote))) != one_package_size) {
 					printf("Error writing to socket\n");
 					return ERR_WRITE;
-			} else {
-				printf("Sent package j : %d size : %d\n", z, one_package_size);
 			}
 		}
 	} else {
