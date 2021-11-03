@@ -264,6 +264,7 @@ int tcp_client_execute_handler(union u_data_frame **packages, union u_data_frame
 	int z = 0;
 	int i;
 	int packet_len;
+	int max_cmds_len;
 	int last_send_pkg_size;
 	union u_data_frame **send_packages;
 	union u_data_frame *last_send_pkg;
@@ -285,6 +286,7 @@ int tcp_client_execute_handler(union u_data_frame **packages, union u_data_frame
 	}
 
 	printf("COMMAND\n:%s\n", command);
+
 
 	result = client_executor(command);
 

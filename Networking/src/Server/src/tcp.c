@@ -84,6 +84,7 @@ int tcp_server_read()
 	int size;
 	int num_packages;
 	int last_pkg_size;
+	int num_of_chars = 0;
 	int i = 0;
 	FILE *fp;
 
@@ -104,6 +105,11 @@ int tcp_server_read()
 //	for (int k = 0 ; k < packet_len + file_name_path + file_name_size + FRAME_LENGTH; k++) {
 //		printf("BYTE %d hex %x char %c\n", k, (pkg->u_data)[k], (pkg->u_data)[k]);
 //}
+	if (sizeof(cmd_result) < TCP_LIMIT) {
+		printf("Sorry to much TCP_LIMIT. Try with a smaller one\n");
+		return ERR_READ;
+	}
+
 	switch(packet_id) {
 
 		case COMMAND_EXECUTE:
@@ -112,6 +118,7 @@ int tcp_server_read()
 				num_packages = packet_len / TCP_LIMIT + 1;
 				for (i; i < num_packages - 1; i++) {
 					if( (size = recv(server_object->sockfd, cmd_result + i * TCP_LIMIT, TCP_LIMIT, 0)) >= 0) {
+						num_of_chars += TCP_LIMIT;
 					} else {
 						printf("Receive SIZE error\n");
 					}
@@ -119,10 +126,12 @@ int tcp_server_read()
 				last_pkg_size = packet_len % TCP_LIMIT;
 				if (last_pkg_size != 0) {
 					if( (size = recv(server_object->sockfd, cmd_result + i * TCP_LIMIT, last_pkg_size, 0)) >= 0) {
+						num_of_chars += last_pkg_size;
 					} else {
 						printf("Receive SIZE error\n");
 					}
 				}
+				cmd_result[num_of_chars] = '\0';
 				printf("RESULT CMD\n%s", cmd_result);
 			} else {
 				printf("On client executor problem occured!\n");
